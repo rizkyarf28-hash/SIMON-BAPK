@@ -496,8 +496,23 @@
       <div class="space-y-3">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Petugas Verifikator</label>
-            <select id="modalPetugas" class="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"></select>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                <span>Petugas Verifikator</span>
+                <span id="petugasLockBadge" class="inline-flex items-center gap-0.5 px-1.5 py-0.2 text-[10px] font-bold rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
+                  &#128274; Terkunci
+                </span>
+              </label>
+              <button type="button" id="btnTogglePetugasLock" onclick="toggleAdminPetugasUnlock()"
+                class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                Buka Kunci (Admin)
+              </button>
+            </div>
+            <select id="modalPetugas" disabled
+              class="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 cursor-not-allowed opacity-90"></select>
+            <p id="petugasLockHint" class="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+              Pembagian PIC sudah dikunci agar tidak tertukar.
+            </p>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Lokasi Box Arsip</label>
@@ -577,6 +592,8 @@
     let SORT_FIELD = "no";
     let SORT_ASC = true;
     let CURRENT_TAB = 1;
+    const ADMIN_UNLOCK_PIN = "2025";
+    let IS_ADMIN_PETUGAS_UNLOCKED = false;
 
     // Point 5: Dark Mode Initialization
     function initDarkMode() {
@@ -1300,6 +1317,57 @@
       el.value = cur ? `${cur}; ${text}` : text;
     }
 
+    function applyPetugasLockState(hasAssignedPetugas) {
+      const sel = document.getElementById("modalPetugas");
+      const badge = document.getElementById("petugasLockBadge");
+      const btn = document.getElementById("btnTogglePetugasLock");
+      const hint = document.getElementById("petugasLockHint");
+
+      // Kunci otomatis jika berkas sudah punya Petugas Verifikator dan belum dibuka Admin
+      const shouldLock = hasAssignedPetugas && !IS_ADMIN_PETUGAS_UNLOCKED;
+      sel.disabled = shouldLock;
+
+      if (shouldLock) {
+        sel.className = "w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 cursor-not-allowed opacity-90";
+        badge.innerHTML = "&#128274; Terkunci";
+        badge.className = "inline-flex items-center gap-0.5 px-1.5 py-0.2 text-[10px] font-bold rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200";
+        btn.textContent = "Buka Kunci (Admin)";
+        hint.textContent = "Pembagian PIC dikunci agar tidak diubah sembarangan.";
+      } else {
+        sel.className = "w-full px-3 py-2 text-xs border border-indigo-400 dark:border-indigo-500 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100";
+        badge.innerHTML = "&#128275; Terbuka";
+        badge.className = "inline-flex items-center gap-0.5 px-1.5 py-0.2 text-[10px] font-bold rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300";
+        btn.textContent = "Kunci Kembali";
+        hint.textContent = "Mode Admin aktif: Anda dapat memindahkan PIC verifikator.";
+      }
+    }
+
+    function toggleAdminPetugasUnlock() {
+      const nip = document.getElementById("modalNip").value;
+      const rec = ALL_RECORDS.find(r => r.nip === nip);
+      const hasAssigned = Boolean(rec && rec.petugas && OFFICERS.includes(rec.petugas));
+
+      if (IS_ADMIN_PETUGAS_UNLOCKED) {
+        IS_ADMIN_PETUGAS_UNLOCKED = false;
+        if (rec && rec.petugas) {
+          document.getElementById("modalPetugas").value = rec.petugas;
+        }
+        applyPetugasLockState(hasAssigned);
+        showToast("Kolom Petugas Verifikator dikunci kembali.");
+        return;
+      }
+
+      const inputPin = prompt("Masukkan PIN Admin untuk membuka kunci perubahan Petugas Verifikator:");
+      if (inputPin === null) return;
+      if (inputPin.trim() === ADMIN_UNLOCK_PIN) {
+        IS_ADMIN_PETUGAS_UNLOCKED = true;
+        applyPetugasLockState(hasAssigned);
+        showToast("Kunci dibuka. Silakan ubah Petugas Verifikator jika diperlukan.");
+      } else {
+        showToast("PIN Admin salah! Perubahan Petugas Verifikator tetap dikunci.");
+      }
+    }
+
     function openEditModal(nip) {
       const rec = ALL_RECORDS.find(r => r.nip === nip);
       if (!rec) return;
@@ -1313,6 +1381,9 @@
       document.getElementById("modalStatusBA").value = rec.statusBA || "Belum";
       document.getElementById("modalStatusPK").value = rec.statusPK || "Belum";
       document.getElementById("modalKeterangan").value = rec.keterangan || "";
+
+      const hasAssigned = Boolean(rec.petugas && OFFICERS.includes(rec.petugas));
+      applyPetugasLockState(hasAssigned);
       document.getElementById("editModal").classList.remove("hidden");
     }
 
@@ -1325,10 +1396,15 @@
       btn.disabled = true;
       btn.textContent = "Menyimpan...";
 
+      const nipVal = document.getElementById("modalNip").value;
+      const existingRec = ALL_RECORDS.find(r => r.nip === nipVal);
+      const isLocked = existingRec && existingRec.petugas && OFFICERS.includes(existingRec.petugas) && !IS_ADMIN_PETUGAS_UNLOCKED;
+      const finalPetugas = isLocked ? existingRec.petugas : document.getElementById("modalPetugas").value;
+
       const payload = {
         action: "update",
-        nip: document.getElementById("modalNip").value,
-        petugas: document.getElementById("modalPetugas").value,
+        nip: nipVal,
+        petugas: finalPetugas,
         lokasiBox: document.getElementById("modalLokasiBox").value.trim().toUpperCase(),
         statusBA: document.getElementById("modalStatusBA").value,
         statusPK: document.getElementById("modalStatusPK").value,
