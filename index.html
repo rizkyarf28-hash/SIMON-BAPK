@@ -34,6 +34,13 @@
       background-color: #e2e8f0;
       color: #0f172a;
     }
+    th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+    th.sortable:hover {
+      background-color: #1e293b;
+    }
     ::-webkit-scrollbar {
       width: 7px;
       height: 7px;
@@ -48,12 +55,25 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
+    @media print {
+      body * { visibility: hidden; }
+      #printArea, #printArea * { visibility: visible; }
+      #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white;
+        padding: 16px;
+      }
+      .no-print { display: none !important; }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
   <!-- Sticky Top Header -->
-  <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30">
+  <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-extrabold text-base tracking-tight shadow-sm">
@@ -72,17 +92,28 @@
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
-        <span id="syncStatusText" class="text-xs text-slate-500 hidden lg:inline mr-1">Menunggu sinkronisasi...</span>
+        <span id="syncStatusText" class="text-xs text-slate-500 hidden xl:inline mr-1">Menunggu sinkronisasi...</span>
+
+        <!-- Identitas Petugas Aktif (Remember My PIC) -->
+        <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200">
+          <span class="text-[11px] font-bold text-indigo-800">PIC Aktif:</span>
+          <select id="activePicSelect" onchange="setActivePic()" class="text-xs font-bold text-indigo-950 bg-transparent focus:outline-none cursor-pointer">
+            <option value="ALL">Semua (Admin)</option>
+          </select>
+        </div>
+
         <label class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-50 border border-slate-200 text-slate-700 cursor-pointer select-none">
           <input id="autoSyncToggle" type="checkbox" checked onchange="toggleAutoSync()" class="rounded text-slate-900 focus:ring-0" />
           <span>Auto-Sync 30d</span>
         </label>
+
         <button onclick="fetchDataFromSheet(true)" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition flex items-center gap-1.5">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
           <span>Segarkan</span>
         </button>
+
         <button onclick="exportExcelReport()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center gap-1.5 shadow-xs">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -92,19 +123,29 @@
       </div>
     </div>
 
-    <!-- Navigation Tabs (2 Tabs) -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-3 flex items-center gap-2 overflow-x-auto">
-      <button id="btnTab1" onclick="switchTab(1)" class="tab-active px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
-        1. Dasbor &amp; 11 Petugas
-      </button>
-      <button id="btnTab2" onclick="switchTab(2)" class="tab-inactive px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
-        2. Kertas Kerja &amp; Verifikasi Berkas
-      </button>
+    <!-- Navigation Tabs -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-3 flex items-center justify-between gap-2 overflow-x-auto">
+      <div class="flex items-center gap-2">
+        <button id="btnTab1" onclick="switchTab(1)" class="tab-active px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
+          1. Dasbor &amp; 11 Petugas
+        </button>
+        <button id="btnTab2" onclick="switchTab(2)" class="tab-inactive px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
+          2. Kertas Kerja &amp; Verifikasi Berkas
+        </button>
+        <button id="btnTab3" onclick="switchTab(3)" class="tab-inactive px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
+          3. Rekap &amp; Daftar Isi Box Arsip
+        </button>
+      </div>
+      <div class="hidden md:flex items-center gap-2 text-[11px] text-slate-400">
+        <span>Pintasan: <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-600 font-mono">/</kbd> Cari</span>
+        <span>•</span>
+        <span><kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-600 font-mono">Esc</kbd> Tutup Modal</span>
+      </div>
     </div>
   </header>
 
   <!-- Status / Alert Banner -->
-  <div id="loadingBar" class="w-full bg-indigo-50 border-b border-indigo-100 px-4 py-2 text-center text-xs font-semibold text-indigo-700">
+  <div id="loadingBar" class="w-full bg-indigo-50 border-b border-indigo-100 px-4 py-2 text-center text-xs font-semibold text-indigo-700 no-print">
     Memuat data real-time dari Google Spreadsheet (Data_Master)...
   </div>
 
@@ -116,31 +157,36 @@
     <!-- ===================================================================== -->
     <section id="tab1" class="space-y-6">
       <!-- KPI Bento Grid -->
-      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+      <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
         <div class="bento-card p-4">
           <p class="text-xs font-semibold text-slate-500">Total Berkas Guru</p>
           <p id="kpiTotal" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">0</p>
           <p class="text-[11px] text-slate-400 mt-1">Urut Abjad A – Z</p>
         </div>
         <div class="bento-card p-4 border-l-4 border-l-emerald-500">
-          <p class="text-xs font-semibold text-emerald-700">Selesai Lengkap (BA &amp; PK)</p>
+          <p class="text-xs font-semibold text-emerald-700">Selesai Lengkap</p>
           <p id="kpiSelesai" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1">0</p>
           <p id="kpiSelesaiPct" class="text-[11px] text-emerald-600 font-bold mt-1">0%</p>
         </div>
         <div class="bento-card p-4 border-l-4 border-l-amber-500">
           <p class="text-xs font-semibold text-amber-700">Dalam Proses</p>
           <p id="kpiProses" class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1">0</p>
-          <p class="text-[11px] text-slate-400 mt-1">Salah satu / sedang dicek</p>
+          <p class="text-[11px] text-slate-400 mt-1">Parsial / sedang cek</p>
         </div>
-        <div class="bento-card p-4 border-l-4 border-l-rose-500">
+        <div class="bento-card p-4 border-l-4 border-l-rose-500 cursor-pointer hover:bg-rose-50/30 transition" onclick="jumpToKendala()">
           <p class="text-xs font-semibold text-rose-700">Ada Kendala</p>
           <p id="kpiKendala" class="text-2xl sm:text-3xl font-extrabold text-rose-600 mt-1">0</p>
-          <p class="text-[11px] text-slate-400 mt-1">Perlu tindak lanjut</p>
+          <p class="text-[11px] text-rose-500 font-semibold mt-1">Klik lihat daftar &rarr;</p>
         </div>
-        <div class="bento-card p-4 col-span-2 lg:col-span-1 border-l-4 border-l-slate-400">
+        <div class="bento-card p-4 border-l-4 border-l-slate-400">
           <p class="text-xs font-semibold text-slate-600">Belum Diproses</p>
           <p id="kpiBelum" class="text-2xl sm:text-3xl font-extrabold text-slate-700 mt-1">0</p>
-          <p class="text-[11px] text-slate-400 mt-1">Menunggu verifikasi</p>
+          <p class="text-[11px] text-slate-400 mt-1">Menunggu giliran</p>
+        </div>
+        <div class="bento-card p-4 border-l-4 border-l-indigo-500 cursor-pointer hover:bg-indigo-50/30 transition" onclick="switchTab(3)">
+          <p class="text-xs font-semibold text-indigo-700">Box Arsip Terisi</p>
+          <p id="kpiBoxCount" class="text-2xl sm:text-3xl font-extrabold text-indigo-600 mt-1">0</p>
+          <p id="kpiBoxSub" class="text-[11px] text-slate-400 mt-1">0 berkas ber-box</p>
         </div>
       </div>
 
@@ -171,79 +217,138 @@
         <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div>
             <h2 class="text-base font-extrabold text-slate-900">Beban Kerja &amp; Progres 11 Petugas Verifikator</h2>
-            <p class="text-xs text-slate-500">Klik kartu petugas mana pun untuk langsung memfilter dan mengerjakan berkasnya.</p>
+            <p class="text-xs text-slate-500">Klik kartu petugas untuk langsung membuka daftar berkas tanggung jawabnya.</p>
           </div>
         </div>
         <div id="officersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
       </div>
+
+      <!-- Pantauan Kendala Terpusat & Aktivitas Terbaru -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Panel Kendala -->
+        <div class="lg:col-span-7 bento-card p-5">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="text-sm font-extrabold text-rose-700 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                <span>Pantauan Berkas Kendala Terpusat</span>
+              </h3>
+              <p class="text-[11px] text-slate-500">Daftar berkas yang membutuhkan tindak lanjut segera</p>
+            </div>
+            <button onclick="jumpToKendala()" class="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-rose-50 text-rose-700 hover:bg-rose-100 transition">
+              Lihat Semua Kendala
+            </button>
+          </div>
+          <div id="kendalaListContainer" class="divide-y divide-slate-100 max-h-64 overflow-y-auto text-xs">
+            <p class="py-6 text-center text-slate-400">Tidak ada berkas berkendala saat ini.</p>
+          </div>
+        </div>
+
+        <!-- Panel Aktivitas Terakhir -->
+        <div class="lg:col-span-5 bento-card p-5">
+          <div class="mb-3">
+            <h3 class="text-sm font-extrabold text-slate-900">Aktivitas Verifikasi Terakhir</h3>
+            <p class="text-[11px] text-slate-500">10 pembaruan data terbaru berdasarkan waktu simpan</p>
+          </div>
+          <div id="recentActivityContainer" class="divide-y divide-slate-100 max-h-64 overflow-y-auto text-xs">
+            <p class="py-6 text-center text-slate-400">Belum ada riwayat pembaruan.</p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ===================================================================== -->
-    <!-- TAB 2: MANAJEMEN & VERIFIKASI BERKAS                                  -->
+    <!-- TAB 2: KERTAS KERJA & VERIFIKASI BERKAS                               -->
     <!-- ===================================================================== -->
     <section id="tab2" class="hidden space-y-4">
       <!-- Filter & Search Bar -->
       <div class="bento-card p-4 space-y-3">
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-          <div class="md:col-span-4">
-            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Cari Nama Guru / NIP / Sekolah</label>
-            <input id="searchInput" type="text" oninput="applyFilters()" placeholder="Ketik nama, NIP, sekolah, atau box..."
-              class="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900" />
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
+          <div class="lg:col-span-3">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Cari Nama / NIP / Ket.</label>
+            <input id="searchInput" type="text" oninput="applyFilters()" placeholder="Tekan / untuk cari..."
+              class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900" />
           </div>
-          <div class="md:col-span-3">
-            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter Petugas (11 Orang)</label>
+          <div class="lg:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Petugas (11 Orang)</label>
             <select id="filterOfficer" onchange="applyFilters()"
-              class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
-              <option value="ALL">Semua Petugas (11 Orang)</option>
+              class="w-full px-2.5 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
+              <option value="ALL">Semua Petugas</option>
             </select>
           </div>
-          <div class="md:col-span-3">
-            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter Status Berkas</label>
+          <div class="lg:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Status Berkas</label>
             <select id="filterStatus" onchange="applyFilters()"
-              class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
+              class="w-full px-2.5 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
               <option value="ALL">Semua Status</option>
-              <option value="SELESAI">Selesai Lengkap (BA &amp; PK)</option>
+              <option value="SELESAI">Selesai (BA &amp; PK)</option>
               <option value="PROSES">Dalam Proses</option>
               <option value="KENDALA">Ada Kendala</option>
               <option value="BELUM">Belum Diproses</option>
             </select>
           </div>
-          <div class="md:col-span-2 flex items-end">
-            <button onclick="resetFilters()" class="w-full px-3 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition">
-              Reset Filter
+          <div class="lg:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Lokasi Box Arsip</label>
+            <select id="filterBox" onchange="applyFilters()"
+              class="w-full px-2.5 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
+              <option value="ALL">Semua Box</option>
+              <option value="EMPTY">Belum Ber-Box</option>
+            </select>
+          </div>
+          <div class="lg:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Unit Sekolah Rakyat</label>
+            <select id="filterUnit" onchange="applyFilters()"
+              class="w-full px-2.5 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
+              <option value="ALL">Semua Unit</option>
+            </select>
+          </div>
+          <div class="lg:col-span-1 flex items-end">
+            <button onclick="resetFilters()" title="Reset semua filter" class="w-full px-2.5 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition">
+              Reset
             </button>
           </div>
         </div>
 
         <!-- Bulk Action Toolbar -->
-        <div id="bulkToolbar" class="hidden pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-indigo-50/80 p-3 rounded-xl">
-          <div class="flex items-center gap-2 text-xs font-bold text-indigo-950">
-            <span id="selectedCountBadge" class="px-2.5 py-0.5 bg-indigo-600 text-white rounded-md">0</span>
-            <span>berkas dipilih</span>
-            <button onclick="clearSelection()" class="text-[11px] underline text-indigo-600 hover:text-indigo-800 ml-1">Batal pilih</button>
+        <div id="bulkToolbar" class="hidden pt-3 border-t border-slate-200 space-y-2.5 bg-indigo-50/80 p-3.5 rounded-xl">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-xs font-bold text-indigo-950">
+              <span id="selectedCountBadge" class="px-2.5 py-0.5 bg-indigo-600 text-white rounded-md">0</span>
+              <span>berkas dipilih</span>
+              <button onclick="clearSelection()" class="text-[11px] underline text-indigo-600 hover:text-indigo-800 ml-1">Batal pilih</button>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <select id="bulkStatusBA" class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white font-medium">
+                <option value="">-- Status BA --</option>
+                <option value="Selesai">BA: Selesai</option>
+                <option value="Proses">BA: Proses</option>
+                <option value="Kendala">BA: Kendala</option>
+                <option value="Belum">BA: Belum</option>
+              </select>
+              <select id="bulkStatusPK" class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white font-medium">
+                <option value="">-- Status PK --</option>
+                <option value="Selesai">PK: Selesai</option>
+                <option value="Proses">PK: Proses</option>
+                <option value="Kendala">PK: Kendala</option>
+                <option value="Belum">PK: Belum</option>
+              </select>
+              <input id="bulkLokasiBoxInput" type="text" placeholder="Lokasi Box (mis. BOX 1)..."
+                class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white w-40" />
+              <input id="bulkNoteInput" type="text" placeholder="Catatan massal..."
+                class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white w-44" />
+              <button id="btnBulkSave" onclick="submitBulkUpdate()" class="px-3.5 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-xs transition">
+                Simpan Massal
+              </button>
+            </div>
           </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <select id="bulkStatusBA" class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white font-medium">
-              <option value="">-- Ubah Status BA --</option>
-              <option value="Selesai">BA: Selesai</option>
-              <option value="Proses">BA: Proses</option>
-              <option value="Kendala">BA: Kendala</option>
-              <option value="Belum">BA: Belum</option>
-            </select>
-            <select id="bulkStatusPK" class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white font-medium">
-              <option value="">-- Ubah Status PK --</option>
-              <option value="Selesai">PK: Selesai</option>
-              <option value="Proses">PK: Proses</option>
-              <option value="Kendala">PK: Kendala</option>
-              <option value="Belum">PK: Belum</option>
-            </select>
-            <input id="bulkLokasiBoxInput" type="text" placeholder="Lokasi Box (mis. BOX 1)..."
-              class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white w-40" />
-            <input id="bulkNoteInput" type="text" placeholder="Catatan massal (opsional)..."
-              class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white w-44" />
-            <button id="btnBulkSave" onclick="submitBulkUpdate()" class="px-3.5 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-xs transition">
-              Simpan Massal
-            </button>
+          <!-- Quick Note Chips untuk Bulk -->
+          <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
+            <span class="text-indigo-800 font-semibold">Template Catatan Cepat:</span>
+            <button type="button" onclick="appendBulkChip('TTE Lengkap')" class="px-2 py-0.5 rounded-full bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-100">TTE Lengkap</button>
+            <button type="button" onclick="appendBulkChip('Belum TTE')" class="px-2 py-0.5 rounded-full bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-100">Belum TTE</button>
+            <button type="button" onclick="appendBulkChip('Scan Buram')" class="px-2 py-0.5 rounded-full bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-100">Scan Buram</button>
+            <button type="button" onclick="appendBulkChip('Berkas Fisik Menyusul')" class="px-2 py-0.5 rounded-full bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-100">Berkas Fisik Menyusul</button>
+            <button type="button" onclick="appendBulkChip('Salah NIP/Nama')" class="px-2 py-0.5 rounded-full bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-100">Salah NIP/Nama</button>
           </div>
         </div>
       </div>
@@ -257,14 +362,14 @@
                 <th class="p-3 w-10 text-center">
                   <input id="selectAllPage" type="checkbox" onclick="toggleSelectPage(this)" class="rounded" title="Pilih semua di halaman ini" />
                 </th>
-                <th class="p-3 w-12 text-center">No</th>
-                <th class="p-3">Nama Guru &amp; NIP</th>
-                <th class="p-3">Unit Sekolah Rakyat &amp; Box</th>
-                <th class="p-3">Petugas PIC</th>
-                <th class="p-3 text-center">Status BA</th>
-                <th class="p-3 text-center">Status PK</th>
+                <th onclick="sortTable('no')" class="sortable p-3 w-14 text-center">No <span id="sortIcon_no" class="opacity-60">&#8597;</span></th>
+                <th onclick="sortTable('nama')" class="sortable p-3">Nama Guru &amp; NIP <span id="sortIcon_nama" class="opacity-60">&#8597;</span></th>
+                <th onclick="sortTable('lokasiBox')" class="sortable p-3">Unit Sekolah Rakyat &amp; Box <span id="sortIcon_lokasiBox" class="opacity-60">&#8597;</span></th>
+                <th onclick="sortTable('petugas')" class="sortable p-3">Petugas PIC <span id="sortIcon_petugas" class="opacity-60">&#8597;</span></th>
+                <th onclick="sortTable('statusBA')" class="sortable p-3 text-center">Status BA <span id="sortIcon_statusBA" class="opacity-60">&#8597;</span></th>
+                <th onclick="sortTable('statusPK')" class="sortable p-3 text-center">Status PK <span id="sortIcon_statusPK" class="opacity-60">&#8597;</span></th>
                 <th class="p-3">Keterangan</th>
-                <th class="p-3 text-center w-24">Aksi</th>
+                <th class="p-3 text-center w-28">Aksi</th>
               </tr>
             </thead>
             <tbody id="tableBody" class="divide-y divide-slate-200 text-xs"></tbody>
@@ -291,16 +396,50 @@
       </div>
     </section>
 
+    <!-- ===================================================================== -->
+    <!-- TAB 3: REKAP & DAFTAR ISI BOX ARSIP (SIAP CETAK LABEL)                -->
+    <!-- ===================================================================== -->
+    <section id="tab3" class="hidden space-y-5">
+      <div class="bento-card p-5 flex flex-wrap items-center justify-between gap-4 no-print">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900">Rekapitulasi &amp; Daftar Isi Box Arsip</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Pilih nomor boks arsip untuk melihat rincian daftar nama guru di dalamnya atau mencetak label boks.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <select id="boxDetailSelect" onchange="renderBoxDetail()" class="px-3.5 py-2 text-xs font-bold border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
+            <option value="">-- Pilih Lokasi Box --</option>
+          </select>
+          <button onclick="printBoxLabel()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            <span>Cetak Daftar Isi Box</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Ringkasan Kartu Semua Box -->
+      <div id="boxSummaryGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 no-print"></div>
+
+      <!-- Area Cetak Daftar Isi Box -->
+      <div id="printArea" class="bento-card p-6">
+        <div id="boxDetailContent" class="text-xs text-slate-500 text-center py-8">
+          Silakan pilih salah satu boks arsip di atas untuk menampilkan daftar isi berkas di dalamnya.
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- Edit Modal -->
-  <div id="editModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="editModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 no-print">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
       <div class="flex justify-between items-start gap-2">
         <div>
           <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Update Verifikasi Real-Time</span>
           <h3 id="modalGuruName" class="text-base font-extrabold text-slate-900 mt-0.5">-</h3>
           <p id="modalGuruMeta" class="text-xs text-slate-500 mt-0.5">-</p>
+          <p id="modalLastUpdated" class="text-[11px] text-slate-400 mt-0.5"></p>
         </div>
         <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 font-bold text-xl leading-none">&times;</button>
       </div>
@@ -315,8 +454,9 @@
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">Lokasi Box Arsip</label>
-            <input id="modalLokasiBox" type="text" placeholder="Contoh: BOX 1"
+            <input id="modalLokasiBox" list="existingBoxesList" type="text" placeholder="Contoh: BOX 1"
               class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900" />
+            <datalist id="existingBoxesList"></datalist>
           </div>
         </div>
 
@@ -342,9 +482,20 @@
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Keterangan / Catatan Berkas</label>
-          <textarea id="modalKeterangan" rows="3" placeholder="Contoh: TTE lengkap, atau Belum scan fisik..."
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-slate-700">Keterangan / Catatan Berkas</label>
+            <button type="button" onclick="document.getElementById('modalKeterangan').value=''" class="text-[11px] text-slate-400 hover:text-slate-600">Kosongkan</button>
+          </div>
+          <textarea id="modalKeterangan" rows="2" placeholder="Contoh: TTE lengkap, atau Belum scan fisik..."
             class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl"></textarea>
+          <!-- Quick Chips Template Catatan -->
+          <div class="flex flex-wrap gap-1.5 mt-1.5">
+            <button type="button" onclick="appendModalChip('TTE Lengkap')" class="px-2 py-0.5 text-[11px] rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100">+ TTE Lengkap</button>
+            <button type="button" onclick="appendModalChip('Belum TTE')" class="px-2 py-0.5 text-[11px] rounded-full bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100">+ Belum TTE</button>
+            <button type="button" onclick="appendModalChip('Scan Buram')" class="px-2 py-0.5 text-[11px] rounded-full bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100">+ Scan Buram</button>
+            <button type="button" onclick="appendModalChip('Salah NIP/Nama')" class="px-2 py-0.5 text-[11px] rounded-full bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100">+ Salah NIP/Nama</button>
+            <button type="button" onclick="appendModalChip('Fisik Menyusul')" class="px-2 py-0.5 text-[11px] rounded-full bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200">+ Fisik Menyusul</button>
+          </div>
         </div>
       </div>
 
@@ -360,11 +511,10 @@
   </div>
 
   <!-- Toast Notification -->
-  <div id="toast" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-lg max-w-sm"></div>
+  <div id="toast" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-lg max-w-sm no-print"></div>
 
   <script>
-    const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbw6U7vqmEd5n8thqt8jOmFFt1XJZ1KjdBZBRhv6H-mgGroGxM3ypKe5yaHGYasgGkIP/exec";
-    let GAS_WEB_APP_URL = DEFAULT_GAS_URL;
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw6U7vqmEd5n8thqt8jOmFFt1XJZ1KjdBZBRhv6H-mgGroGxM3ypKe5yaHGYasgGkIP/exec";
 
     let ALL_RECORDS = [];
     let FILTERED_RECORDS = [];
@@ -377,12 +527,40 @@
     let CURRENT_PAGE = 1;
     let PAGE_SIZE = 50;
     let AUTO_SYNC_TIMER = null;
+    let SORT_FIELD = "no";
+    let SORT_ASC = true;
 
     window.addEventListener("DOMContentLoaded", () => {
       populateOfficerDropdowns();
+      const savedPic = localStorage.getItem("SIMON_BAPK_ACTIVE_PIC") || "ALL";
+      if (savedPic !== "ALL" && OFFICERS.includes(savedPic)) {
+        document.getElementById("activePicSelect").value = savedPic;
+        document.getElementById("filterOfficer").value = savedPic;
+      }
       fetchDataFromSheet(false);
       toggleAutoSync();
     });
+
+    // Keyboard shortcuts: '/' to focus search, 'Esc' to close modal
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeEditModal();
+      } else if (e.key === "/" && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) {
+        e.preventDefault();
+        switchTab(2);
+        document.getElementById("searchInput").focus();
+      }
+    });
+
+    function setActivePic() {
+      const pic = document.getElementById("activePicSelect").value;
+      localStorage.setItem("SIMON_BAPK_ACTIVE_PIC", pic);
+      document.getElementById("filterOfficer").value = pic;
+      applyFilters();
+      if (pic !== "ALL") {
+        showToast(`Mode PIC Aktif: ${pic}`);
+      }
+    }
 
     function setConnectionStatus(state, text) {
       const badge = document.getElementById("connBadge");
@@ -419,9 +597,12 @@
     function populateOfficerDropdowns() {
       const filterSel = document.getElementById("filterOfficer");
       const modalSel = document.getElementById("modalPetugas");
+      const activePicSel = document.getElementById("activePicSelect");
       const currentFilter = filterSel.value;
+      const currentActive = activePicSel.value;
 
-      filterSel.innerHTML = `<option value="ALL">Semua Petugas (${OFFICERS.length} Orang)</option>`;
+      filterSel.innerHTML = `<option value="ALL">Semua Petugas (${OFFICERS.length})</option>`;
+      activePicSel.innerHTML = `<option value="ALL">Semua (Admin)</option>`;
       modalSel.innerHTML = "";
 
       OFFICERS.forEach((name, idx) => {
@@ -434,10 +615,77 @@
         opt2.value = name;
         opt2.textContent = name;
         modalSel.appendChild(opt2);
+
+        const opt3 = document.createElement("option");
+        opt3.value = name;
+        opt3.textContent = name;
+        activePicSel.appendChild(opt3);
       });
 
       if (currentFilter && (currentFilter === "ALL" || OFFICERS.includes(currentFilter))) {
         filterSel.value = currentFilter;
+      }
+      if (currentActive && (currentActive === "ALL" || OFFICERS.includes(currentActive))) {
+        activePicSel.value = currentActive;
+      }
+    }
+
+    function populateDynamicFilters() {
+      // Populate Box Filter & Datalist
+      const boxSet = new Set();
+      const unitSet = new Set();
+      ALL_RECORDS.forEach(r => {
+        if (r.lokasiBox) boxSet.add(r.lokasiBox);
+        if (r.unitKerja) unitSet.add(r.unitKerja);
+      });
+
+      const sortedBoxes = Array.from(boxSet).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+      const sortedUnits = Array.from(unitSet).sort();
+
+      const filterBoxSel = document.getElementById("filterBox");
+      const boxDetailSel = document.getElementById("boxDetailSelect");
+      const datalist = document.getElementById("existingBoxesList");
+      const curBox = filterBoxSel.value;
+      const curDetailBox = boxDetailSel.value;
+
+      filterBoxSel.innerHTML = `<option value="ALL">Semua Box (${sortedBoxes.length})</option><option value="EMPTY">Belum Ber-Box</option>`;
+      boxDetailSel.innerHTML = `<option value="">-- Pilih Lokasi Box (${sortedBoxes.length}) --</option>`;
+      datalist.innerHTML = "";
+
+      sortedBoxes.forEach(b => {
+        const o1 = document.createElement("option");
+        o1.value = b;
+        o1.textContent = b;
+        filterBoxSel.appendChild(o1);
+
+        const o2 = document.createElement("option");
+        o2.value = b;
+        o2.textContent = b;
+        boxDetailSel.appendChild(o2);
+
+        const o3 = document.createElement("option");
+        o3.value = b;
+        datalist.appendChild(o3);
+      });
+
+      if (curBox === "ALL" || curBox === "EMPTY" || sortedBoxes.includes(curBox)) {
+        filterBoxSel.value = curBox;
+      }
+      if (sortedBoxes.includes(curDetailBox)) {
+        boxDetailSel.value = curDetailBox;
+      }
+
+      const filterUnitSel = document.getElementById("filterUnit");
+      const curUnit = filterUnitSel.value;
+      filterUnitSel.innerHTML = `<option value="ALL">Semua Unit (${sortedUnits.length})</option>`;
+      sortedUnits.forEach(u => {
+        const o = document.createElement("option");
+        o.value = u;
+        o.textContent = u;
+        filterUnitSel.appendChild(o);
+      });
+      if (curUnit === "ALL" || sortedUnits.includes(curUnit)) {
+        filterUnitSel.value = curUnit;
       }
     }
 
@@ -446,17 +694,26 @@
       t.textContent = msg;
       t.classList.remove("hidden");
       clearTimeout(t._timer);
-      t._timer = setTimeout(() => t.classList.add("hidden"), 3800);
+      t._timer = setTimeout(() => t.classList.add("hidden"), 3500);
     }
 
     function switchTab(tabNum) {
-      for (let i = 1; i <= 2; i++) {
+      for (let i = 1; i <= 3; i++) {
         document.getElementById("tab" + i).classList.toggle("hidden", i !== tabNum);
         const btn = document.getElementById("btnTab" + i);
         btn.className = (i === tabNum)
           ? "tab-active px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap"
           : "tab-inactive px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap";
       }
+      if (tabNum === 3) {
+        renderBoxOverview();
+      }
+    }
+
+    function jumpToKendala() {
+      document.getElementById("filterStatus").value = "KENDALA";
+      switchTab(2);
+      applyFilters();
     }
 
     async function fetchDataFromSheet(manual = false, silent = false) {
@@ -486,12 +743,17 @@
             OFFICERS = res.officers;
             populateOfficerDropdowns();
           }
+          populateDynamicFilters();
           setConnectionStatus("connected", `Terhubung • ${ALL_RECORDS.length.toLocaleString("id-ID")} Berkas`);
           document.getElementById("syncStatusText").textContent = `Sinkron: ${res.serverTime || "Baru saja"}`;
           bar.classList.add("hidden");
 
           renderDashboard();
           applyFilters(true);
+          if (!document.getElementById("tab3").classList.contains("hidden")) {
+            renderBoxOverview();
+            renderBoxDetail();
+          }
           if (manual) showToast(`Data berhasil disinkronkan (${ALL_RECORDS.length.toLocaleString("id-ID")} berkas).`);
         } else {
           throw new Error((res && res.message) ? res.message : "Gagal memuat data dari Spreadsheet.");
@@ -499,7 +761,7 @@
       } catch (err) {
         setConnectionStatus("error", "Koneksi Terputus");
         bar.textContent = "Gagal terhubung ke Google Sheets: " + err.message;
-        bar.className = "w-full bg-rose-50 border-b border-rose-200 px-4 py-2 text-center text-xs font-semibold text-rose-700";
+        bar.className = "w-full bg-rose-50 border-b border-rose-200 px-4 py-2 text-center text-xs font-semibold text-rose-700 no-print";
         bar.classList.remove("hidden");
         if (manual) showToast("Error: " + err.message);
       }
@@ -518,7 +780,7 @@
       try {
         return JSON.parse(text);
       } catch (e) {
-        throw new Error("Server Apps Script belum memiliki fungsi doPost(e) atau perlu Deploy versi baru.");
+        throw new Error("Server Apps Script gagal merespons JSON.");
       }
     }
 
@@ -532,7 +794,9 @@
     function renderDashboard() {
       const total = ALL_RECORDS.length;
       let selesai = 0, proses = 0, kendala = 0, belum = 0;
-      let baDone = 0, pkDone = 0;
+      let baDone = 0, pkDone = 0, boxedCount = 0;
+      const boxSet = new Set();
+      const kendalaList = [];
 
       const officerStats = {};
       OFFICERS.forEach(name => {
@@ -545,12 +809,19 @@
       ALL_RECORDS.forEach(r => {
         const cat = getCategory(r);
         if (cat === "SELESAI") selesai++;
-        else if (cat === "KENDALA") kendala++;
+        else if (cat === "KENDALA") {
+          kendala++;
+          kendalaList.push(r);
+        }
         else if (cat === "PROSES") proses++;
         else belum++;
 
         if (r.statusBA === "Selesai") baDone++;
         if (r.statusPK === "Selesai") pkDone++;
+        if (r.lokasiBox) {
+          boxedCount++;
+          boxSet.add(r.lokasiBox);
+        }
 
         const st = officerStats[r.petugas];
         if (st) {
@@ -573,6 +844,8 @@
       document.getElementById("kpiProses").textContent = proses.toLocaleString("id-ID");
       document.getElementById("kpiKendala").textContent = kendala.toLocaleString("id-ID");
       document.getElementById("kpiBelum").textContent = belum.toLocaleString("id-ID");
+      document.getElementById("kpiBoxCount").textContent = `${boxSet.size} Box`;
+      document.getElementById("kpiBoxSub").textContent = `${boxedCount.toLocaleString("id-ID")} berkas terarsip`;
 
       const baPct = total ? (baDone / total * 100).toFixed(1) : 0;
       const pkPct = total ? (pkDone / total * 100).toFixed(1) : 0;
@@ -581,9 +854,9 @@
       document.getElementById("pkSummaryText").textContent = `${pkDone.toLocaleString("id-ID")} / ${total.toLocaleString("id-ID")} (${pkPct}%)`;
       document.getElementById("pkProgressBar").style.width = `${pkPct}%`;
 
+      // Render Officer Cards
       const grid = document.getElementById("officersGrid");
       grid.innerHTML = "";
-
       OFFICERS.forEach((name, idx) => {
         const o = officerStats[name];
         const pct = o.total ? Math.round(((o.baDone + o.pkDone) / (2 * o.total)) * 100) : 0;
@@ -621,21 +894,87 @@
         `;
         grid.appendChild(card);
       });
+
+      // Render Pantauan Kendala Terpusat
+      const kendalaContainer = document.getElementById("kendalaListContainer");
+      if (kendalaList.length === 0) {
+        kendalaContainer.innerHTML = '<p class="py-6 text-center text-slate-400">Tidak ada berkas berkendala saat ini.</p>';
+      } else {
+        kendalaContainer.innerHTML = kendalaList.slice(0, 15).map(r => `
+          <div class="py-2.5 flex items-center justify-between gap-2 hover:bg-slate-50 px-2 rounded-lg">
+            <div class="min-w-0">
+              <p class="font-bold text-slate-900 truncate">${escapeHtml(r.nama)} <span class="font-normal text-slate-400">(${escapeHtml(r.petugas)})</span></p>
+              <p class="text-[11px] text-rose-600 truncate">${escapeHtml(r.keterangan || "Status kendala tanpa catatan")}</p>
+            </div>
+            <button onclick="openEditModal('${escapeAttr(r.nip)}')" class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-900 text-white text-[11px] font-bold hover:bg-slate-700">
+              Tindak Lanjut
+            </button>
+          </div>
+        `).join("");
+      }
+
+      // Render Aktivitas Terakhir
+      const recentContainer = document.getElementById("recentActivityContainer");
+      const recentList = ALL_RECORDS
+        .filter(r => r.updatedAt)
+        .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)))
+        .slice(0, 10);
+
+      if (recentList.length === 0) {
+        recentContainer.innerHTML = '<p class="py-6 text-center text-slate-400">Belum ada riwayat pembaruan.</p>';
+      } else {
+        recentContainer.innerHTML = recentList.map(r => `
+          <div class="py-2.5 flex items-center justify-between gap-2 px-1">
+            <div class="min-w-0">
+              <p class="font-bold text-slate-800 truncate">${escapeHtml(r.nama)}</p>
+              <p class="text-[11px] text-slate-500 truncate">PIC: ${escapeHtml(r.petugas)} • BA: ${r.statusBA} | PK: ${r.statusPK}</p>
+            </div>
+            <span class="shrink-0 text-[10px] font-mono text-slate-400">${escapeHtml(r.updatedAt.slice(5, 16))}</span>
+          </div>
+        `).join("");
+      }
+    }
+
+    function sortTable(field) {
+      if (SORT_FIELD === field) {
+        SORT_ASC = !SORT_ASC;
+      } else {
+        SORT_FIELD = field;
+        SORT_ASC = true;
+      }
+      applyFilters(true);
     }
 
     function applyFilters(keepPage = false) {
       const q = document.getElementById("searchInput").value.toLowerCase().trim();
       const off = document.getElementById("filterOfficer").value;
       const st = document.getElementById("filterStatus").value;
+      const box = document.getElementById("filterBox").value;
+      const unit = document.getElementById("filterUnit").value;
 
       FILTERED_RECORDS = ALL_RECORDS.filter(r => {
         if (off !== "ALL" && r.petugas !== off) return false;
         if (st !== "ALL" && getCategory(r) !== st) return false;
+        if (box === "EMPTY" && r.lokasiBox) return false;
+        if (box !== "ALL" && box !== "EMPTY" && r.lokasiBox !== box) return false;
+        if (unit !== "ALL" && r.unitKerja !== unit) return false;
         if (q) {
           const hay = `${r.nama} ${r.nip} ${r.unitKerja} ${r.jabatan} ${r.lokasiBox} ${r.keterangan}`.toLowerCase();
           if (!hay.includes(q)) return false;
         }
         return true;
+      });
+
+      FILTERED_RECORDS.sort((a, b) => {
+        let valA = a[SORT_FIELD];
+        let valB = b[SORT_FIELD];
+        if (SORT_FIELD === "no") {
+          return SORT_ASC ? (Number(valA) - Number(valB)) : (Number(valB) - Number(valA));
+        }
+        valA = String(valA || "").toLowerCase();
+        valB = String(valB || "").toLowerCase();
+        const cmp = valA.localeCompare(valB, undefined, { numeric: true });
+        return SORT_ASC ? cmp : -cmp;
       });
 
       if (!keepPage) CURRENT_PAGE = 1;
@@ -646,6 +985,10 @@
       document.getElementById("searchInput").value = "";
       document.getElementById("filterOfficer").value = "ALL";
       document.getElementById("filterStatus").value = "ALL";
+      document.getElementById("filterBox").value = "ALL";
+      document.getElementById("filterUnit").value = "ALL";
+      SORT_FIELD = "no";
+      SORT_ASC = true;
       clearSelection();
       applyFilters();
     }
@@ -681,8 +1024,11 @@
       for (let i = start; i < end; i++) {
         const r = FILTERED_RECORDS[i];
         const checked = SELECTED_NIPS[r.nip] ? "checked" : "";
+        const isDone = (r.statusBA === "Selesai" && r.statusPK === "Selesai");
+        const titleHover = r.updatedAt ? `Terakhir diubah: ${r.updatedAt}` : "Belum pernah diubah";
+
         html += `
-          <tr class="hover:bg-slate-50 transition-colors">
+          <tr class="hover:bg-slate-50 transition-colors" title="${escapeAttr(titleHover)}">
             <td class="p-3 text-center">
               <input type="checkbox" ${checked} onchange="toggleSelectOne('${escapeAttr(r.nip)}', this.checked)" class="rounded" />
             </td>
@@ -695,7 +1041,7 @@
               <div class="text-slate-800 font-medium">${escapeHtml(r.unitKerja)}</div>
               <div class="mt-0.5">
                 ${r.lokasiBox
-                  ? `<span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-slate-100 text-slate-700 border border-slate-200">${escapeHtml(r.lokasiBox)}</span>`
+                  ? `<span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-50 text-indigo-700 border border-indigo-200">${escapeHtml(r.lokasiBox)}</span>`
                   : `<span class="text-[11px] text-slate-400 italic">Box belum diinput</span>`}
               </div>
             </td>
@@ -704,14 +1050,54 @@
             <td class="p-3 text-center">${statusBadge(r.statusPK)}</td>
             <td class="p-3 text-slate-600 max-w-xs truncate" title="${escapeAttr(r.keterangan || '')}">${escapeHtml(r.keterangan || "-")}</td>
             <td class="p-3 text-center">
-              <button onclick="openEditModal('${escapeAttr(r.nip)}')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-700 text-white text-[11px] font-bold transition">
-                Ubah
-              </button>
+              <div class="inline-flex items-center gap-1">
+                ${!isDone ? `
+                  <button onclick="quickComplete('${escapeAttr(r.nip)}')" title="Tandai BA & PK Selesai (1-Klik)"
+                    class="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </button>
+                ` : ""}
+                <button onclick="openEditModal('${escapeAttr(r.nip)}')" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-700 text-white text-[11px] font-bold transition">
+                  Ubah
+                </button>
+              </div>
             </td>
           </tr>
         `;
       }
       tbody.innerHTML = html;
+    }
+
+    async function quickComplete(nip) {
+      const rec = ALL_RECORDS.find(r => r.nip === nip);
+      if (!rec) return;
+
+      showToast(`Menyelesaikan berkas ${rec.nama}...`);
+      try {
+        const res = await postToGas({
+          action: "update",
+          nip: rec.nip,
+          petugas: rec.petugas,
+          lokasiBox: rec.lokasiBox,
+          statusBA: "Selesai",
+          statusPK: "Selesai",
+          keterangan: rec.keterangan
+        });
+        if (res && res.status === "success") {
+          rec.statusBA = "Selesai";
+          rec.statusPK = "Selesai";
+          rec.updatedAt = res.updatedAt || "";
+          renderDashboard();
+          applyFilters(true);
+          showToast(`Selesai! ${rec.nama} tersimpan ke Sheets.`);
+        } else {
+          throw new Error((res && res.message) ? res.message : "Gagal menyimpan.");
+        }
+      } catch (err) {
+        showToast("Gagal: " + err.message);
+      }
     }
 
     function escapeHtml(str) {
@@ -723,7 +1109,7 @@
     }
 
     function escapeAttr(str) {
-      return String(str || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+      return String(str || "").replace(/'/g, "\'").replace(/"/g, "&quot;");
     }
 
     function changePageSize() {
@@ -777,6 +1163,18 @@
       document.getElementById("bulkToolbar").classList.toggle("hidden", count === 0);
     }
 
+    function appendModalChip(text) {
+      const el = document.getElementById("modalKeterangan");
+      const cur = el.value.trim();
+      el.value = cur ? `${cur}; ${text}` : text;
+    }
+
+    function appendBulkChip(text) {
+      const el = document.getElementById("bulkNoteInput");
+      const cur = el.value.trim();
+      el.value = cur ? `${cur}; ${text}` : text;
+    }
+
     function openEditModal(nip) {
       const rec = ALL_RECORDS.find(r => r.nip === nip);
       if (!rec) return;
@@ -784,6 +1182,7 @@
       document.getElementById("modalNip").value = rec.nip;
       document.getElementById("modalGuruName").textContent = rec.nama;
       document.getElementById("modalGuruMeta").textContent = `NIP: ${rec.nip} • ${rec.unitKerja}`;
+      document.getElementById("modalLastUpdated").textContent = rec.updatedAt ? `Terakhir diubah: ${rec.updatedAt}` : "";
       document.getElementById("modalPetugas").value = rec.petugas;
       document.getElementById("modalLokasiBox").value = rec.lokasiBox || "";
       document.getElementById("modalStatusBA").value = rec.statusBA || "Belum";
@@ -805,7 +1204,7 @@
         action: "update",
         nip: document.getElementById("modalNip").value,
         petugas: document.getElementById("modalPetugas").value,
-        lokasiBox: document.getElementById("modalLokasiBox").value.trim(),
+        lokasiBox: document.getElementById("modalLokasiBox").value.trim().toUpperCase(),
         statusBA: document.getElementById("modalStatusBA").value,
         statusPK: document.getElementById("modalStatusPK").value,
         keterangan: document.getElementById("modalKeterangan").value
@@ -823,6 +1222,7 @@
             rec.keterangan = payload.keterangan;
             rec.updatedAt = res.updatedAt || "";
           }
+          populateDynamicFilters();
           closeEditModal();
           renderDashboard();
           applyFilters(true);
@@ -844,7 +1244,7 @@
 
       const statusBA = document.getElementById("bulkStatusBA").value;
       const statusPK = document.getElementById("bulkStatusPK").value;
-      const lokasiBox = document.getElementById("bulkLokasiBoxInput").value.trim();
+      const lokasiBox = document.getElementById("bulkLokasiBoxInput").value.trim().toUpperCase();
       const keterangan = document.getElementById("bulkNoteInput").value.trim();
 
       if (!statusBA && !statusPK && !lokasiBox && !keterangan) {
@@ -882,6 +1282,7 @@
           document.getElementById("bulkStatusBA").value = "";
           document.getElementById("bulkStatusPK").value = "";
           document.getElementById("bulkNoteInput").value = "";
+          populateDynamicFilters();
           updateBulkBar();
           renderDashboard();
           applyFilters(true);
@@ -895,6 +1296,107 @@
         btn.disabled = false;
         btn.textContent = "Simpan Massal";
       }
+    }
+
+    // =========================================================================
+    // TAB 3: REKAP & DAFTAR ISI BOX ARSIP
+    // =========================================================================
+    function renderBoxOverview() {
+      const boxMap = {};
+      ALL_RECORDS.forEach(r => {
+        if (!r.lokasiBox) return;
+        if (!boxMap[r.lokasiBox]) boxMap[r.lokasiBox] = [];
+        boxMap[r.lokasiBox].push(r);
+      });
+
+      const boxes = Object.keys(boxMap).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+      const grid = document.getElementById("boxSummaryGrid");
+
+      if (boxes.length === 0) {
+        grid.innerHTML = '<div class="col-span-full bento-card p-6 text-center text-xs text-slate-400">Belum ada berkas yang diberi nomor Lokasi Box.</div>';
+        return;
+      }
+
+      grid.innerHTML = boxes.map(b => {
+        const list = boxMap[b];
+        const doneCount = list.filter(x => x.statusBA === "Selesai" && x.statusPK === "Selesai").length;
+        return `
+          <div onclick="selectBoxForDetail('${escapeAttr(b)}')" class="bento-card p-3.5 hover:border-slate-900 cursor-pointer transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-indigo-700">${escapeHtml(b)}</span>
+              <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-slate-100 text-slate-700">${list.length} Berkas</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1.5">Tuntas BA &amp; PK: <strong class="text-emerald-600">${doneCount}</strong>/${list.length}</p>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function selectBoxForDetail(boxName) {
+      document.getElementById("boxDetailSelect").value = boxName;
+      renderBoxDetail();
+    }
+
+    function renderBoxDetail() {
+      const boxName = document.getElementById("boxDetailSelect").value;
+      const container = document.getElementById("boxDetailContent");
+      if (!boxName) {
+        container.innerHTML = '<div class="text-xs text-slate-500 text-center py-8">Silakan pilih salah satu boks arsip di atas untuk menampilkan daftar isi berkas di dalamnya.</div>';
+        return;
+      }
+
+      const items = ALL_RECORDS.filter(r => r.lokasiBox === boxName).sort((a, b) => a.no - b.no);
+      container.innerHTML = `
+        <div class="text-left space-y-4">
+          <div class="border-b-2 border-slate-900 pb-3 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">DAFTAR ISI BOKS ARSIP AKTIF • SIMON-BAPK 2025</p>
+              <h3 class="text-xl font-extrabold text-slate-900 mt-0.5">${escapeHtml(boxName)}</h3>
+            </div>
+            <div class="text-right">
+              <span class="px-3 py-1 rounded-lg bg-slate-900 text-white text-xs font-bold">Total: ${items.length} Berkas</span>
+            </div>
+          </div>
+
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 border-y border-slate-300 text-[11px] uppercase text-slate-700">
+                <th class="p-2 w-10 text-center">No</th>
+                <th class="p-2 w-12 text-center">Urut</th>
+                <th class="p-2">Nama Guru</th>
+                <th class="p-2">NIP</th>
+                <th class="p-2">Unit Sekolah Rakyat</th>
+                <th class="p-2 text-center">BA</th>
+                <th class="p-2 text-center">PK</th>
+                <th class="p-2">PIC</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              ${items.map((r, idx) => `
+                <tr>
+                  <td class="p-2 text-center font-semibold">${idx + 1}</td>
+                  <td class="p-2 text-center text-slate-500">${r.no}</td>
+                  <td class="p-2 font-bold text-slate-900">${escapeHtml(r.nama)}</td>
+                  <td class="p-2 font-mono text-slate-600">${escapeHtml(r.nip)}</td>
+                  <td class="p-2 text-slate-700">${escapeHtml(r.unitKerja)}</td>
+                  <td class="p-2 text-center font-semibold">${escapeHtml(r.statusBA)}</td>
+                  <td class="p-2 text-center font-semibold">${escapeHtml(r.statusPK)}</td>
+                  <td class="p-2 text-slate-600">${escapeHtml(r.petugas)}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function printBoxLabel() {
+      const boxName = document.getElementById("boxDetailSelect").value;
+      if (!boxName) {
+        showToast("Pilih nomor Box terlebih dahulu sebelum mencetak.");
+        return;
+      }
+      window.print();
     }
 
     function exportExcelReport() {
