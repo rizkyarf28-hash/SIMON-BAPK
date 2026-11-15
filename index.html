@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SIMON-BAPK 2025 | Monitoring Berita Acara & Perjanjian Kerja Guru Sekolah Rakyat</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    };
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,48 +17,28 @@
   <style>
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #f8fafc;
-      color: #0f172a;
     }
     .bento-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
       border-radius: 1rem;
       box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-    }
-    .tab-active {
-      background-color: #0f172a;
-      color: #ffffff;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
-    }
-    .tab-inactive {
-      background-color: #f1f5f9;
-      color: #475569;
-    }
-    .tab-inactive:hover {
-      background-color: #e2e8f0;
-      color: #0f172a;
     }
     th.sortable {
       cursor: pointer;
       user-select: none;
-    }
-    th.sortable:hover {
-      background-color: #1e293b;
     }
     ::-webkit-scrollbar {
       width: 7px;
       height: 7px;
     }
     ::-webkit-scrollbar-track {
-      background: #f1f5f9;
+      background: transparent;
     }
     ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
+      background: #94a3b8;
       border-radius: 9999px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
+      background: #64748b;
     }
     @media print {
       body * { visibility: hidden; }
@@ -63,51 +48,63 @@
         left: 0;
         top: 0;
         width: 100%;
-        background: white;
+        background: white !important;
+        color: black !important;
         padding: 16px;
       }
       .no-print { display: none !important; }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
 
   <!-- Sticky Top Header -->
-  <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 no-print">
+  <header class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-extrabold text-base tracking-tight shadow-sm">
+        <div class="w-10 h-10 rounded-xl bg-slate-900 dark:bg-indigo-600 text-white flex items-center justify-center font-extrabold text-base tracking-tight shadow-sm">
           SB
         </div>
         <div>
           <div class="flex items-center gap-2 flex-wrap">
-            <h1 class="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">SIMON-BAPK 2025</h1>
-            <span id="connBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+            <h1 class="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg tracking-tight">SIMON-BAPK 2025</h1>
+            <span id="connBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800">
               <span id="connDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
               <span id="connText">Menghubungkan...</span>
             </span>
           </div>
-          <p class="text-xs text-slate-500">Monitoring Berita Acara &amp; Perjanjian Kerja Guru Sekolah Rakyat • 11 Petugas</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Monitoring Berita Acara &amp; Perjanjian Kerja Guru Sekolah Rakyat • 11 Petugas</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
-        <span id="syncStatusText" class="text-xs text-slate-500 hidden xl:inline mr-1">Menunggu sinkronisasi...</span>
+        <span id="syncStatusText" class="text-xs text-slate-500 dark:text-slate-400 hidden xl:inline mr-1">Menunggu sinkronisasi...</span>
 
         <!-- Identitas Petugas Aktif (Remember My PIC) -->
-        <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200">
-          <span class="text-[11px] font-bold text-indigo-800">PIC Aktif:</span>
-          <select id="activePicSelect" onchange="setActivePic()" class="text-xs font-bold text-indigo-950 bg-transparent focus:outline-none cursor-pointer">
-            <option value="ALL">Semua (Admin)</option>
+        <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800">
+          <span class="text-[11px] font-bold text-indigo-800 dark:text-indigo-300">PIC Aktif:</span>
+          <select id="activePicSelect" onchange="setActivePic()" class="text-xs font-bold text-indigo-950 dark:text-indigo-100 bg-transparent focus:outline-none cursor-pointer">
+            <option value="ALL" class="dark:bg-slate-900">Semua (Admin)</option>
           </select>
         </div>
 
-        <label class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-50 border border-slate-200 text-slate-700 cursor-pointer select-none">
+        <!-- Dark Mode Toggle (Point 5) -->
+        <button id="themeToggleBtn" onclick="toggleDarkMode()" title="Ganti Mode Terang / Gelap"
+          class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-300 border border-slate-200 dark:border-slate-700 transition">
+          <svg id="iconSun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <svg id="iconMoon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+
+        <label class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer select-none">
           <input id="autoSyncToggle" type="checkbox" checked onchange="toggleAutoSync()" class="rounded text-slate-900 focus:ring-0" />
           <span>Auto-Sync 30d</span>
         </label>
 
-        <button onclick="fetchDataFromSheet(true)" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition flex items-center gap-1.5">
+        <button onclick="fetchDataFromSheet(true)" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
@@ -126,26 +123,26 @@
     <!-- Navigation Tabs -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-3 flex items-center justify-between gap-2 overflow-x-auto">
       <div class="flex items-center gap-2">
-        <button id="btnTab1" onclick="switchTab(1)" class="tab-active px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
+        <button id="btnTab1" onclick="switchTab(1)" class="px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
           1. Dasbor &amp; 11 Petugas
         </button>
-        <button id="btnTab2" onclick="switchTab(2)" class="tab-inactive px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
+        <button id="btnTab2" onclick="switchTab(2)" class="px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
           2. Kertas Kerja &amp; Verifikasi Berkas
         </button>
-        <button id="btnTab3" onclick="switchTab(3)" class="tab-inactive px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
+        <button id="btnTab3" onclick="switchTab(3)" class="px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
           3. Rekap &amp; Daftar Isi Box Arsip
         </button>
       </div>
-      <div class="hidden md:flex items-center gap-2 text-[11px] text-slate-400">
-        <span>Pintasan: <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-600 font-mono">/</kbd> Cari</span>
+      <div class="hidden md:flex items-center gap-2 text-[11px] text-slate-400 dark:text-slate-500">
+        <span>Pintasan: <kbd class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-600 dark:text-slate-300 font-mono">/</kbd> Cari</span>
         <span>•</span>
-        <span><kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-600 font-mono">Esc</kbd> Tutup Modal</span>
+        <span><kbd class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-600 dark:text-slate-300 font-mono">Esc</kbd> Tutup Modal</span>
       </div>
     </div>
   </header>
 
   <!-- Status / Alert Banner -->
-  <div id="loadingBar" class="w-full bg-indigo-50 border-b border-indigo-100 px-4 py-2 text-center text-xs font-semibold text-indigo-700 no-print">
+  <div id="loadingBar" class="w-full bg-indigo-50 dark:bg-indigo-950/60 border-b border-indigo-100 dark:border-indigo-900 px-4 py-2 text-center text-xs font-semibold text-indigo-700 dark:text-indigo-300 no-print">
     Memuat data real-time dari Google Spreadsheet (Data_Master)...
   </div>
 
@@ -158,56 +155,102 @@
     <section id="tab1" class="space-y-6">
       <!-- KPI Bento Grid -->
       <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
-        <div class="bento-card p-4">
-          <p class="text-xs font-semibold text-slate-500">Total Berkas Guru</p>
-          <p id="kpiTotal" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">0</p>
-          <p class="text-[11px] text-slate-400 mt-1">Urut Abjad A – Z</p>
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4">
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Berkas Guru</p>
+          <p id="kpiTotal" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">0</p>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Urut Abjad A – Z</p>
         </div>
-        <div class="bento-card p-4 border-l-4 border-l-emerald-500">
-          <p class="text-xs font-semibold text-emerald-700">Selesai Lengkap</p>
-          <p id="kpiSelesai" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1">0</p>
-          <p id="kpiSelesaiPct" class="text-[11px] text-emerald-600 font-bold mt-1">0%</p>
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 border-l-4 border-l-emerald-500">
+          <p class="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Selesai Lengkap</p>
+          <p id="kpiSelesai" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">0</p>
+          <p id="kpiSelesaiPct" class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">0%</p>
         </div>
-        <div class="bento-card p-4 border-l-4 border-l-amber-500">
-          <p class="text-xs font-semibold text-amber-700">Dalam Proses</p>
-          <p id="kpiProses" class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1">0</p>
-          <p class="text-[11px] text-slate-400 mt-1">Parsial / sedang cek</p>
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 border-l-4 border-l-amber-500">
+          <p class="text-xs font-semibold text-amber-700 dark:text-amber-400">Dalam Proses</p>
+          <p id="kpiProses" class="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">0</p>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Parsial / sedang cek</p>
         </div>
-        <div class="bento-card p-4 border-l-4 border-l-rose-500 cursor-pointer hover:bg-rose-50/30 transition" onclick="jumpToKendala()">
-          <p class="text-xs font-semibold text-rose-700">Ada Kendala</p>
-          <p id="kpiKendala" class="text-2xl sm:text-3xl font-extrabold text-rose-600 mt-1">0</p>
-          <p class="text-[11px] text-rose-500 font-semibold mt-1">Klik lihat daftar &rarr;</p>
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 border-l-4 border-l-rose-500 cursor-pointer hover:bg-rose-50/30 dark:hover:bg-rose-950/20 transition" onclick="jumpToKendala()">
+          <p class="text-xs font-semibold text-rose-700 dark:text-rose-400">Ada Kendala</p>
+          <p id="kpiKendala" class="text-2xl sm:text-3xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">0</p>
+          <p class="text-[11px] text-rose-500 dark:text-rose-400 font-semibold mt-1">Klik lihat daftar &rarr;</p>
         </div>
-        <div class="bento-card p-4 border-l-4 border-l-slate-400">
-          <p class="text-xs font-semibold text-slate-600">Belum Diproses</p>
-          <p id="kpiBelum" class="text-2xl sm:text-3xl font-extrabold text-slate-700 mt-1">0</p>
-          <p class="text-[11px] text-slate-400 mt-1">Menunggu giliran</p>
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 border-l-4 border-l-slate-400">
+          <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">Belum Diproses</p>
+          <p id="kpiBelum" class="text-2xl sm:text-3xl font-extrabold text-slate-700 dark:text-slate-200 mt-1">0</p>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Menunggu giliran</p>
         </div>
-        <div class="bento-card p-4 border-l-4 border-l-indigo-500 cursor-pointer hover:bg-indigo-50/30 transition" onclick="switchTab(3)">
-          <p class="text-xs font-semibold text-indigo-700">Box Arsip Terisi</p>
-          <p id="kpiBoxCount" class="text-2xl sm:text-3xl font-extrabold text-indigo-600 mt-1">0</p>
-          <p id="kpiBoxSub" class="text-[11px] text-slate-400 mt-1">0 berkas ber-box</p>
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 border-l-4 border-l-indigo-500 cursor-pointer hover:bg-indigo-50/30 dark:hover:bg-indigo-950/20 transition" onclick="switchTab(3)">
+          <p class="text-xs font-semibold text-indigo-700 dark:text-indigo-400">Box Arsip Terisi</p>
+          <p id="kpiBoxCount" class="text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-1">0</p>
+          <p id="kpiBoxSub" class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">0 berkas ber-box</p>
         </div>
       </div>
 
       <!-- Progress Bar Terpisah BA vs PK -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bento-card p-5">
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
           <div class="flex justify-between items-center mb-2">
-            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Progres Berita Acara (BA)</span>
-            <span id="baSummaryText" class="text-xs font-extrabold text-indigo-600">0 / 0 (0%)</span>
+            <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Progres Berita Acara (BA)</span>
+            <span id="baSummaryText" class="text-xs font-extrabold text-indigo-600 dark:text-indigo-400">0 / 0 (0%)</span>
           </div>
-          <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-            <div id="baProgressBar" class="h-full bg-indigo-600 transition-all duration-500 rounded-full" style="width: 0%"></div>
+          <div class="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+            <div id="baProgressBar" class="h-full bg-indigo-600 dark:bg-indigo-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
           </div>
         </div>
-        <div class="bento-card p-5">
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
           <div class="flex justify-between items-center mb-2">
-            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Progres Perjanjian Kerja (PK)</span>
-            <span id="pkSummaryText" class="text-xs font-extrabold text-emerald-600">0 / 0 (0%)</span>
+            <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Progres Perjanjian Kerja (PK)</span>
+            <span id="pkSummaryText" class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">0 / 0 (0%)</span>
           </div>
-          <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-            <div id="pkProgressBar" class="h-full bg-emerald-600 transition-all duration-500 rounded-full" style="width: 0%"></div>
+          <div class="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+            <div id="pkProgressBar" class="h-full bg-emerald-600 dark:bg-emerald-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Point 3: Audit Checker / Deteksi Anomali Data Otomatis -->
+      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div>
+            <h2 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800">Audit Checker</span>
+              <span>Deteksi Anomali &amp; Validasi Kebersihan Data</span>
+            </h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Klik kartu anomali di bawah untuk langsung menyaring dan memperbaiki data yang belum konsisten.</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div onclick="jumpToAnomaly('DONE_NO_BOX')" class="p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/70 bg-amber-50/60 dark:bg-amber-950/30 hover:border-amber-500 cursor-pointer transition">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-amber-800 dark:text-amber-300">Selesai Tanpa Nomor Box</span>
+              <span id="anomDoneNoBox" class="text-lg font-extrabold text-amber-700 dark:text-amber-400">0</span>
+            </div>
+            <p class="text-[11px] text-amber-700/80 dark:text-amber-400/70 mt-1">BA &amp; PK Selesai tapi Lokasi Box kosong</p>
+          </div>
+
+          <div onclick="jumpToAnomaly('BOX_NOT_DONE')" class="p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-900/70 bg-indigo-50/60 dark:bg-indigo-950/30 hover:border-indigo-500 cursor-pointer transition">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-indigo-800 dark:text-indigo-300">Sudah Ber-Box Belum Selesai</span>
+              <span id="anomBoxNotDone" class="text-lg font-extrabold text-indigo-700 dark:text-indigo-400">0</span>
+            </div>
+            <p class="text-[11px] text-indigo-700/80 dark:text-indigo-400/70 mt-1">Sudah masuk Box tapi BA/PK belum Selesai</p>
+          </div>
+
+          <div onclick="jumpToAnomaly('KENDALA_NO_NOTE')" class="p-3.5 rounded-xl border border-rose-200 dark:border-rose-900/70 bg-rose-50/60 dark:bg-rose-950/30 hover:border-rose-500 cursor-pointer transition">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-rose-800 dark:text-rose-300">Kendala Tanpa Keterangan</span>
+              <span id="anomKendalaNoNote" class="text-lg font-extrabold text-rose-700 dark:text-rose-400">0</span>
+            </div>
+            <p class="text-[11px] text-rose-700/80 dark:text-rose-400/70 mt-1">Status Kendala tapi kolom catatan kosong</p>
+          </div>
+
+          <div onclick="jumpToAnomaly('PARTIAL_STATUS')" class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 hover:border-slate-500 cursor-pointer transition">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">Status BA &amp; PK Timpang</span>
+              <span id="anomPartial" class="text-lg font-extrabold text-slate-800 dark:text-slate-200">0</span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Salah satu Selesai, pasangannya masih Belum</p>
           </div>
         </div>
       </div>
@@ -216,8 +259,8 @@
       <div>
         <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div>
-            <h2 class="text-base font-extrabold text-slate-900">Beban Kerja &amp; Progres 11 Petugas Verifikator</h2>
-            <p class="text-xs text-slate-500">Klik kartu petugas untuk langsung membuka daftar berkas tanggung jawabnya.</p>
+            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Beban Kerja &amp; Progres 11 Petugas Verifikator</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Klik kartu petugas untuk langsung membuka daftar berkas tanggung jawabnya.</p>
           </div>
         </div>
         <div id="officersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
@@ -225,32 +268,30 @@
 
       <!-- Pantauan Kendala Terpusat & Aktivitas Terbaru -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <!-- Panel Kendala -->
-        <div class="lg:col-span-7 bento-card p-5">
+        <div class="lg:col-span-7 bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
           <div class="flex items-center justify-between mb-3">
             <div>
-              <h3 class="text-sm font-extrabold text-rose-700 flex items-center gap-1.5">
+              <h3 class="text-sm font-extrabold text-rose-700 dark:text-rose-400 flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-rose-500"></span>
                 <span>Pantauan Berkas Kendala Terpusat</span>
               </h3>
-              <p class="text-[11px] text-slate-500">Daftar berkas yang membutuhkan tindak lanjut segera</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Daftar berkas yang membutuhkan tindak lanjut segera</p>
             </div>
-            <button onclick="jumpToKendala()" class="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-rose-50 text-rose-700 hover:bg-rose-100 transition">
+            <button onclick="jumpToKendala()" class="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 transition">
               Lihat Semua Kendala
             </button>
           </div>
-          <div id="kendalaListContainer" class="divide-y divide-slate-100 max-h-64 overflow-y-auto text-xs">
+          <div id="kendalaListContainer" class="divide-y divide-slate-100 dark:divide-slate-800 max-h-64 overflow-y-auto text-xs">
             <p class="py-6 text-center text-slate-400">Tidak ada berkas berkendala saat ini.</p>
           </div>
         </div>
 
-        <!-- Panel Aktivitas Terakhir -->
-        <div class="lg:col-span-5 bento-card p-5">
+        <div class="lg:col-span-5 bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
           <div class="mb-3">
-            <h3 class="text-sm font-extrabold text-slate-900">Aktivitas Verifikasi Terakhir</h3>
-            <p class="text-[11px] text-slate-500">10 pembaruan data terbaru berdasarkan waktu simpan</p>
+            <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Aktivitas Verifikasi Terakhir</h3>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">10 pembaruan data terbaru berdasarkan waktu simpan</p>
           </div>
-          <div id="recentActivityContainer" class="divide-y divide-slate-100 max-h-64 overflow-y-auto text-xs">
+          <div id="recentActivityContainer" class="divide-y divide-slate-100 dark:divide-slate-800 max-h-64 overflow-y-auto text-xs">
             <p class="py-6 text-center text-slate-400">Belum ada riwayat pembaruan.</p>
           </div>
         </div>
@@ -262,70 +303,76 @@
     <!-- ===================================================================== -->
     <section id="tab2" class="hidden space-y-4">
       <!-- Filter & Search Bar -->
-      <div class="bento-card p-4 space-y-3">
+      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 space-y-3">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
           <div class="lg:col-span-3">
-            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Cari Nama / NIP / Ket.</label>
+            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Cari Nama / NIP / Ket.</label>
             <input id="searchInput" type="text" oninput="applyFilters()" placeholder="Tekan / untuk cari..."
-              class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900" />
+              class="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
           <div class="lg:col-span-2">
-            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Petugas (11 Orang)</label>
+            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Petugas (11 Orang)</label>
             <select id="filterOfficer" onchange="applyFilters()"
-              class="w-full px-2.5 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
+              class="w-full px-2.5 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <option value="ALL">Semua Petugas</option>
             </select>
           </div>
           <div class="lg:col-span-2">
-            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Status Berkas</label>
+            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Status &amp; Audit</label>
             <select id="filterStatus" onchange="applyFilters()"
-              class="w-full px-2.5 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
+              class="w-full px-2.5 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <option value="ALL">Semua Status</option>
               <option value="SELESAI">Selesai (BA &amp; PK)</option>
               <option value="PROSES">Dalam Proses</option>
               <option value="KENDALA">Ada Kendala</option>
               <option value="BELUM">Belum Diproses</option>
+              <optgroup label="--- Audit Anomali ---">
+                <option value="DONE_NO_BOX">Selesai Tanpa Box</option>
+                <option value="BOX_NOT_DONE">Ber-Box Belum Selesai</option>
+                <option value="KENDALA_NO_NOTE">Kendala Tanpa Catatan</option>
+                <option value="PARTIAL_STATUS">Status BA &amp; PK Timpang</option>
+              </optgroup>
             </select>
           </div>
           <div class="lg:col-span-2">
-            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Lokasi Box Arsip</label>
+            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Lokasi Box Arsip</label>
             <select id="filterBox" onchange="applyFilters()"
-              class="w-full px-2.5 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
+              class="w-full px-2.5 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <option value="ALL">Semua Box</option>
               <option value="EMPTY">Belum Ber-Box</option>
             </select>
           </div>
           <div class="lg:col-span-2">
-            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Unit Sekolah Rakyat</label>
+            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Unit Sekolah Rakyat</label>
             <select id="filterUnit" onchange="applyFilters()"
-              class="w-full px-2.5 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
+              class="w-full px-2.5 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <option value="ALL">Semua Unit</option>
             </select>
           </div>
           <div class="lg:col-span-1 flex items-end">
-            <button onclick="resetFilters()" title="Reset semua filter" class="w-full px-2.5 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition">
+            <button onclick="resetFilters()" title="Reset semua filter" class="w-full px-2.5 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition">
               Reset
             </button>
           </div>
         </div>
 
         <!-- Bulk Action Toolbar -->
-        <div id="bulkToolbar" class="hidden pt-3 border-t border-slate-200 space-y-2.5 bg-indigo-50/80 p-3.5 rounded-xl">
+        <div id="bulkToolbar" class="hidden pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2.5 bg-indigo-50/80 dark:bg-indigo-950/50 p-3.5 rounded-xl">
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2 text-xs font-bold text-indigo-950">
+            <div class="flex items-center gap-2 text-xs font-bold text-indigo-950 dark:text-indigo-200">
               <span id="selectedCountBadge" class="px-2.5 py-0.5 bg-indigo-600 text-white rounded-md">0</span>
               <span>berkas dipilih</span>
-              <button onclick="clearSelection()" class="text-[11px] underline text-indigo-600 hover:text-indigo-800 ml-1">Batal pilih</button>
+              <button onclick="clearSelection()" class="text-[11px] underline text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 ml-1">Batal pilih</button>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-              <select id="bulkStatusBA" class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white font-medium">
+              <select id="bulkStatusBA" class="px-2.5 py-1.5 text-xs border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-medium">
                 <option value="">-- Status BA --</option>
                 <option value="Selesai">BA: Selesai</option>
                 <option value="Proses">BA: Proses</option>
                 <option value="Kendala">BA: Kendala</option>
                 <option value="Belum">BA: Belum</option>
               </select>
-              <select id="bulkStatusPK" class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white font-medium">
+              <select id="bulkStatusPK" class="px-2.5 py-1.5 text-xs border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-medium">
                 <option value="">-- Status PK --</option>
                 <option value="Selesai">PK: Selesai</option>
                 <option value="Proses">PK: Proses</option>
@@ -333,9 +380,9 @@
                 <option value="Belum">PK: Belum</option>
               </select>
               <input id="bulkLokasiBoxInput" type="text" placeholder="Lokasi Box (mis. BOX 1)..."
-                class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white w-40" />
+                class="px-2.5 py-1.5 text-xs border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 w-40" />
               <input id="bulkNoteInput" type="text" placeholder="Catatan massal..."
-                class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white w-44" />
+                class="px-2.5 py-1.5 text-xs border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 w-44" />
               <button id="btnBulkSave" onclick="submitBulkUpdate()" class="px-3.5 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-xs transition">
                 Simpan Massal
               </button>
@@ -343,44 +390,44 @@
           </div>
           <!-- Quick Note Chips untuk Bulk -->
           <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
-            <span class="text-indigo-800 font-semibold">Template Catatan Cepat:</span>
-            <button type="button" onclick="appendBulkChip('TTE Lengkap')" class="px-2 py-0.5 rounded-full bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-100">TTE Lengkap</button>
-            <button type="button" onclick="appendBulkChip('Belum TTE')" class="px-2 py-0.5 rounded-full bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-100">Belum TTE</button>
-            <button type="button" onclick="appendBulkChip('Scan Buram')" class="px-2 py-0.5 rounded-full bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-100">Scan Buram</button>
-            <button type="button" onclick="appendBulkChip('Berkas Fisik Menyusul')" class="px-2 py-0.5 rounded-full bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-100">Berkas Fisik Menyusul</button>
-            <button type="button" onclick="appendBulkChip('Salah NIP/Nama')" class="px-2 py-0.5 rounded-full bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-100">Salah NIP/Nama</button>
+            <span class="text-indigo-800 dark:text-indigo-300 font-semibold">Template Catatan Cepat:</span>
+            <button type="button" onclick="appendBulkChip('TTE Lengkap')" class="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">TTE Lengkap</button>
+            <button type="button" onclick="appendBulkChip('Belum TTE')" class="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">Belum TTE</button>
+            <button type="button" onclick="appendBulkChip('Scan Buram')" class="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">Scan Buram</button>
+            <button type="button" onclick="appendBulkChip('Berkas Fisik Menyusul')" class="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">Berkas Fisik Menyusul</button>
+            <button type="button" onclick="appendBulkChip('Salah NIP/Nama')" class="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">Salah NIP/Nama</button>
           </div>
         </div>
       </div>
 
       <!-- Data Table -->
-      <div class="bento-card overflow-hidden">
+      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="bg-slate-900 text-white text-[11px] uppercase tracking-wider">
+              <tr class="bg-slate-900 dark:bg-slate-800 text-white text-[11px] uppercase tracking-wider">
                 <th class="p-3 w-10 text-center">
                   <input id="selectAllPage" type="checkbox" onclick="toggleSelectPage(this)" class="rounded" title="Pilih semua di halaman ini" />
                 </th>
-                <th onclick="sortTable('no')" class="sortable p-3 w-14 text-center">No <span id="sortIcon_no" class="opacity-60">&#8597;</span></th>
-                <th onclick="sortTable('nama')" class="sortable p-3">Nama Guru &amp; NIP <span id="sortIcon_nama" class="opacity-60">&#8597;</span></th>
-                <th onclick="sortTable('lokasiBox')" class="sortable p-3">Unit Sekolah Rakyat &amp; Box <span id="sortIcon_lokasiBox" class="opacity-60">&#8597;</span></th>
-                <th onclick="sortTable('petugas')" class="sortable p-3">Petugas PIC <span id="sortIcon_petugas" class="opacity-60">&#8597;</span></th>
-                <th onclick="sortTable('statusBA')" class="sortable p-3 text-center">Status BA <span id="sortIcon_statusBA" class="opacity-60">&#8597;</span></th>
-                <th onclick="sortTable('statusPK')" class="sortable p-3 text-center">Status PK <span id="sortIcon_statusPK" class="opacity-60">&#8597;</span></th>
+                <th onclick="sortTable('no')" class="sortable hover:bg-slate-800 dark:hover:bg-slate-700 p-3 w-14 text-center">No <span id="sortIcon_no" class="opacity-60">&#8597;</span></th>
+                <th onclick="sortTable('nama')" class="sortable hover:bg-slate-800 dark:hover:bg-slate-700 p-3">Nama Guru &amp; NIP <span id="sortIcon_nama" class="opacity-60">&#8597;</span></th>
+                <th onclick="sortTable('lokasiBox')" class="sortable hover:bg-slate-800 dark:hover:bg-slate-700 p-3">Unit Sekolah Rakyat &amp; Box <span id="sortIcon_lokasiBox" class="opacity-60">&#8597;</span></th>
+                <th onclick="sortTable('petugas')" class="sortable hover:bg-slate-800 dark:hover:bg-slate-700 p-3">Petugas PIC <span id="sortIcon_petugas" class="opacity-60">&#8597;</span></th>
+                <th onclick="sortTable('statusBA')" class="sortable hover:bg-slate-800 dark:hover:bg-slate-700 p-3 text-center">Status BA <span id="sortIcon_statusBA" class="opacity-60">&#8597;</span></th>
+                <th onclick="sortTable('statusPK')" class="sortable hover:bg-slate-800 dark:hover:bg-slate-700 p-3 text-center">Status PK <span id="sortIcon_statusPK" class="opacity-60">&#8597;</span></th>
                 <th class="p-3">Keterangan</th>
                 <th class="p-3 text-center w-28">Aksi</th>
               </tr>
             </thead>
-            <tbody id="tableBody" class="divide-y divide-slate-200 text-xs"></tbody>
+            <tbody id="tableBody" class="divide-y divide-slate-200 dark:divide-slate-800 text-xs"></tbody>
           </table>
         </div>
 
         <!-- Pagination Footer -->
-        <div class="p-3.5 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div class="flex items-center gap-2 text-slate-600">
+        <div class="p-3.5 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
             <span id="paginationInfo">Menampilkan 0 - 0 dari 0 data</span>
-            <select id="pageSizeSelect" onchange="changePageSize()" class="px-2 py-1 border border-slate-300 rounded-lg bg-white">
+            <select id="pageSizeSelect" onchange="changePageSize()" class="px-2 py-1 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">
               <option value="25">25 / hal</option>
               <option value="50" selected>50 / hal</option>
               <option value="100">100 / hal</option>
@@ -388,9 +435,9 @@
             </select>
           </div>
           <div class="flex items-center gap-1.5">
-            <button onclick="prevPage()" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-semibold transition">Sebelumnya</button>
-            <span id="pageIndicator" class="px-3 py-1.5 font-bold text-slate-700">Hal 1 / 1</span>
-            <button onclick="nextPage()" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-semibold transition">Berikutnya</button>
+            <button onclick="prevPage()" class="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold transition">Sebelumnya</button>
+            <span id="pageIndicator" class="px-3 py-1.5 font-bold text-slate-700 dark:text-slate-300">Hal 1 / 1</span>
+            <button onclick="nextPage()" class="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold transition">Berikutnya</button>
           </div>
         </div>
       </div>
@@ -400,16 +447,16 @@
     <!-- TAB 3: REKAP & DAFTAR ISI BOX ARSIP (SIAP CETAK LABEL)                -->
     <!-- ===================================================================== -->
     <section id="tab3" class="hidden space-y-5">
-      <div class="bento-card p-5 flex flex-wrap items-center justify-between gap-4 no-print">
+      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 flex flex-wrap items-center justify-between gap-4 no-print">
         <div>
-          <h2 class="text-base font-extrabold text-slate-900">Rekapitulasi &amp; Daftar Isi Box Arsip</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Pilih nomor boks arsip untuk melihat rincian daftar nama guru di dalamnya atau mencetak label boks.</p>
+          <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Rekapitulasi &amp; Daftar Isi Box Arsip</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pilih nomor boks arsip untuk melihat rincian daftar nama guru di dalamnya atau mencetak label boks.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <select id="boxDetailSelect" onchange="renderBoxDetail()" class="px-3.5 py-2 text-xs font-bold border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
+          <select id="boxDetailSelect" onchange="renderBoxDetail()" class="px-3.5 py-2 text-xs font-bold border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
             <option value="">-- Pilih Lokasi Box --</option>
           </select>
-          <button onclick="printBoxLabel()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition flex items-center gap-1.5">
+          <button onclick="printBoxLabel()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white transition flex items-center gap-1.5">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
             </svg>
@@ -422,8 +469,8 @@
       <div id="boxSummaryGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 no-print"></div>
 
       <!-- Area Cetak Daftar Isi Box -->
-      <div id="printArea" class="bento-card p-6">
-        <div id="boxDetailContent" class="text-xs text-slate-500 text-center py-8">
+      <div id="printArea" class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6">
+        <div id="boxDetailContent" class="text-xs text-slate-500 dark:text-slate-400 text-center py-8">
           Silakan pilih salah satu boks arsip di atas untuk menampilkan daftar isi berkas di dalamnya.
         </div>
       </div>
@@ -432,16 +479,16 @@
   </main>
 
   <!-- Edit Modal -->
-  <div id="editModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 no-print">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+  <div id="editModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 no-print">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 dark:border-slate-800 space-y-4">
       <div class="flex justify-between items-start gap-2">
         <div>
-          <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Update Verifikasi Real-Time</span>
-          <h3 id="modalGuruName" class="text-base font-extrabold text-slate-900 mt-0.5">-</h3>
-          <p id="modalGuruMeta" class="text-xs text-slate-500 mt-0.5">-</p>
-          <p id="modalLastUpdated" class="text-[11px] text-slate-400 mt-0.5"></p>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Update Verifikasi Real-Time</span>
+          <h3 id="modalGuruName" class="text-base font-extrabold text-slate-900 dark:text-white mt-0.5">-</h3>
+          <p id="modalGuruMeta" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">-</p>
+          <p id="modalLastUpdated" class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5"></p>
         </div>
-        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 font-bold text-xl leading-none">&times;</button>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-bold text-xl leading-none">&times;</button>
       </div>
 
       <input type="hidden" id="modalNip" />
@@ -449,21 +496,21 @@
       <div class="space-y-3">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Petugas Verifikator</label>
-            <select id="modalPetugas" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white"></select>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Petugas Verifikator</label>
+            <select id="modalPetugas" class="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"></select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Lokasi Box Arsip</label>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Lokasi Box Arsip</label>
             <input id="modalLokasiBox" list="existingBoxesList" type="text" placeholder="Contoh: BOX 1"
-              class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900" />
+              class="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             <datalist id="existingBoxesList"></datalist>
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Status Berita Acara (BA)</label>
-            <select id="modalStatusBA" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Status Berita Acara (BA)</label>
+            <select id="modalStatusBA" class="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
               <option value="Belum">Belum</option>
               <option value="Proses">Proses</option>
               <option value="Selesai">Selesai</option>
@@ -471,8 +518,8 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Status Perjanjian Kerja (PK)</label>
-            <select id="modalStatusPK" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Status Perjanjian Kerja (PK)</label>
+            <select id="modalStatusPK" class="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
               <option value="Belum">Belum</option>
               <option value="Proses">Proses</option>
               <option value="Selesai">Selesai</option>
@@ -483,27 +530,27 @@
 
         <div>
           <div class="flex items-center justify-between mb-1">
-            <label class="block text-xs font-bold text-slate-700">Keterangan / Catatan Berkas</label>
-            <button type="button" onclick="document.getElementById('modalKeterangan').value=''" class="text-[11px] text-slate-400 hover:text-slate-600">Kosongkan</button>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Keterangan / Catatan Berkas</label>
+            <button type="button" onclick="document.getElementById('modalKeterangan').value=''" class="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">Kosongkan</button>
           </div>
           <textarea id="modalKeterangan" rows="2" placeholder="Contoh: TTE lengkap, atau Belum scan fisik..."
-            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl"></textarea>
+            class="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl"></textarea>
           <!-- Quick Chips Template Catatan -->
           <div class="flex flex-wrap gap-1.5 mt-1.5">
-            <button type="button" onclick="appendModalChip('TTE Lengkap')" class="px-2 py-0.5 text-[11px] rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100">+ TTE Lengkap</button>
-            <button type="button" onclick="appendModalChip('Belum TTE')" class="px-2 py-0.5 text-[11px] rounded-full bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100">+ Belum TTE</button>
-            <button type="button" onclick="appendModalChip('Scan Buram')" class="px-2 py-0.5 text-[11px] rounded-full bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100">+ Scan Buram</button>
-            <button type="button" onclick="appendModalChip('Salah NIP/Nama')" class="px-2 py-0.5 text-[11px] rounded-full bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100">+ Salah NIP/Nama</button>
-            <button type="button" onclick="appendModalChip('Fisik Menyusul')" class="px-2 py-0.5 text-[11px] rounded-full bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200">+ Fisik Menyusul</button>
+            <button type="button" onclick="appendModalChip('TTE Lengkap')" class="px-2 py-0.5 text-[11px] rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100">+ TTE Lengkap</button>
+            <button type="button" onclick="appendModalChip('Belum TTE')" class="px-2 py-0.5 text-[11px] rounded-full bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100">+ Belum TTE</button>
+            <button type="button" onclick="appendModalChip('Scan Buram')" class="px-2 py-0.5 text-[11px] rounded-full bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 hover:bg-rose-100">+ Scan Buram</button>
+            <button type="button" onclick="appendModalChip('Salah NIP/Nama')" class="px-2 py-0.5 text-[11px] rounded-full bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 hover:bg-rose-100">+ Salah NIP/Nama</button>
+            <button type="button" onclick="appendModalChip('Fisik Menyusul')" class="px-2 py-0.5 text-[11px] rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200">+ Fisik Menyusul</button>
           </div>
         </div>
       </div>
 
       <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeEditModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700">
+        <button onclick="closeEditModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200">
           Batal
         </button>
-        <button id="btnSaveSingle" onclick="saveSingleEdit()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white">
+        <button id="btnSaveSingle" onclick="saveSingleEdit()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white">
           Simpan ke Spreadsheet
         </button>
       </div>
@@ -511,7 +558,7 @@
   </div>
 
   <!-- Toast Notification -->
-  <div id="toast" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-lg max-w-sm no-print"></div>
+  <div id="toast" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900 dark:bg-indigo-600 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-lg max-w-sm no-print"></div>
 
   <script>
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw6U7vqmEd5n8thqt8jOmFFt1XJZ1KjdBZBRhv6H-mgGroGxM3ypKe5yaHGYasgGkIP/exec";
@@ -529,8 +576,31 @@
     let AUTO_SYNC_TIMER = null;
     let SORT_FIELD = "no";
     let SORT_ASC = true;
+    let CURRENT_TAB = 1;
+
+    // Point 5: Dark Mode Initialization
+    function initDarkMode() {
+      const savedTheme = localStorage.getItem("SIMON_BAPK_THEME");
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const isDark = savedTheme ? (savedTheme === "dark") : prefersDark;
+      applyTheme(isDark);
+    }
+
+    function applyTheme(isDark) {
+      document.documentElement.classList.toggle("dark", isDark);
+      document.getElementById("iconSun").classList.toggle("hidden", !isDark);
+      document.getElementById("iconMoon").classList.toggle("hidden", isDark);
+    }
+
+    function toggleDarkMode() {
+      const isDark = !document.documentElement.classList.contains("dark");
+      localStorage.setItem("SIMON_BAPK_THEME", isDark ? "dark" : "light");
+      applyTheme(isDark);
+    }
 
     window.addEventListener("DOMContentLoaded", () => {
+      initDarkMode();
+      switchTab(1);
       populateOfficerDropdowns();
       const savedPic = localStorage.getItem("SIMON_BAPK_ACTIVE_PIC") || "ALL";
       if (savedPic !== "ALL" && OFFICERS.includes(savedPic)) {
@@ -569,13 +639,13 @@
       label.textContent = text;
 
       if (state === "connected") {
-        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200";
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800";
         dot.className = "w-2 h-2 rounded-full bg-emerald-500";
       } else if (state === "error") {
-        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200";
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-800";
         dot.className = "w-2 h-2 rounded-full bg-rose-500";
       } else {
-        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200";
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800";
         dot.className = "w-2 h-2 rounded-full bg-amber-500 animate-pulse";
       }
     }
@@ -602,7 +672,7 @@
       const currentActive = activePicSel.value;
 
       filterSel.innerHTML = `<option value="ALL">Semua Petugas (${OFFICERS.length})</option>`;
-      activePicSel.innerHTML = `<option value="ALL">Semua (Admin)</option>`;
+      activePicSel.innerHTML = `<option value="ALL" class="dark:bg-slate-900">Semua (Admin)</option>`;
       modalSel.innerHTML = "";
 
       OFFICERS.forEach((name, idx) => {
@@ -619,6 +689,7 @@
         const opt3 = document.createElement("option");
         opt3.value = name;
         opt3.textContent = name;
+        opt3.className = "dark:bg-slate-900";
         activePicSel.appendChild(opt3);
       });
 
@@ -631,7 +702,6 @@
     }
 
     function populateDynamicFilters() {
-      // Populate Box Filter & Datalist
       const boxSet = new Set();
       const unitSet = new Set();
       ALL_RECORDS.forEach(r => {
@@ -698,12 +768,13 @@
     }
 
     function switchTab(tabNum) {
+      CURRENT_TAB = tabNum;
       for (let i = 1; i <= 3; i++) {
         document.getElementById("tab" + i).classList.toggle("hidden", i !== tabNum);
         const btn = document.getElementById("btnTab" + i);
         btn.className = (i === tabNum)
-          ? "tab-active px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap"
-          : "tab-inactive px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap";
+          ? "px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap bg-slate-900 text-white dark:bg-indigo-600 shadow-xs"
+          : "px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700";
       }
       if (tabNum === 3) {
         renderBoxOverview();
@@ -712,6 +783,15 @@
 
     function jumpToKendala() {
       document.getElementById("filterStatus").value = "KENDALA";
+      switchTab(2);
+      applyFilters();
+    }
+
+    function jumpToAnomaly(type) {
+      document.getElementById("searchInput").value = "";
+      document.getElementById("filterBox").value = "ALL";
+      document.getElementById("filterUnit").value = "ALL";
+      document.getElementById("filterStatus").value = type;
       switchTab(2);
       applyFilters();
     }
@@ -761,7 +841,7 @@
       } catch (err) {
         setConnectionStatus("error", "Koneksi Terputus");
         bar.textContent = "Gagal terhubung ke Google Sheets: " + err.message;
-        bar.className = "w-full bg-rose-50 border-b border-rose-200 px-4 py-2 text-center text-xs font-semibold text-rose-700 no-print";
+        bar.className = "w-full bg-rose-50 dark:bg-rose-950/70 border-b border-rose-200 dark:border-rose-900 px-4 py-2 text-center text-xs font-semibold text-rose-700 dark:text-rose-300 no-print";
         bar.classList.remove("hidden");
         if (manual) showToast("Error: " + err.message);
       }
@@ -791,10 +871,26 @@
       return "BELUM";
     }
 
+    // Point 3: Anomaly Check Helpers
+    function isDoneNoBox(r) {
+      return (r.statusBA === "Selesai" && r.statusPK === "Selesai" && !r.lokasiBox);
+    }
+    function isBoxNotDone(r) {
+      return (Boolean(r.lokasiBox) && (r.statusBA !== "Selesai" || r.statusPK !== "Selesai"));
+    }
+    function isKendalaNoNote(r) {
+      return ((r.statusBA === "Kendala" || r.statusPK === "Kendala") && !r.keterangan);
+    }
+    function isPartialStatus(r) {
+      return ((r.statusBA === "Selesai" && r.statusPK === "Belum") || (r.statusPK === "Selesai" && r.statusBA === "Belum"));
+    }
+
     function renderDashboard() {
       const total = ALL_RECORDS.length;
       let selesai = 0, proses = 0, kendala = 0, belum = 0;
       let baDone = 0, pkDone = 0, boxedCount = 0;
+      let anomDoneNoBox = 0, anomBoxNotDone = 0, anomKendalaNoNote = 0, anomPartial = 0;
+
       const boxSet = new Set();
       const kendalaList = [];
 
@@ -823,6 +919,11 @@
           boxSet.add(r.lokasiBox);
         }
 
+        if (isDoneNoBox(r)) anomDoneNoBox++;
+        if (isBoxNotDone(r)) anomBoxNotDone++;
+        if (isKendalaNoNote(r)) anomKendalaNoNote++;
+        if (isPartialStatus(r)) anomPartial++;
+
         const st = officerStats[r.petugas];
         if (st) {
           st.total++;
@@ -847,6 +948,12 @@
       document.getElementById("kpiBoxCount").textContent = `${boxSet.size} Box`;
       document.getElementById("kpiBoxSub").textContent = `${boxedCount.toLocaleString("id-ID")} berkas terarsip`;
 
+      // Audit Checker KPIs
+      document.getElementById("anomDoneNoBox").textContent = anomDoneNoBox.toLocaleString("id-ID");
+      document.getElementById("anomBoxNotDone").textContent = anomBoxNotDone.toLocaleString("id-ID");
+      document.getElementById("anomKendalaNoNote").textContent = anomKendalaNoNote.toLocaleString("id-ID");
+      document.getElementById("anomPartial").textContent = anomPartial.toLocaleString("id-ID");
+
       const baPct = total ? (baDone / total * 100).toFixed(1) : 0;
       const pkPct = total ? (pkDone / total * 100).toFixed(1) : 0;
       document.getElementById("baSummaryText").textContent = `${baDone.toLocaleString("id-ID")} / ${total.toLocaleString("id-ID")} (${baPct}%)`;
@@ -866,7 +973,7 @@
         const rangeNo = o.total ? `No. ${o.minNo}–${o.maxNo}` : "-";
 
         const card = document.createElement("div");
-        card.className = "bento-card p-4 hover:border-slate-900 hover:shadow-md cursor-pointer transition flex flex-col justify-between";
+        card.className = "bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 hover:border-slate-900 dark:hover:border-indigo-500 hover:shadow-md cursor-pointer transition flex flex-col justify-between";
         card.onclick = () => {
           document.getElementById("filterOfficer").value = o.name;
           switchTab(2);
@@ -876,18 +983,18 @@
         card.innerHTML = `
           <div>
             <div class="flex items-center justify-between gap-2">
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-100 text-slate-700">Petugas #${idx + 1}</span>
-              <span class="text-[11px] font-bold text-indigo-600">${abjad}</span>
+              <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Petugas #${idx + 1}</span>
+              <span class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">${abjad}</span>
             </div>
-            <h3 class="font-extrabold text-slate-900 text-sm mt-2">${escapeHtml(o.name)}</h3>
-            <p class="text-[11px] text-slate-500 mt-0.5">${o.total} berkas (${rangeNo})</p>
+            <h3 class="font-extrabold text-slate-900 dark:text-white text-sm mt-2">${escapeHtml(o.name)}</h3>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${o.total} berkas (${rangeNo})</p>
           </div>
           <div class="mt-4">
             <div class="flex justify-between text-[11px] font-bold mb-1">
-              <span class="text-slate-600">BA: ${o.baDone} | PK: ${o.pkDone}</span>
-              <span class="text-emerald-600">${pct}%</span>
+              <span class="text-slate-600 dark:text-slate-400">BA: ${o.baDone} | PK: ${o.pkDone}</span>
+              <span class="text-emerald-600 dark:text-emerald-400">${pct}%</span>
             </div>
-            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
               <div class="h-full bg-emerald-500 transition-all duration-300" style="width:${pct}%"></div>
             </div>
           </div>
@@ -901,12 +1008,12 @@
         kendalaContainer.innerHTML = '<p class="py-6 text-center text-slate-400">Tidak ada berkas berkendala saat ini.</p>';
       } else {
         kendalaContainer.innerHTML = kendalaList.slice(0, 15).map(r => `
-          <div class="py-2.5 flex items-center justify-between gap-2 hover:bg-slate-50 px-2 rounded-lg">
+          <div class="py-2.5 flex items-center justify-between gap-2 hover:bg-slate-50 dark:hover:bg-slate-800/60 px-2 rounded-lg">
             <div class="min-w-0">
-              <p class="font-bold text-slate-900 truncate">${escapeHtml(r.nama)} <span class="font-normal text-slate-400">(${escapeHtml(r.petugas)})</span></p>
-              <p class="text-[11px] text-rose-600 truncate">${escapeHtml(r.keterangan || "Status kendala tanpa catatan")}</p>
+              <p class="font-bold text-slate-900 dark:text-slate-100 truncate">${escapeHtml(r.nama)} <span class="font-normal text-slate-400">(${escapeHtml(r.petugas)})</span></p>
+              <p class="text-[11px] text-rose-600 dark:text-rose-400 truncate">${escapeHtml(r.keterangan || "Status kendala tanpa catatan")}</p>
             </div>
-            <button onclick="openEditModal('${escapeAttr(r.nip)}')" class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-900 text-white text-[11px] font-bold hover:bg-slate-700">
+            <button onclick="openEditModal('${escapeAttr(r.nip)}')" class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-900 dark:bg-indigo-600 text-white text-[11px] font-bold hover:bg-slate-700 dark:hover:bg-indigo-500">
               Tindak Lanjut
             </button>
           </div>
@@ -926,8 +1033,8 @@
         recentContainer.innerHTML = recentList.map(r => `
           <div class="py-2.5 flex items-center justify-between gap-2 px-1">
             <div class="min-w-0">
-              <p class="font-bold text-slate-800 truncate">${escapeHtml(r.nama)}</p>
-              <p class="text-[11px] text-slate-500 truncate">PIC: ${escapeHtml(r.petugas)} • BA: ${r.statusBA} | PK: ${r.statusPK}</p>
+              <p class="font-bold text-slate-800 dark:text-slate-200 truncate">${escapeHtml(r.nama)}</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">PIC: ${escapeHtml(r.petugas)} • BA: ${r.statusBA} | PK: ${r.statusPK}</p>
             </div>
             <span class="shrink-0 text-[10px] font-mono text-slate-400">${escapeHtml(r.updatedAt.slice(5, 16))}</span>
           </div>
@@ -954,7 +1061,13 @@
 
       FILTERED_RECORDS = ALL_RECORDS.filter(r => {
         if (off !== "ALL" && r.petugas !== off) return false;
-        if (st !== "ALL" && getCategory(r) !== st) return false;
+        if (st !== "ALL") {
+          if (st === "DONE_NO_BOX" && !isDoneNoBox(r)) return false;
+          else if (st === "BOX_NOT_DONE" && !isBoxNotDone(r)) return false;
+          else if (st === "KENDALA_NO_NOTE" && !isKendalaNoNote(r)) return false;
+          else if (st === "PARTIAL_STATUS" && !isPartialStatus(r)) return false;
+          else if (["SELESAI", "PROSES", "KENDALA", "BELUM"].includes(st) && getCategory(r) !== st) return false;
+        }
         if (box === "EMPTY" && r.lokasiBox) return false;
         if (box !== "ALL" && box !== "EMPTY" && r.lokasiBox !== box) return false;
         if (unit !== "ALL" && r.unitKerja !== unit) return false;
@@ -994,10 +1107,18 @@
     }
 
     function statusBadge(val) {
-      if (val === "Selesai") return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Selesai</span>';
-      if (val === "Proses") return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Proses</span>';
-      if (val === "Kendala") return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Kendala</span>';
-      return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600">Belum</span>';
+      if (val === "Selesai") return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-800">Selesai</span>';
+      if (val === "Proses") return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-800">Proses</span>';
+      if (val === "Kendala") return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/80 dark:text-rose-300 dark:border-rose-800">Kendala</span>';
+      return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">Belum</span>';
+    }
+
+    function getAnomalyWarning(r) {
+      if (isDoneNoBox(r)) return "Anomali: Sudah Selesai tetapi belum ada nomor Box";
+      if (isBoxNotDone(r)) return "Anomali: Sudah masuk Box tetapi status BA/PK belum Selesai";
+      if (isKendalaNoNote(r)) return "Anomali: Status Kendala tanpa catatan keterangan";
+      if (isPartialStatus(r)) return "Anomali: Salah satu BA/PK Selesai, pasangannya masih Belum";
+      return "";
     }
 
     function renderTable() {
@@ -1025,30 +1146,34 @@
         const r = FILTERED_RECORDS[i];
         const checked = SELECTED_NIPS[r.nip] ? "checked" : "";
         const isDone = (r.statusBA === "Selesai" && r.statusPK === "Selesai");
+        const anomMsg = getAnomalyWarning(r);
         const titleHover = r.updatedAt ? `Terakhir diubah: ${r.updatedAt}` : "Belum pernah diubah";
 
         html += `
-          <tr class="hover:bg-slate-50 transition-colors" title="${escapeAttr(titleHover)}">
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" title="${escapeAttr(titleHover)}">
             <td class="p-3 text-center">
               <input type="checkbox" ${checked} onchange="toggleSelectOne('${escapeAttr(r.nip)}', this.checked)" class="rounded" />
             </td>
-            <td class="p-3 text-center font-semibold text-slate-500">${r.no}</td>
+            <td class="p-3 text-center font-semibold text-slate-500 dark:text-slate-400">${r.no}</td>
             <td class="p-3">
-              <div class="font-bold text-slate-900">${escapeHtml(r.nama)}</div>
-              <div class="text-[11px] text-slate-500 font-mono">NIP: ${escapeHtml(r.nip)}</div>
+              <div class="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <span>${escapeHtml(r.nama)}</span>
+                ${anomMsg ? `<span title="${escapeAttr(anomMsg)}" class="inline-flex items-center px-1.5 py-0.2 text-[10px] font-bold rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">!</span>` : ""}
+              </div>
+              <div class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">NIP: ${escapeHtml(r.nip)}</div>
             </td>
             <td class="p-3">
-              <div class="text-slate-800 font-medium">${escapeHtml(r.unitKerja)}</div>
+              <div class="text-slate-800 dark:text-slate-200 font-medium">${escapeHtml(r.unitKerja)}</div>
               <div class="mt-0.5">
                 ${r.lokasiBox
-                  ? `<span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-50 text-indigo-700 border border-indigo-200">${escapeHtml(r.lokasiBox)}</span>`
-                  : `<span class="text-[11px] text-slate-400 italic">Box belum diinput</span>`}
+                  ? `<span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">${escapeHtml(r.lokasiBox)}</span>`
+                  : `<span class="text-[11px] text-slate-400 dark:text-slate-500 italic">Box belum diinput</span>`}
               </div>
             </td>
-            <td class="p-3 font-semibold text-slate-700">${escapeHtml(r.petugas)}</td>
+            <td class="p-3 font-semibold text-slate-700 dark:text-slate-300">${escapeHtml(r.petugas)}</td>
             <td class="p-3 text-center">${statusBadge(r.statusBA)}</td>
             <td class="p-3 text-center">${statusBadge(r.statusPK)}</td>
-            <td class="p-3 text-slate-600 max-w-xs truncate" title="${escapeAttr(r.keterangan || '')}">${escapeHtml(r.keterangan || "-")}</td>
+            <td class="p-3 text-slate-600 dark:text-slate-400 max-w-xs truncate" title="${escapeAttr(r.keterangan || '')}">${escapeHtml(r.keterangan || "-")}</td>
             <td class="p-3 text-center">
               <div class="inline-flex items-center gap-1">
                 ${!isDone ? `
@@ -1059,7 +1184,7 @@
                     </svg>
                   </button>
                 ` : ""}
-                <button onclick="openEditModal('${escapeAttr(r.nip)}')" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-700 text-white text-[11px] font-bold transition">
+                <button onclick="openEditModal('${escapeAttr(r.nip)}')" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white text-[11px] font-bold transition">
                   Ubah
                 </button>
               </div>
@@ -1109,7 +1234,7 @@
     }
 
     function escapeAttr(str) {
-      return String(str || "").replace(/'/g, "\'").replace(/"/g, "&quot;");
+      return String(str || "").replace(/'/g, "'").replace(/"/g, "&quot;");
     }
 
     function changePageSize() {
@@ -1313,7 +1438,7 @@
       const grid = document.getElementById("boxSummaryGrid");
 
       if (boxes.length === 0) {
-        grid.innerHTML = '<div class="col-span-full bento-card p-6 text-center text-xs text-slate-400">Belum ada berkas yang diberi nomor Lokasi Box.</div>';
+        grid.innerHTML = '<div class="col-span-full bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 text-center text-xs text-slate-400">Belum ada berkas yang diberi nomor Lokasi Box.</div>';
         return;
       }
 
@@ -1321,12 +1446,12 @@
         const list = boxMap[b];
         const doneCount = list.filter(x => x.statusBA === "Selesai" && x.statusPK === "Selesai").length;
         return `
-          <div onclick="selectBoxForDetail('${escapeAttr(b)}')" class="bento-card p-3.5 hover:border-slate-900 cursor-pointer transition">
+          <div onclick="selectBoxForDetail('${escapeAttr(b)}')" class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3.5 hover:border-slate-900 dark:hover:border-indigo-500 cursor-pointer transition">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-extrabold text-indigo-700">${escapeHtml(b)}</span>
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-slate-100 text-slate-700">${list.length} Berkas</span>
+              <span class="text-xs font-extrabold text-indigo-700 dark:text-indigo-400">${escapeHtml(b)}</span>
+              <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">${list.length} Berkas</span>
             </div>
-            <p class="text-[11px] text-slate-500 mt-1.5">Tuntas BA &amp; PK: <strong class="text-emerald-600">${doneCount}</strong>/${list.length}</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">Tuntas BA &amp; PK: <strong class="text-emerald-600 dark:text-emerald-400">${doneCount}</strong>/${list.length}</p>
           </div>
         `;
       }).join("");
@@ -1341,26 +1466,26 @@
       const boxName = document.getElementById("boxDetailSelect").value;
       const container = document.getElementById("boxDetailContent");
       if (!boxName) {
-        container.innerHTML = '<div class="text-xs text-slate-500 text-center py-8">Silakan pilih salah satu boks arsip di atas untuk menampilkan daftar isi berkas di dalamnya.</div>';
+        container.innerHTML = '<div class="text-xs text-slate-500 dark:text-slate-400 text-center py-8">Silakan pilih salah satu boks arsip di atas untuk menampilkan daftar isi berkas di dalamnya.</div>';
         return;
       }
 
       const items = ALL_RECORDS.filter(r => r.lokasiBox === boxName).sort((a, b) => a.no - b.no);
       container.innerHTML = `
         <div class="text-left space-y-4">
-          <div class="border-b-2 border-slate-900 pb-3 flex flex-wrap items-center justify-between gap-2">
+          <div class="border-b-2 border-slate-900 dark:border-slate-700 pb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
-              <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">DAFTAR ISI BOKS ARSIP AKTIF • SIMON-BAPK 2025</p>
-              <h3 class="text-xl font-extrabold text-slate-900 mt-0.5">${escapeHtml(boxName)}</h3>
+              <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">DAFTAR ISI BOKS ARSIP AKTIF • SIMON-BAPK 2025</p>
+              <h3 class="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">${escapeHtml(boxName)}</h3>
             </div>
             <div class="text-right">
-              <span class="px-3 py-1 rounded-lg bg-slate-900 text-white text-xs font-bold">Total: ${items.length} Berkas</span>
+              <span class="px-3 py-1 rounded-lg bg-slate-900 dark:bg-indigo-600 text-white text-xs font-bold">Total: ${items.length} Berkas</span>
             </div>
           </div>
 
           <table class="w-full text-left border-collapse text-xs">
             <thead>
-              <tr class="bg-slate-100 border-y border-slate-300 text-[11px] uppercase text-slate-700">
+              <tr class="bg-slate-100 dark:bg-slate-800 border-y border-slate-300 dark:border-slate-700 text-[11px] uppercase text-slate-700 dark:text-slate-300">
                 <th class="p-2 w-10 text-center">No</th>
                 <th class="p-2 w-12 text-center">Urut</th>
                 <th class="p-2">Nama Guru</th>
@@ -1371,17 +1496,17 @@
                 <th class="p-2">PIC</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-200">
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
               ${items.map((r, idx) => `
                 <tr>
                   <td class="p-2 text-center font-semibold">${idx + 1}</td>
-                  <td class="p-2 text-center text-slate-500">${r.no}</td>
-                  <td class="p-2 font-bold text-slate-900">${escapeHtml(r.nama)}</td>
-                  <td class="p-2 font-mono text-slate-600">${escapeHtml(r.nip)}</td>
-                  <td class="p-2 text-slate-700">${escapeHtml(r.unitKerja)}</td>
+                  <td class="p-2 text-center text-slate-500 dark:text-slate-400">${r.no}</td>
+                  <td class="p-2 font-bold text-slate-900 dark:text-slate-100">${escapeHtml(r.nama)}</td>
+                  <td class="p-2 font-mono text-slate-600 dark:text-slate-400">${escapeHtml(r.nip)}</td>
+                  <td class="p-2 text-slate-700 dark:text-slate-300">${escapeHtml(r.unitKerja)}</td>
                   <td class="p-2 text-center font-semibold">${escapeHtml(r.statusBA)}</td>
                   <td class="p-2 text-center font-semibold">${escapeHtml(r.statusPK)}</td>
-                  <td class="p-2 text-slate-600">${escapeHtml(r.petugas)}</td>
+                  <td class="p-2 text-slate-600 dark:text-slate-400">${escapeHtml(r.petugas)}</td>
                 </tr>
               `).join("")}
             </tbody>
