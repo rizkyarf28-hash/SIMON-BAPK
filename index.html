@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIMON-BAPK 2025 | Monitoring Berita Acara & Perjanjian Kerja Guru Sekolah Rakyat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .bento-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 1rem;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .tab-active {
+      background-color: #0f172a;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
+    }
+    .tab-inactive {
+      background-color: #f1f5f9;
+      color: #475569;
+    }
+    .tab-inactive:hover {
+      background-color: #e2e8f0;
+      color: #0f172a;
+    }
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Sticky Top Header -->
+  <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-extrabold text-base tracking-tight shadow-sm">
+          SB
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">SIMON-BAPK 2025</h1>
+            <span id="connBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+              <span id="connDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+              <span id="connText">Menghubungkan...</span>
+            </span>
+          </div>
+          <p class="text-xs text-slate-500">Monitoring Berita Acara &amp; Perjanjian Kerja Guru Sekolah Rakyat • 11 Petugas</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <span id="syncStatusText" class="text-xs text-slate-500 hidden lg:inline mr-1">Menunggu sinkronisasi...</span>
+        <label class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-50 border border-slate-200 text-slate-700 cursor-pointer select-none">
+          <input id="autoSyncToggle" type="checkbox" checked onchange="toggleAutoSync()" class="rounded text-slate-900 focus:ring-0" />
+          <span>Auto-Sync 30d</span>
+        </label>
+        <button onclick="fetchDataFromSheet(true)" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>Segarkan</span>
+        </button>
+        <button onclick="exportExcelReport()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center gap-1.5 shadow-xs">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span>Export Excel (.xlsx)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-3 flex items-center gap-2 overflow-x-auto">
+      <button id="btnTab1" onclick="switchTab(1)" class="tab-active px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
+        1. Dasbor &amp; 11 Petugas
+      </button>
+      <button id="btnTab2" onclick="switchTab(2)" class="tab-inactive px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
+        2. Kertas Kerja &amp; Verifikasi Berkas
+      </button>
+      <button id="btnTab3" onclick="switchTab(3)" class="tab-inactive px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
+        3. Pengaturan API &amp; Bagi Rata Abjad (A–Z)
+      </button>
+    </div>
+  </header>
+
+  <!-- Status / Alert Banner -->
+  <div id="loadingBar" class="w-full bg-indigo-50 border-b border-indigo-100 px-4 py-2 text-center text-xs font-semibold text-indigo-700">
+    Memuat data real-time dari Google Spreadsheet (Data_Master)...
+  </div>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex-1">
+
+    <!-- ===================================================================== -->
+    <!-- TAB 1: DASBOR & MONITORING 11 PETUGAS                                 -->
+    <!-- ===================================================================== -->
+    <section id="tab1" class="space-y-6">
+      <!-- KPI Bento Grid -->
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div class="bento-card p-4">
+          <p class="text-xs font-semibold text-slate-500">Total Berkas Guru</p>
+          <p id="kpiTotal" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">0</p>
+          <p class="text-[11px] text-slate-400 mt-1">Urut Abjad A – Z</p>
+        </div>
+        <div class="bento-card p-4 border-l-4 border-l-emerald-500">
+          <p class="text-xs font-semibold text-emerald-700">Selesai Lengkap (BA &amp; PK)</p>
+          <p id="kpiSelesai" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1">0</p>
+          <p id="kpiSelesaiPct" class="text-[11px] text-emerald-600 font-bold mt-1">0%</p>
+        </div>
+        <div class="bento-card p-4 border-l-4 border-l-amber-500">
+          <p class="text-xs font-semibold text-amber-700">Dalam Proses</p>
+          <p id="kpiProses" class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1">0</p>
+          <p class="text-[11px] text-slate-400 mt-1">Salah satu / sedang dicek</p>
+        </div>
+        <div class="bento-card p-4 border-l-4 border-l-rose-500">
+          <p class="text-xs font-semibold text-rose-700">Ada Kendala</p>
+          <p id="kpiKendala" class="text-2xl sm:text-3xl font-extrabold text-rose-600 mt-1">0</p>
+          <p class="text-[11px] text-slate-400 mt-1">Perlu tindak lanjut</p>
+        </div>
+        <div class="bento-card p-4 col-span-2 lg:col-span-1 border-l-4 border-l-slate-400">
+          <p class="text-xs font-semibold text-slate-600">Belum Diproses</p>
+          <p id="kpiBelum" class="text-2xl sm:text-3xl font-extrabold text-slate-700 mt-1">0</p>
+          <p class="text-[11px] text-slate-400 mt-1">Menunggu verifikasi</p>
+        </div>
+      </div>
+
+      <!-- Progress Bar Terpisah BA vs PK -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bento-card p-5">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Progres Berita Acara (BA)</span>
+            <span id="baSummaryText" class="text-xs font-extrabold text-indigo-600">0 / 0 (0%)</span>
+          </div>
+          <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+            <div id="baProgressBar" class="h-full bg-indigo-600 transition-all duration-500 rounded-full" style="width: 0%"></div>
+          </div>
+        </div>
+        <div class="bento-card p-5">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Progres Perjanjian Kerja (PK)</span>
+            <span id="pkSummaryText" class="text-xs font-extrabold text-emerald-600">0 / 0 (0%)</span>
+          </div>
+          <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+            <div id="pkProgressBar" class="h-full bg-emerald-600 transition-all duration-500 rounded-full" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 11 Officer Cards -->
+      <div>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900">Beban Kerja &amp; Progres 11 Petugas Verifikator</h2>
+            <p class="text-xs text-slate-500">Klik kartu petugas mana pun untuk langsung memfilter dan mengerjakan berkasnya.</p>
+          </div>
+        </div>
+        <div id="officersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 2: MANAJEMEN & VERIFIKASI BERKAS                                  -->
+    <!-- ===================================================================== -->
+    <section id="tab2" class="hidden space-y-4">
+      <!-- Filter & Search Bar -->
+      <div class="bento-card p-4 space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+          <div class="md:col-span-4">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Cari Nama Guru / NIP / Sekolah</label>
+            <input id="searchInput" type="text" oninput="applyFilters()" placeholder="Ketik nama, NIP, sekolah, atau box..."
+              class="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900" />
+          </div>
+          <div class="md:col-span-3">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter Petugas (11 Orang)</label>
+            <select id="filterOfficer" onchange="applyFilters()"
+              class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
+              <option value="ALL">Semua Petugas (11 Orang)</option>
+            </select>
+          </div>
+          <div class="md:col-span-3">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter Status Berkas</label>
+            <select id="filterStatus" onchange="applyFilters()"
+              class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
+              <option value="ALL">Semua Status</option>
+              <option value="SELESAI">Selesai Lengkap (BA &amp; PK)</option>
+              <option value="PROSES">Dalam Proses</option>
+              <option value="KENDALA">Ada Kendala</option>
+              <option value="BELUM">Belum Diproses</option>
+            </select>
+          </div>
+          <div class="md:col-span-2 flex items-end">
+            <button onclick="resetFilters()" class="w-full px-3 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition">
+              Reset Filter
+            </button>
+          </div>
+        </div>
+
+        <!-- Bulk Action Toolbar -->
+        <div id="bulkToolbar" class="hidden pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-indigo-50/80 p-3 rounded-xl">
+          <div class="flex items-center gap-2 text-xs font-bold text-indigo-950">
+            <span id="selectedCountBadge" class="px-2.5 py-0.5 bg-indigo-600 text-white rounded-md">0</span>
+            <span>berkas dipilih</span>
+            <button onclick="clearSelection()" class="text-[11px] underline text-indigo-600 hover:text-indigo-800 ml-1">Batal pilih</button>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="bulkStatusBA" class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white font-medium">
+              <option value="">-- Ubah Status BA --</option>
+              <option value="Selesai">BA: Selesai</option>
+              <option value="Proses">BA: Proses</option>
+              <option value="Kendala">BA: Kendala</option>
+              <option value="Belum">BA: Belum</option>
+            </select>
+            <select id="bulkStatusPK" class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white font-medium">
+              <option value="">-- Ubah Status PK --</option>
+              <option value="Selesai">PK: Selesai</option>
+              <option value="Proses">PK: Proses</option>
+              <option value="Kendala">PK: Kendala</option>
+              <option value="Belum">PK: Belum</option>
+            </select>
+            <input id="bulkNoteInput" type="text" placeholder="Catatan massal (opsional)..."
+              class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white w-44" />
+            <button id="btnBulkSave" onclick="submitBulkUpdate()" class="px-3.5 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-xs transition">
+              Simpan Massal
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="bento-card overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-900 text-white text-[11px] uppercase tracking-wider">
+                <th class="p-3 w-10 text-center">
+                  <input id="selectAllPage" type="checkbox" onclick="toggleSelectPage(this)" class="rounded" title="Pilih semua di halaman ini" />
+                </th>
+                <th class="p-3 w-12 text-center">No</th>
+                <th class="p-3">Nama Guru &amp; NIP</th>
+                <th class="p-3">Unit Sekolah Rakyat &amp; Box</th>
+                <th class="p-3">Petugas PIC</th>
+                <th class="p-3 text-center">Status BA</th>
+                <th class="p-3 text-center">Status PK</th>
+                <th class="p-3">Keterangan</th>
+                <th class="p-3 text-center w-24">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody" class="divide-y divide-slate-200 text-xs"></tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Footer -->
+        <div class="p-3.5 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-2 text-slate-600">
+            <span id="paginationInfo">Menampilkan 0 - 0 dari 0 data</span>
+            <select id="pageSizeSelect" onchange="changePageSize()" class="px-2 py-1 border border-slate-300 rounded-lg bg-white">
+              <option value="25">25 / hal</option>
+              <option value="50" selected>50 / hal</option>
+              <option value="100">100 / hal</option>
+              <option value="250">250 / hal</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="prevPage()" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-semibold transition">Sebelumnya</button>
+            <span id="pageIndicator" class="px-3 py-1.5 font-bold text-slate-700">Hal 1 / 1</span>
+            <button onclick="nextPage()" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-semibold transition">Berikutnya</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 3: PENGATURAN API & PEMBAGIAN ABJAD (A-Z)                         -->
+    <!-- ===================================================================== -->
+    <section id="tab3" class="hidden space-y-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="bento-card p-6 space-y-4">
+          <div>
+            <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Endpoint Aktif</span>
+            <h2 class="text-base font-extrabold text-slate-900 mt-2">Koneksi Google Apps Script Web App</h2>
+            <p class="text-xs text-slate-500 mt-1">URL Web App sudah terpasang permanen untuk hosting GitHub Pages.</p>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">URL Web App (/exec)</label>
+            <input id="gasUrlInput" type="text"
+              value="https://script.google.com/macros/s/AKfycbw6U7vqmEd5n8thqt8jOmFFt1XJZ1KjdBZBRhv6H-mgGroGxM3ypKe5yaHGYasgGkIP/exec"
+              class="w-full px-3 py-2 text-xs font-mono border border-slate-300 rounded-xl bg-slate-50 text-slate-700" />
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="saveGasUrl()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition">
+              Simpan &amp; Muat Ulang Data
+            </button>
+            <button onclick="resetDefaultGasUrl()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+              Reset ke URL Default
+            </button>
+          </div>
+        </div>
+
+        <div class="bento-card p-6 space-y-4">
+          <div>
+            <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">Distribusi Adil</span>
+            <h2 class="text-base font-extrabold text-slate-900 mt-2">Urutkan Abjad (A–Z) &amp; Bagi Rata 11 Petugas</h2>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+              Seluruh data di sheet <strong>Data_Master</strong> diurutkan berdasarkan abjad nama guru (A–Z) dan dibagi rata ke 11 petugas.
+              Gunakan tombol ini hanya jika Anda baru menambahkan atau menghapus baris guru di Spreadsheet.
+            </p>
+          </div>
+          <div>
+            <button onclick="triggerServerRedistribute()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition">
+              Urutkan Abjad (A–Z) &amp; Bagi Rata Ulang
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+      <div class="flex justify-between items-start gap-2">
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Update Verifikasi Real-Time</span>
+          <h3 id="modalGuruName" class="text-base font-extrabold text-slate-900 mt-0.5">-</h3>
+          <p id="modalGuruMeta" class="text-xs text-slate-500 mt-0.5">-</p>
+        </div>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 font-bold text-xl leading-none">&times;</button>
+      </div>
+
+      <input type="hidden" id="modalNip" />
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Petugas Verifikator</label>
+          <select id="modalPetugas" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white"></select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Status Berita Acara (BA)</label>
+            <select id="modalStatusBA" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white">
+              <option value="Belum">Belum</option>
+              <option value="Proses">Proses</option>
+              <option value="Selesai">Selesai</option>
+              <option value="Kendala">Kendala</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Status Perjanjian Kerja (PK)</label>
+            <select id="modalStatusPK" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white">
+              <option value="Belum">Belum</option>
+              <option value="Proses">Proses</option>
+              <option value="Selesai">Selesai</option>
+              <option value="Kendala">Kendala</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Keterangan / Catatan Berkas</label>
+          <textarea id="modalKeterangan" rows="3" placeholder="Contoh: TTE lengkap, atau Belum scan fisik..."
+            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl"></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeEditModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700">
+          Batal
+        </button>
+        <button id="btnSaveSingle" onclick="saveSingleEdit()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white">
+          Simpan ke Spreadsheet
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-lg max-w-sm"></div>
+
+  <script>
+    const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbw6U7vqmEd5n8thqt8jOmFFt1XJZ1KjdBZBRhv6H-mgGroGxM3ypKe5yaHGYasgGkIP/exec";
+    let GAS_WEB_APP_URL = localStorage.getItem("SIMON_BAPK_GAS_URL") || DEFAULT_GAS_URL;
+
+    let ALL_RECORDS = [];
+    let FILTERED_RECORDS = [];
+    let OFFICERS = [
+      "Anjas Marantika", "Rizky Arfiansyah", "Tony", "Gustrinelli",
+      "Taufik Hadi", "Rafi Prakas", "Bentar Purnama", "Dilla Triyana",
+      "Wira Oktoria", "Bayoe Angin", "Hikmah Mahatir"
+    ];
+    let SELECTED_NIPS = {};
+    let CURRENT_PAGE = 1;
+    let PAGE_SIZE = 50;
+    let AUTO_SYNC_TIMER = null;
+
+    window.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("gasUrlInput").value = GAS_WEB_APP_URL;
+      populateOfficerDropdowns();
+      fetchDataFromSheet(false);
+      toggleAutoSync();
+    });
+
+    function setConnectionStatus(state, text) {
+      const badge = document.getElementById("connBadge");
+      const dot = document.getElementById("connDot");
+      const label = document.getElementById("connText");
+      label.textContent = text;
+
+      if (state === "connected") {
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200";
+        dot.className = "w-2 h-2 rounded-full bg-emerald-500";
+      } else if (state === "error") {
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200";
+        dot.className = "w-2 h-2 rounded-full bg-rose-500";
+      } else {
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200";
+        dot.className = "w-2 h-2 rounded-full bg-amber-500 animate-pulse";
+      }
+    }
+
+    function toggleAutoSync() {
+      if (AUTO_SYNC_TIMER) {
+        clearInterval(AUTO_SYNC_TIMER);
+        AUTO_SYNC_TIMER = null;
+      }
+      if (document.getElementById("autoSyncToggle").checked) {
+        AUTO_SYNC_TIMER = setInterval(() => {
+          // Jangan ganggu jika modal edit sedang terbuka
+          if (document.getElementById("editModal").classList.contains("hidden")) {
+            fetchDataFromSheet(false, true);
+          }
+        }, 30000);
+      }
+    }
+
+    function saveGasUrl() {
+      const val = document.getElementById("gasUrlInput").value.trim();
+      if (!val) {
+        showToast("URL Web App tidak boleh kosong.");
+        return;
+      }
+      GAS_WEB_APP_URL = val;
+      localStorage.setItem("SIMON_BAPK_GAS_URL", val);
+      fetchDataFromSheet(true);
+    }
+
+    function resetDefaultGasUrl() {
+      GAS_WEB_APP_URL = DEFAULT_GAS_URL;
+      localStorage.removeItem("SIMON_BAPK_GAS_URL");
+      document.getElementById("gasUrlInput").value = DEFAULT_GAS_URL;
+      fetchDataFromSheet(true);
+    }
+
+    function populateOfficerDropdowns() {
+      const filterSel = document.getElementById("filterOfficer");
+      const modalSel = document.getElementById("modalPetugas");
+      const currentFilter = filterSel.value;
+
+      filterSel.innerHTML = `<option value="ALL">Semua Petugas (${OFFICERS.length} Orang)</option>`;
+      modalSel.innerHTML = "";
+
+      OFFICERS.forEach((name, idx) => {
+        const opt1 = document.createElement("option");
+        opt1.value = name;
+        opt1.textContent = `${idx + 1}. ${name}`;
+        filterSel.appendChild(opt1);
+
+        const opt2 = document.createElement("option");
+        opt2.value = name;
+        opt2.textContent = name;
+        modalSel.appendChild(opt2);
+      });
+
+      if (currentFilter && (currentFilter === "ALL" || OFFICERS.includes(currentFilter))) {
+        filterSel.value = currentFilter;
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.remove("hidden");
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.add("hidden"), 3800);
+    }
+
+    function switchTab(tabNum) {
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById("tab" + i).classList.toggle("hidden", i !== tabNum);
+        const btn = document.getElementById("btnTab" + i);
+        btn.className = (i === tabNum)
+          ? "tab-active px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap"
+          : "tab-inactive px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap";
+      }
+    }
+
+    async function fetchDataFromSheet(manual = false, silent = false) {
+      const bar = document.getElementById("loadingBar");
+      if (!silent) {
+        setConnectionStatus("loading", "Menyinkronkan...");
+        bar.textContent = "Menyinkronkan data dari Google Spreadsheet (Data_Master)...";
+        bar.classList.remove("hidden");
+      }
+
+      try {
+        const sep = GAS_WEB_APP_URL.includes("?") ? "&" : "?";
+        const url = `${GAS_WEB_APP_URL}${sep}mode=json&t=${Date.now()}`;
+        const response = await fetch(url, { method: "GET", redirect: "follow" });
+        const text = await response.text();
+
+        let res;
+        try {
+          res = JSON.parse(text);
+        } catch (parseErr) {
+          throw new Error("Respon bukan JSON. Pastikan akses Web App di-set ke 'Siapa saja (Anyone)'.");
+        }
+
+        if (res && res.status === "success") {
+          ALL_RECORDS = res.data || [];
+          if (Array.isArray(res.officers) && res.officers.length > 0) {
+            OFFICERS = res.officers;
+            populateOfficerDropdowns();
+          }
+          setConnectionStatus("connected", `Terhubung • ${ALL_RECORDS.length.toLocaleString("id-ID")} Berkas`);
+          document.getElementById("syncStatusText").textContent = `Sinkron: ${res.serverTime || "Baru saja"}`;
+          bar.classList.add("hidden");
+
+          renderDashboard();
+          applyFilters(true);
+          if (manual) showToast(`Data berhasil disinkronkan (${ALL_RECORDS.length.toLocaleString("id-ID")} berkas).`);
+        } else {
+          throw new Error((res && res.message) ? res.message : "Gagal memuat data dari Spreadsheet.");
+        }
+      } catch (err) {
+        setConnectionStatus("error", "Koneksi Terputus");
+        bar.textContent = "Gagal terhubung ke Google Sheets: " + err.message;
+        bar.className = "w-full bg-rose-50 border-b border-rose-200 px-4 py-2 text-center text-xs font-semibold text-rose-700";
+        bar.classList.remove("hidden");
+        if (manual) showToast("Error: " + err.message);
+      }
+    }
+
+    async function postToGas(payloadObj) {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        redirect: "follow",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify(payloadObj)
+      });
+      const text = await response.text();
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        throw new Error("Server Apps Script belum memiliki fungsi doPost(e) atau perlu Deploy versi baru.");
+      }
+    }
+
+    function getCategory(rec) {
+      if (rec.statusBA === "Selesai" && rec.statusPK === "Selesai") return "SELESAI";
+      if (rec.statusBA === "Kendala" || rec.statusPK === "Kendala") return "KENDALA";
+      if (rec.statusBA === "Proses" || rec.statusPK === "Proses" || rec.statusBA === "Selesai" || rec.statusPK === "Selesai") return "PROSES";
+      return "BELUM";
+    }
+
+    function renderDashboard() {
+      const total = ALL_RECORDS.length;
+      let selesai = 0, proses = 0, kendala = 0, belum = 0;
+      let baDone = 0, pkDone = 0;
+
+      const officerStats = {};
+      OFFICERS.forEach(name => {
+        officerStats[name] = {
+          name, total: 0, selesai: 0, baDone: 0, pkDone: 0, kendala: 0,
+          firstChar: "", lastChar: "", minNo: 999999, maxNo: 0
+        };
+      });
+
+      ALL_RECORDS.forEach(r => {
+        const cat = getCategory(r);
+        if (cat === "SELESAI") selesai++;
+        else if (cat === "KENDALA") kendala++;
+        else if (cat === "PROSES") proses++;
+        else belum++;
+
+        if (r.statusBA === "Selesai") baDone++;
+        if (r.statusPK === "Selesai") pkDone++;
+
+        const st = officerStats[r.petugas];
+        if (st) {
+          st.total++;
+          if (cat === "SELESAI") st.selesai++;
+          if (r.statusBA === "Selesai") st.baDone++;
+          if (r.statusPK === "Selesai") st.pkDone++;
+          if (cat === "KENDALA") st.kendala++;
+          const ch = r.nama ? r.nama.charAt(0).toUpperCase() : "";
+          if (!st.firstChar) st.firstChar = ch;
+          if (ch) st.lastChar = ch;
+          if (r.no < st.minNo) st.minNo = r.no;
+          if (r.no > st.maxNo) st.maxNo = r.no;
+        }
+      });
+
+      document.getElementById("kpiTotal").textContent = total.toLocaleString("id-ID");
+      document.getElementById("kpiSelesai").textContent = selesai.toLocaleString("id-ID");
+      document.getElementById("kpiSelesaiPct").textContent = total ? `${(selesai / total * 100).toFixed(1)}% tuntas` : "0%";
+      document.getElementById("kpiProses").textContent = proses.toLocaleString("id-ID");
+      document.getElementById("kpiKendala").textContent = kendala.toLocaleString("id-ID");
+      document.getElementById("kpiBelum").textContent = belum.toLocaleString("id-ID");
+
+      const baPct = total ? (baDone / total * 100).toFixed(1) : 0;
+      const pkPct = total ? (pkDone / total * 100).toFixed(1) : 0;
+      document.getElementById("baSummaryText").textContent = `${baDone.toLocaleString("id-ID")} / ${total.toLocaleString("id-ID")} (${baPct}%)`;
+      document.getElementById("baProgressBar").style.width = `${baPct}%`;
+      document.getElementById("pkSummaryText").textContent = `${pkDone.toLocaleString("id-ID")} / ${total.toLocaleString("id-ID")} (${pkPct}%)`;
+      document.getElementById("pkProgressBar").style.width = `${pkPct}%`;
+
+      const grid = document.getElementById("officersGrid");
+      grid.innerHTML = "";
+
+      OFFICERS.forEach((name, idx) => {
+        const o = officerStats[name];
+        const pct = o.total ? Math.round(((o.baDone + o.pkDone) / (2 * o.total)) * 100) : 0;
+        const abjad = (o.firstChar && o.lastChar)
+          ? (o.firstChar === o.lastChar ? `Abjad ${o.firstChar}` : `Abjad ${o.firstChar} – ${o.lastChar}`)
+          : "Belum ada data";
+        const rangeNo = o.total ? `No. ${o.minNo}–${o.maxNo}` : "-";
+
+        const card = document.createElement("div");
+        card.className = "bento-card p-4 hover:border-slate-900 hover:shadow-md cursor-pointer transition flex flex-col justify-between";
+        card.onclick = () => {
+          document.getElementById("filterOfficer").value = o.name;
+          switchTab(2);
+          applyFilters();
+        };
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between gap-2">
+              <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-100 text-slate-700">Petugas #${idx + 1}</span>
+              <span class="text-[11px] font-bold text-indigo-600">${abjad}</span>
+            </div>
+            <h3 class="font-extrabold text-slate-900 text-sm mt-2">${escapeHtml(o.name)}</h3>
+            <p class="text-[11px] text-slate-500 mt-0.5">${o.total} berkas (${rangeNo})</p>
+          </div>
+          <div class="mt-4">
+            <div class="flex justify-between text-[11px] font-bold mb-1">
+              <span class="text-slate-600">BA: ${o.baDone} | PK: ${o.pkDone}</span>
+              <span class="text-emerald-600">${pct}%</span>
+            </div>
+            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full bg-emerald-500 transition-all duration-300" style="width:${pct}%"></div>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function applyFilters(keepPage = false) {
+      const q = document.getElementById("searchInput").value.toLowerCase().trim();
+      const off = document.getElementById("filterOfficer").value;
+      const st = document.getElementById("filterStatus").value;
+
+      FILTERED_RECORDS = ALL_RECORDS.filter(r => {
+        if (off !== "ALL" && r.petugas !== off) return false;
+        if (st !== "ALL" && getCategory(r) !== st) return false;
+        if (q) {
+          const hay = `${r.nama} ${r.nip} ${r.unitKerja} ${r.jabatan} ${r.lokasiBox} ${r.keterangan}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      if (!keepPage) CURRENT_PAGE = 1;
+      renderTable();
+    }
+
+    function resetFilters() {
+      document.getElementById("searchInput").value = "";
+      document.getElementById("filterOfficer").value = "ALL";
+      document.getElementById("filterStatus").value = "ALL";
+      clearSelection();
+      applyFilters();
+    }
+
+    function statusBadge(val) {
+      if (val === "Selesai") return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Selesai</span>';
+      if (val === "Proses") return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Proses</span>';
+      if (val === "Kendala") return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Kendala</span>';
+      return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600">Belum</span>';
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("tableBody");
+      const total = FILTERED_RECORDS.length;
+      const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      if (CURRENT_PAGE > totalPages) CURRENT_PAGE = totalPages;
+
+      const start = (CURRENT_PAGE - 1) * PAGE_SIZE;
+      const end = Math.min(start + PAGE_SIZE, total);
+
+      document.getElementById("paginationInfo").textContent = total
+        ? `Menampilkan ${start + 1} - ${end} dari ${total.toLocaleString("id-ID")} data`
+        : "Tidak ada data yang cocok";
+      document.getElementById("pageIndicator").textContent = `Hal ${CURRENT_PAGE} / ${totalPages}`;
+      document.getElementById("selectAllPage").checked = false;
+
+      if (total === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="p-8 text-center text-slate-400">Tidak ada berkas ditemukan.</td></tr>';
+        return;
+      }
+
+      let html = "";
+      for (let i = start; i < end; i++) {
+        const r = FILTERED_RECORDS[i];
+        const checked = SELECTED_NIPS[r.nip] ? "checked" : "";
+        html += `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="p-3 text-center">
+              <input type="checkbox" ${checked} onchange="toggleSelectOne('${escapeAttr(r.nip)}', this.checked)" class="rounded" />
+            </td>
+            <td class="p-3 text-center font-semibold text-slate-500">${r.no}</td>
+            <td class="p-3">
+              <div class="font-bold text-slate-900">${escapeHtml(r.nama)}</div>
+              <div class="text-[11px] text-slate-500 font-mono">NIP: ${escapeHtml(r.nip)}</div>
+            </td>
+            <td class="p-3">
+              <div class="text-slate-800 font-medium">${escapeHtml(r.unitKerja)}</div>
+              <div class="text-[11px] text-slate-400">${escapeHtml(r.lokasiBox)}</div>
+            </td>
+            <td class="p-3 font-semibold text-slate-700">${escapeHtml(r.petugas)}</td>
+            <td class="p-3 text-center">${statusBadge(r.statusBA)}</td>
+            <td class="p-3 text-center">${statusBadge(r.statusPK)}</td>
+            <td class="p-3 text-slate-600 max-w-xs truncate" title="${escapeAttr(r.keterangan || '')}">${escapeHtml(r.keterangan || "-")}</td>
+            <td class="p-3 text-center">
+              <button onclick="openEditModal('${escapeAttr(r.nip)}')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-700 text-white text-[11px] font-bold transition">
+                Ubah
+              </button>
+            </td>
+          </tr>
+        `;
+      }
+      tbody.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function escapeAttr(str) {
+      return String(str || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+    }
+
+    function changePageSize() {
+      PAGE_SIZE = Number(document.getElementById("pageSizeSelect").value) || 50;
+      CURRENT_PAGE = 1;
+      renderTable();
+    }
+
+    function prevPage() {
+      if (CURRENT_PAGE > 1) {
+        CURRENT_PAGE--;
+        renderTable();
+      }
+    }
+
+    function nextPage() {
+      const totalPages = Math.max(1, Math.ceil(FILTERED_RECORDS.length / PAGE_SIZE));
+      if (CURRENT_PAGE < totalPages) {
+        CURRENT_PAGE++;
+        renderTable();
+      }
+    }
+
+    function toggleSelectOne(nip, isChecked) {
+      if (isChecked) SELECTED_NIPS[nip] = true;
+      else delete SELECTED_NIPS[nip];
+      updateBulkBar();
+    }
+
+    function toggleSelectPage(cb) {
+      const start = (CURRENT_PAGE - 1) * PAGE_SIZE;
+      const end = Math.min(start + PAGE_SIZE, FILTERED_RECORDS.length);
+      for (let i = start; i < end; i++) {
+        const nip = FILTERED_RECORDS[i].nip;
+        if (cb.checked) SELECTED_NIPS[nip] = true;
+        else delete SELECTED_NIPS[nip];
+      }
+      renderTable();
+      updateBulkBar();
+    }
+
+    function clearSelection() {
+      SELECTED_NIPS = {};
+      updateBulkBar();
+      renderTable();
+    }
+
+    function updateBulkBar() {
+      const count = Object.keys(SELECTED_NIPS).length;
+      document.getElementById("selectedCountBadge").textContent = count;
+      document.getElementById("bulkToolbar").classList.toggle("hidden", count === 0);
+    }
+
+    function openEditModal(nip) {
+      const rec = ALL_RECORDS.find(r => r.nip === nip);
+      if (!rec) return;
+
+      document.getElementById("modalNip").value = rec.nip;
+      document.getElementById("modalGuruName").textContent = rec.nama;
+      document.getElementById("modalGuruMeta").textContent = `NIP: ${rec.nip} • ${rec.unitKerja}`;
+      document.getElementById("modalPetugas").value = rec.petugas;
+      document.getElementById("modalStatusBA").value = rec.statusBA || "Belum";
+      document.getElementById("modalStatusPK").value = rec.statusPK || "Belum";
+      document.getElementById("modalKeterangan").value = rec.keterangan || "";
+      document.getElementById("editModal").classList.remove("hidden");
+    }
+
+    function closeEditModal() {
+      document.getElementById("editModal").classList.add("hidden");
+    }
+
+    async function saveSingleEdit() {
+      const btn = document.getElementById("btnSaveSingle");
+      btn.disabled = true;
+      btn.textContent = "Menyimpan...";
+
+      const payload = {
+        action: "update",
+        nip: document.getElementById("modalNip").value,
+        petugas: document.getElementById("modalPetugas").value,
+        statusBA: document.getElementById("modalStatusBA").value,
+        statusPK: document.getElementById("modalStatusPK").value,
+        keterangan: document.getElementById("modalKeterangan").value
+      };
+
+      try {
+        const res = await postToGas(payload);
+        if (res && res.status === "success") {
+          const rec = ALL_RECORDS.find(r => r.nip === payload.nip);
+          if (rec) {
+            rec.petugas = payload.petugas;
+            rec.statusBA = payload.statusBA;
+            rec.statusPK = payload.statusPK;
+            rec.keterangan = payload.keterangan;
+            rec.updatedAt = res.updatedAt || "";
+          }
+          closeEditModal();
+          renderDashboard();
+          applyFilters(true);
+          showToast("Tersimpan real-time ke Google Sheets!");
+        } else {
+          throw new Error((res && res.message) ? res.message : "Gagal menyimpan data.");
+        }
+      } catch (err) {
+        showToast("Gagal menyimpan: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Simpan ke Spreadsheet";
+      }
+    }
+
+    async function submitBulkUpdate() {
+      const nips = Object.keys(SELECTED_NIPS);
+      if (nips.length === 0) return;
+
+      const statusBA = document.getElementById("bulkStatusBA").value;
+      const statusPK = document.getElementById("bulkStatusPK").value;
+      const keterangan = document.getElementById("bulkNoteInput").value.trim();
+
+      if (!statusBA && !statusPK && !keterangan) {
+        showToast("Pilih minimal satu perubahan (BA, PK, atau Catatan).");
+        return;
+      }
+
+      const btn = document.getElementById("btnBulkSave");
+      btn.disabled = true;
+      btn.textContent = "Menyimpan...";
+      showToast(`Menyimpan ${nips.length} berkas ke Spreadsheet...`);
+
+      try {
+        const res = await postToGas({
+          action: "bulk_update",
+          nips,
+          statusBA,
+          statusPK,
+          keterangan
+        });
+
+        if (res && res.status === "success") {
+          ALL_RECORDS.forEach(r => {
+            if (SELECTED_NIPS[r.nip]) {
+              if (statusBA) r.statusBA = statusBA;
+              if (statusPK) r.statusPK = statusPK;
+              if (keterangan) r.keterangan = keterangan;
+              r.updatedAt = res.updatedAt || "";
+            }
+          });
+          SELECTED_NIPS = {};
+          document.getElementById("bulkStatusBA").value = "";
+          document.getElementById("bulkStatusPK").value = "";
+          document.getElementById("bulkNoteInput").value = "";
+          updateBulkBar();
+          renderDashboard();
+          applyFilters(true);
+          showToast(`${res.updatedCount || nips.length} berkas berhasil diperbarui di Google Sheets!`);
+        } else {
+          throw new Error((res && res.message) ? res.message : "Gagal update massal.");
+        }
+      } catch (err) {
+        showToast("Error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Simpan Massal";
+      }
+    }
+
+    async function triggerServerRedistribute() {
+      if (!confirm("Urutkan ulang seluruh data (A-Z) dan bagi rata ke 11 petugas di Google Sheets?")) return;
+      showToast("Memproses pengurutan abjad & pembagian...");
+      try {
+        const res = await postToGas({ action: "redistribute" });
+        if (res && res.status === "success") {
+          showToast(res.message);
+          fetchDataFromSheet(false);
+        } else {
+          throw new Error((res && res.message) ? res.message : "Gagal membagi ulang.");
+        }
+      } catch (err) {
+        showToast("Error: " + err.message);
+      }
+    }
+
+    function exportExcelReport() {
+      if (!ALL_RECORDS.length) {
+        showToast("Belum ada data untuk diekspor.");
+        return;
+      }
+
+      const dataRows = ALL_RECORDS.map(r => ({
+        "No": r.no,
+        "NIP": r.nip,
+        "Nama_Guru": r.nama,
+        "Jabatan": r.jabatan,
+        "Unit_Kerja": r.unitKerja,
+        "Lokasi_Box": r.lokasiBox,
+        "Petugas_Verifikator": r.petugas,
+        "Status_BA": r.statusBA,
+        "Status_PK": r.statusPK,
+        "Keterangan": r.keterangan,
+        "Updated_At": r.updatedAt
+      }));
+
+      const rekapRows = OFFICERS.map((name, idx) => {
+        const subset = ALL_RECORDS.filter(r => r.petugas === name);
+        const baDone = subset.filter(r => r.statusBA === "Selesai").length;
+        const pkDone = subset.filter(r => r.statusPK === "Selesai").length;
+        const kendala = subset.filter(r => r.statusBA === "Kendala" || r.statusPK === "Kendala").length;
+        const pct = subset.length ? Number((((baDone + pkDone) / (2 * subset.length)) * 100).toFixed(1)) : 0;
+        return {
+          "No": idx + 1,
+          "Nama_Petugas": name,
+          "Total_Berkas": subset.length,
+          "BA_Selesai": baDone,
+          "PK_Selesai": pkDone,
+          "Ada_Kendala": kendala,
+          "Progres_Persen": pct
+        };
+      });
+
+      const wb = XLSX.utils.book_new();
+      const wsData = XLSX.utils.json_to_sheet(dataRows);
+      const wsRekap = XLSX.utils.json_to_sheet(rekapRows);
+      XLSX.utils.book_append_sheet(wb, wsData, "Data_Berkas_Guru");
+      XLSX.utils.book_append_sheet(wb, wsRekap, "Rekap_11_Petugas");
+      XLSX.writeFile(wb, "Laporan_SIMON_BAPK_2025.xlsx");
+    }
+  </script>
+</body>
+</html>
