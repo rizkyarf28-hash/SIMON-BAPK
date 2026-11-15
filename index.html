@@ -11,6 +11,7 @@
     };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -19,16 +20,19 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
     .bento-card {
-      border-radius: 1rem;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      border-radius: 1.15rem;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.03);
+    }
+    .dark .bento-card {
+      box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.35);
     }
     th.sortable {
       cursor: pointer;
       user-select: none;
     }
     ::-webkit-scrollbar {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
     }
     ::-webkit-scrollbar-track {
       background: transparent;
@@ -39,6 +43,13 @@
     }
     ::-webkit-scrollbar-thumb:hover {
       background: #64748b;
+    }
+    /* Slide-over drawer transition */
+    #profileDrawerBackdrop {
+      transition: opacity 0.25s ease;
+    }
+    #profileDrawerPanel {
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     @media print {
       body * { visibility: hidden; }
@@ -56,13 +67,13 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-slate-50 to-indigo-50/30 text-slate-900 dark:from-slate-950 dark:via-slate-950 dark:to-indigo-950/20 dark:text-slate-100 transition-colors duration-200">
 
   <!-- Sticky Top Header -->
-  <header class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 no-print">
+  <header class="bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80 sticky top-0 z-30 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-slate-900 dark:bg-indigo-600 text-white flex items-center justify-center font-extrabold text-base tracking-tight shadow-sm">
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-indigo-700 dark:from-indigo-500 dark:to-violet-600 text-white flex items-center justify-center font-extrabold text-base tracking-tight shadow-md shadow-indigo-500/15">
           SB
         </div>
         <div>
@@ -81,14 +92,15 @@
         <span id="syncStatusText" class="text-xs text-slate-500 dark:text-slate-400 hidden xl:inline mr-1">Menunggu sinkronisasi...</span>
 
         <!-- Identitas Petugas Aktif (Remember My PIC) -->
-        <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800">
-          <span class="text-[11px] font-bold text-indigo-800 dark:text-indigo-300">PIC Aktif:</span>
-          <select id="activePicSelect" onchange="setActivePic()" class="text-xs font-bold text-indigo-950 dark:text-indigo-100 bg-transparent focus:outline-none cursor-pointer">
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/80 dark:to-violet-950/60 border border-indigo-200/80 dark:border-indigo-800 shadow-2xs">
+          <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+          <span class="text-[11px] font-bold text-indigo-900 dark:text-indigo-300">PIC Aktif:</span>
+          <select id="activePicSelect" onchange="setActivePic()" class="text-xs font-extrabold text-indigo-950 dark:text-indigo-100 bg-transparent focus:outline-none cursor-pointer">
             <option value="ALL" class="dark:bg-slate-900">Semua (Admin)</option>
           </select>
         </div>
 
-        <!-- Dark Mode Toggle (Point 5) -->
+        <!-- Dark Mode Toggle -->
         <button id="themeToggleBtn" onclick="toggleDarkMode()" title="Ganti Mode Terang / Gelap"
           class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-300 border border-slate-200 dark:border-slate-700 transition">
           <svg id="iconSun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
@@ -100,7 +112,7 @@
         </button>
 
         <label class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer select-none">
-          <input id="autoSyncToggle" type="checkbox" checked onchange="toggleAutoSync()" class="rounded text-slate-900 focus:ring-0" />
+          <input id="autoSyncToggle" type="checkbox" checked onchange="toggleAutoSync()" class="rounded text-indigo-600 focus:ring-0" />
           <span>Auto-Sync 30d</span>
         </label>
 
@@ -111,7 +123,7 @@
           <span>Segarkan</span>
         </button>
 
-        <button onclick="exportExcelReport()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center gap-1.5 shadow-xs">
+        <button onclick="exportExcelReport()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white transition flex items-center gap-1.5 shadow-sm shadow-emerald-600/20">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
@@ -124,7 +136,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-3 flex items-center justify-between gap-2 overflow-x-auto">
       <div class="flex items-center gap-2">
         <button id="btnTab1" onclick="switchTab(1)" class="px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
-          1. Dasbor &amp; 11 Petugas
+          1. Dasbor &amp; Analitik Visual
         </button>
         <button id="btnTab2" onclick="switchTab(2)" class="px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
           2. Kertas Kerja &amp; Verifikasi Berkas
@@ -136,7 +148,7 @@
       <div class="hidden md:flex items-center gap-2 text-[11px] text-slate-400 dark:text-slate-500">
         <span>Pintasan: <kbd class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-600 dark:text-slate-300 font-mono">/</kbd> Cari</span>
         <span>•</span>
-        <span><kbd class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-600 dark:text-slate-300 font-mono">Esc</kbd> Tutup Modal</span>
+        <span><kbd class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-600 dark:text-slate-300 font-mono">Esc</kbd> Tutup Panel</span>
       </div>
     </div>
   </header>
@@ -150,37 +162,45 @@
   <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex-1">
 
     <!-- ===================================================================== -->
-    <!-- TAB 1: DASBOR & MONITORING 11 PETUGAS                                 -->
+    <!-- TAB 1: DASBOR & ANALITIK VISUAL                                       -->
     <!-- ===================================================================== -->
     <section id="tab1" class="space-y-6">
       <!-- KPI Bento Grid -->
       <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4">
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 relative overflow-hidden">
+          <div class="absolute right-3 top-3 w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
           <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Berkas Guru</p>
           <p id="kpiTotal" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">0</p>
           <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Urut Abjad A – Z</p>
         </div>
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 border-l-4 border-l-emerald-500">
+
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 border-l-4 border-l-emerald-500 relative overflow-hidden">
           <p class="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Selesai Lengkap</p>
           <p id="kpiSelesai" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">0</p>
           <p id="kpiSelesaiPct" class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">0%</p>
         </div>
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 border-l-4 border-l-amber-500">
+
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 border-l-4 border-l-amber-500">
           <p class="text-xs font-semibold text-amber-700 dark:text-amber-400">Dalam Proses</p>
           <p id="kpiProses" class="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">0</p>
           <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Parsial / sedang cek</p>
         </div>
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 border-l-4 border-l-rose-500 cursor-pointer hover:bg-rose-50/30 dark:hover:bg-rose-950/20 transition" onclick="jumpToKendala()">
+
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 border-l-4 border-l-rose-500 cursor-pointer hover:bg-rose-50/40 dark:hover:bg-rose-950/25 transition" onclick="jumpToKendala()">
           <p class="text-xs font-semibold text-rose-700 dark:text-rose-400">Ada Kendala</p>
           <p id="kpiKendala" class="text-2xl sm:text-3xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">0</p>
           <p class="text-[11px] text-rose-500 dark:text-rose-400 font-semibold mt-1">Klik lihat daftar &rarr;</p>
         </div>
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 border-l-4 border-l-slate-400">
+
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 border-l-4 border-l-slate-400">
           <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">Belum Diproses</p>
           <p id="kpiBelum" class="text-2xl sm:text-3xl font-extrabold text-slate-700 dark:text-slate-200 mt-1">0</p>
           <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Menunggu giliran</p>
         </div>
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 border-l-4 border-l-indigo-500 cursor-pointer hover:bg-indigo-50/30 dark:hover:bg-indigo-950/20 transition" onclick="switchTab(3)">
+
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 border-l-4 border-l-indigo-500 cursor-pointer hover:bg-indigo-50/40 dark:hover:bg-indigo-950/25 transition" onclick="switchTab(3)">
           <p class="text-xs font-semibold text-indigo-700 dark:text-indigo-400">Box Arsip Terisi</p>
           <p id="kpiBoxCount" class="text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-1">0</p>
           <p id="kpiBoxSub" class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">0 berkas ber-box</p>
@@ -189,28 +209,89 @@
 
       <!-- Progress Bar Terpisah BA vs PK -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
-          <div class="flex justify-between items-center mb-2">
-            <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Progres Berita Acara (BA)</span>
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5">
+          <div class="flex justify-between items-center mb-2.5">
+            <span class="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+              Progres Berita Acara (BA)
+            </span>
             <span id="baSummaryText" class="text-xs font-extrabold text-indigo-600 dark:text-indigo-400">0 / 0 (0%)</span>
           </div>
-          <div class="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-            <div id="baProgressBar" class="h-full bg-indigo-600 dark:bg-indigo-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
+          <div class="w-full h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5">
+            <div id="baProgressBar" class="h-full bg-gradient-to-r from-indigo-600 to-violet-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
           </div>
         </div>
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
-          <div class="flex justify-between items-center mb-2">
-            <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Progres Perjanjian Kerja (PK)</span>
+        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5">
+          <div class="flex justify-between items-center mb-2.5">
+            <span class="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+              Progres Perjanjian Kerja (PK)
+            </span>
             <span id="pkSummaryText" class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">0 / 0 (0%)</span>
           </div>
-          <div class="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-            <div id="pkProgressBar" class="h-full bg-emerald-600 dark:bg-emerald-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
+          <div class="w-full h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5">
+            <div id="pkProgressBar" class="h-full bg-gradient-to-r from-emerald-600 to-teal-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
           </div>
         </div>
       </div>
 
-      <!-- Point 3: Audit Checker / Deteksi Anomali Data Otomatis -->
-      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
+      <!-- NEW: Grafik Visual (Chart.js) — Horizontal Stacked Bar Chart & Doughnut Status Chart -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Horizontal Stacked Bar Chart: BA vs PK per Petugas -->
+        <div class="lg:col-span-8 bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 flex flex-col justify-between">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div>
+              <h2 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">Grafik Kinerja</span>
+                <span>Perbandingan Capaian BA vs PK per Petugas</span>
+              </h2>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Visualisasi jumlah dokumen BA Selesai, PK Selesai, dan sisa yang belum diproses oleh tiap PIC.</p>
+            </div>
+          </div>
+          <div class="relative w-full h-80">
+            <canvas id="officerChartCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Doughnut Chart: Komposisi Status Keseluruhan -->
+        <div class="lg:col-span-4 bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 flex flex-col justify-between">
+          <div class="mb-2">
+            <h2 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">Komposisi</span>
+              <span>Proporsi Status Berkas</span>
+            </h2>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Sebaran status Selesai, Proses, Kendala, dan Belum.</p>
+          </div>
+          <div class="relative w-full h-60 flex items-center justify-center">
+            <canvas id="statusDoughnutCanvas"></canvas>
+            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span id="doughnutCenterPct" class="text-2xl font-extrabold text-slate-900 dark:text-white">0%</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tuntas</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px]">
+            <div class="flex items-center justify-between px-2 py-1 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/40">
+              <span class="font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Selesai</span>
+              <span id="legSelesai" class="font-extrabold text-emerald-700 dark:text-emerald-300">0</span>
+            </div>
+            <div class="flex items-center justify-between px-2 py-1 rounded-lg bg-amber-50/70 dark:bg-amber-950/40">
+              <span class="font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Proses</span>
+              <span id="legProses" class="font-extrabold text-amber-700 dark:text-amber-300">0</span>
+            </div>
+            <div class="flex items-center justify-between px-2 py-1 rounded-lg bg-rose-50/70 dark:bg-rose-950/40">
+              <span class="font-semibold text-rose-800 dark:text-rose-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-500"></span>Kendala</span>
+              <span id="legKendala" class="font-extrabold text-rose-700 dark:text-rose-300">0</span>
+            </div>
+            <div class="flex items-center justify-between px-2 py-1 rounded-lg bg-slate-100/80 dark:bg-slate-800">
+              <span class="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-400"></span>Belum</span>
+              <span id="legBelum" class="font-extrabold text-slate-700 dark:text-slate-300">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit Checker / Deteksi Anomali Data Otomatis -->
+      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div>
             <h2 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
@@ -221,7 +302,7 @@
           </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div onclick="jumpToAnomaly('DONE_NO_BOX')" class="p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/70 bg-amber-50/60 dark:bg-amber-950/30 hover:border-amber-500 cursor-pointer transition">
+          <div onclick="jumpToAnomaly('DONE_NO_BOX')" class="p-3.5 rounded-xl border border-amber-200/80 dark:border-amber-900/70 bg-amber-50/60 dark:bg-amber-950/30 hover:border-amber-500 cursor-pointer transition">
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-bold text-amber-800 dark:text-amber-300">Selesai Tanpa Nomor Box</span>
               <span id="anomDoneNoBox" class="text-lg font-extrabold text-amber-700 dark:text-amber-400">0</span>
@@ -229,7 +310,7 @@
             <p class="text-[11px] text-amber-700/80 dark:text-amber-400/70 mt-1">BA &amp; PK Selesai tapi Lokasi Box kosong</p>
           </div>
 
-          <div onclick="jumpToAnomaly('BOX_NOT_DONE')" class="p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-900/70 bg-indigo-50/60 dark:bg-indigo-950/30 hover:border-indigo-500 cursor-pointer transition">
+          <div onclick="jumpToAnomaly('BOX_NOT_DONE')" class="p-3.5 rounded-xl border border-indigo-200/80 dark:border-indigo-900/70 bg-indigo-50/60 dark:bg-indigo-950/30 hover:border-indigo-500 cursor-pointer transition">
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-bold text-indigo-800 dark:text-indigo-300">Sudah Ber-Box Belum Selesai</span>
               <span id="anomBoxNotDone" class="text-lg font-extrabold text-indigo-700 dark:text-indigo-400">0</span>
@@ -237,7 +318,7 @@
             <p class="text-[11px] text-indigo-700/80 dark:text-indigo-400/70 mt-1">Sudah masuk Box tapi BA/PK belum Selesai</p>
           </div>
 
-          <div onclick="jumpToAnomaly('KENDALA_NO_NOTE')" class="p-3.5 rounded-xl border border-rose-200 dark:border-rose-900/70 bg-rose-50/60 dark:bg-rose-950/30 hover:border-rose-500 cursor-pointer transition">
+          <div onclick="jumpToAnomaly('KENDALA_NO_NOTE')" class="p-3.5 rounded-xl border border-rose-200/80 dark:border-rose-900/70 bg-rose-50/60 dark:bg-rose-950/30 hover:border-rose-500 cursor-pointer transition">
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-bold text-rose-800 dark:text-rose-300">Kendala Tanpa Keterangan</span>
               <span id="anomKendalaNoNote" class="text-lg font-extrabold text-rose-700 dark:text-rose-400">0</span>
@@ -268,7 +349,7 @@
 
       <!-- Pantauan Kendala Terpusat & Aktivitas Terbaru -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div class="lg:col-span-7 bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
+        <div class="lg:col-span-7 bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5">
           <div class="flex items-center justify-between mb-3">
             <div>
               <h3 class="text-sm font-extrabold text-rose-700 dark:text-rose-400 flex items-center gap-1.5">
@@ -286,7 +367,7 @@
           </div>
         </div>
 
-        <div class="lg:col-span-5 bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
+        <div class="lg:col-span-5 bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5">
           <div class="mb-3">
             <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Aktivitas Verifikasi Terakhir</h3>
             <p class="text-[11px] text-slate-500 dark:text-slate-400">10 pembaruan data terbaru berdasarkan waktu simpan</p>
@@ -302,8 +383,37 @@
     <!-- TAB 2: KERTAS KERJA & VERIFIKASI BERKAS                               -->
     <!-- ===================================================================== -->
     <section id="tab2" class="hidden space-y-4">
+
+      <!-- NEW: Personal PIC Banner ("Berkas Saya Saja" & "Belum Selesai Saja") -->
+      <div id="personalPicBanner" class="hidden bento-card bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 dark:from-indigo-900 dark:via-indigo-950 dark:to-violet-950 text-white p-4 sm:p-5 border border-indigo-500/40 shadow-md">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-md bg-white/15 text-white backdrop-blur-xs">Mode Fokus PIC</span>
+              <span id="personalPicPctBadge" class="text-xs font-extrabold text-emerald-300">0% Tuntas</span>
+            </div>
+            <h3 id="personalPicGreeting" class="text-base sm:text-lg font-extrabold tracking-tight">Halo Petugas, sisa 0 berkas lagi untuk tuntas 100%!</h3>
+            <p id="personalPicSubtext" class="text-xs text-indigo-100/90">Total tanggung jawab: 0 berkas • Selesai lengkap: 0 • Belum/Proses/Kendala: 0</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <button id="btnMyRemaining" onclick="toggleMyRemainingFilter()"
+              class="px-3.5 py-2 rounded-xl text-xs font-extrabold bg-white text-indigo-900 hover:bg-indigo-50 shadow-sm transition flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              <span id="btnMyRemainingText">Tampilkan Sisa Tugas Saya</span>
+            </button>
+            <button onclick="showAllMyFiles()"
+              class="px-3.5 py-2 rounded-xl text-xs font-bold bg-white/15 hover:bg-white/25 text-white border border-white/20 transition">
+              Semua Berkas Saya
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Filter & Search Bar -->
-      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 space-y-3">
+      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 space-y-3">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
           <div class="lg:col-span-3">
             <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Cari Nama / NIP / Ket.</label>
@@ -312,7 +422,7 @@
           </div>
           <div class="lg:col-span-2">
             <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Petugas (11 Orang)</label>
-            <select id="filterOfficer" onchange="applyFilters()"
+            <select id="filterOfficer" onchange="onFilterOfficerChange()"
               class="w-full px-2.5 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <option value="ALL">Semua Petugas</option>
             </select>
@@ -322,6 +432,7 @@
             <select id="filterStatus" onchange="applyFilters()"
               class="w-full px-2.5 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <option value="ALL">Semua Status</option>
+              <option value="NOT_SELESAI">Belum Selesai (Sisa Tugas)</option>
               <option value="SELESAI">Selesai (BA &amp; PK)</option>
               <option value="PROSES">Dalam Proses</option>
               <option value="KENDALA">Ada Kendala</option>
@@ -354,6 +465,18 @@
               Reset
             </button>
           </div>
+        </div>
+
+        <!-- Legend Pembeda Warna Baris -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-slate-500 dark:text-slate-400">
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="font-semibold">Penanda Warna Baris:</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-700"></span>BA &amp; PK Selesai</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700"></span>Dalam Proses</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-rose-100/80 dark:bg-rose-950/70 border border-rose-300 dark:border-rose-700"></span>Ada Kendala</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700"></span>Belum Diproses</span>
+          </div>
+          <span class="text-indigo-600 dark:text-indigo-400 font-semibold">Tip: Klik Nama Guru atau NIP untuk melihat Kartu Profil &amp; Salin NIP</span>
         </div>
 
         <!-- Bulk Action Toolbar -->
@@ -401,7 +524,7 @@
       </div>
 
       <!-- Data Table -->
-      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
@@ -419,7 +542,7 @@
                 <th class="p-3 text-center w-28">Aksi</th>
               </tr>
             </thead>
-            <tbody id="tableBody" class="divide-y divide-slate-200 dark:divide-slate-800 text-xs"></tbody>
+            <tbody id="tableBody" class="divide-y divide-slate-200/80 dark:divide-slate-800 text-xs"></tbody>
           </table>
         </div>
 
@@ -447,7 +570,7 @@
     <!-- TAB 3: REKAP & DAFTAR ISI BOX ARSIP (SIAP CETAK LABEL)                -->
     <!-- ===================================================================== -->
     <section id="tab3" class="hidden space-y-5">
-      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 flex flex-wrap items-center justify-between gap-4 no-print">
+      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 flex flex-wrap items-center justify-between gap-4 no-print">
         <div>
           <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Rekapitulasi &amp; Daftar Isi Box Arsip</h2>
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pilih nomor boks arsip untuk melihat rincian daftar nama guru di dalamnya atau mencetak label boks.</p>
@@ -469,7 +592,7 @@
       <div id="boxSummaryGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 no-print"></div>
 
       <!-- Area Cetak Daftar Isi Box -->
-      <div id="printArea" class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6">
+      <div id="printArea" class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6">
         <div id="boxDetailContent" class="text-xs text-slate-500 dark:text-slate-400 text-center py-8">
           Silakan pilih salah satu boks arsip di atas untuk menampilkan daftar isi berkas di dalamnya.
         </div>
@@ -477,6 +600,112 @@
     </section>
 
   </main>
+
+  <!-- ===================================================================== -->
+  <!-- NEW: SLIDE-OVER DRAWER (KARTU PROFIL DETAIL GURU)                     -->
+  <!-- ===================================================================== -->
+  <div id="profileDrawer" class="hidden fixed inset-0 z-50 overflow-hidden no-print">
+    <!-- Backdrop -->
+    <div id="profileDrawerBackdrop" onclick="closeProfileDrawer()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs opacity-0"></div>
+
+    <!-- Drawer Panel -->
+    <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div id="profileDrawerPanel" class="w-screen max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between translate-x-full">
+        <!-- Drawer Header -->
+        <div>
+          <div class="p-6 bg-gradient-to-br from-slate-900 via-indigo-950 to-indigo-800 text-white relative">
+            <button onclick="closeProfileDrawer()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-lg font-bold transition">
+              &times;
+            </button>
+            <div class="flex items-center gap-2 mb-2">
+              <span id="drawerNoBadge" class="px-2.5 py-0.5 rounded-md bg-white/15 text-[11px] font-bold">Urut #0</span>
+              <span id="drawerOverallStatus" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">Status</span>
+            </div>
+            <h3 id="drawerNama" class="text-lg font-extrabold leading-snug pr-8">-</h3>
+
+            <!-- NIP + Tombol Salin NIP 1-Klik -->
+            <div class="mt-3 flex items-center justify-between gap-2 bg-white/10 border border-white/15 rounded-xl px-3 py-2">
+              <div>
+                <p class="text-[10px] uppercase tracking-wider text-indigo-200 font-semibold">Nomor Induk PPPK / NIP</p>
+                <p id="drawerNip" class="text-sm font-mono font-bold tracking-wide text-white">-</p>
+              </div>
+              <button id="btnCopyNip" onclick="copyDrawerNip()"
+                class="px-3 py-1.5 rounded-lg bg-white text-slate-900 hover:bg-indigo-50 text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition shrink-0">
+                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <span id="btnCopyNipText">Salin NIP</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Drawer Body -->
+          <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(100vh-230px)] text-xs">
+            <div class="grid grid-cols-1 gap-3">
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80">
+                <p class="text-[11px] font-bold text-slate-400 uppercase">Jabatan Fungsional</p>
+                <p id="drawerJabatan" class="text-sm font-bold text-slate-900 dark:text-white mt-0.5">-</p>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80">
+                <p class="text-[11px] font-bold text-slate-400 uppercase">Unit Kerja / Sekolah Rakyat</p>
+                <p id="drawerUnitKerja" class="text-sm font-bold text-slate-900 dark:text-white mt-0.5">-</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80">
+                <p class="text-[11px] font-bold text-slate-400 uppercase">Petugas Verifikator</p>
+                <p id="drawerPetugas" class="text-xs font-extrabold text-indigo-600 dark:text-indigo-400 mt-1">-</p>
+              </div>
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80">
+                <p class="text-[11px] font-bold text-slate-400 uppercase">Lokasi Box Arsip</p>
+                <p id="drawerLokasiBox" class="text-xs font-extrabold text-slate-900 dark:text-white mt-1">-</p>
+              </div>
+            </div>
+
+            <!-- Status BA & PK Cards -->
+            <div class="grid grid-cols-2 gap-3">
+              <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5">Berita Acara (BA)</p>
+                <div id="drawerStatusBA">-</div>
+              </div>
+              <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5">Perjanjian Kerja (PK)</p>
+                <div id="drawerStatusPK">-</div>
+              </div>
+            </div>
+
+            <!-- Catatan / Keterangan -->
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80">
+              <p class="text-[11px] font-bold text-slate-400 uppercase">Keterangan / Catatan Verifikasi</p>
+              <p id="drawerKeterangan" class="text-xs text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">-</p>
+            </div>
+
+            <!-- Riwayat Perubahan Status -->
+            <div class="p-3.5 rounded-xl border border-indigo-100 dark:border-indigo-900/60 bg-indigo-50/40 dark:bg-indigo-950/20">
+              <p class="text-[11px] font-bold text-indigo-800 dark:text-indigo-300 uppercase flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Riwayat Sinkronisasi Terakhir</span>
+              </p>
+              <p id="drawerUpdatedAt" class="text-xs font-mono text-slate-600 dark:text-slate-400 mt-1">Belum pernah diperbarui</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Drawer Footer -->
+        <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between gap-2">
+          <button onclick="closeProfileDrawer()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">
+            Tutup
+          </button>
+          <button id="drawerEditBtn" onclick="" class="flex-1 px-4 py-2.5 rounded-xl text-xs font-extrabold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition flex items-center justify-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            <span>Ubah Status &amp; Box Arsip</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Edit Modal -->
   <div id="editModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 no-print">
@@ -595,7 +824,12 @@
     const ADMIN_UNLOCK_PIN = "2025";
     let IS_ADMIN_PETUGAS_UNLOCKED = false;
 
-    // Point 5: Dark Mode Initialization
+    // Chart.js Instances
+    let OFFICER_CHART = null;
+    let STATUS_DOUGHNUT_CHART = null;
+    let DRAWER_CURRENT_NIP = "";
+
+    // Dark Mode Initialization
     function initDarkMode() {
       const savedTheme = localStorage.getItem("SIMON_BAPK_THEME");
       const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -607,6 +841,9 @@
       document.documentElement.classList.toggle("dark", isDark);
       document.getElementById("iconSun").classList.toggle("hidden", !isDark);
       document.getElementById("iconMoon").classList.toggle("hidden", isDark);
+      if (ALL_RECORDS.length > 0) {
+        renderDashboard();
+      }
     }
 
     function toggleDarkMode() {
@@ -624,14 +861,16 @@
         document.getElementById("activePicSelect").value = savedPic;
         document.getElementById("filterOfficer").value = savedPic;
       }
+      updatePersonalPicBanner();
       fetchDataFromSheet(false);
       toggleAutoSync();
     });
 
-    // Keyboard shortcuts: '/' to focus search, 'Esc' to close modal
+    // Keyboard shortcuts: '/' to focus search, 'Esc' to close modal/drawer
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         closeEditModal();
+        closeProfileDrawer();
       } else if (e.key === "/" && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) {
         e.preventDefault();
         switchTab(2);
@@ -643,10 +882,77 @@
       const pic = document.getElementById("activePicSelect").value;
       localStorage.setItem("SIMON_BAPK_ACTIVE_PIC", pic);
       document.getElementById("filterOfficer").value = pic;
+      updatePersonalPicBanner();
       applyFilters();
       if (pic !== "ALL") {
         showToast(`Mode PIC Aktif: ${pic}`);
       }
+    }
+
+    function onFilterOfficerChange() {
+      const off = document.getElementById("filterOfficer").value;
+      // Sinkronkan PIC Aktif jika user memilih petugas spesifik di filter
+      if (off !== "ALL" && OFFICERS.includes(off)) {
+        document.getElementById("activePicSelect").value = off;
+        localStorage.setItem("SIMON_BAPK_ACTIVE_PIC", off);
+      }
+      updatePersonalPicBanner();
+      applyFilters();
+    }
+
+    function updatePersonalPicBanner() {
+      const activePic = document.getElementById("activePicSelect").value;
+      const banner = document.getElementById("personalPicBanner");
+
+      if (!activePic || activePic === "ALL" || !OFFICERS.includes(activePic)) {
+        banner.classList.add("hidden");
+        return;
+      }
+
+      const myRecords = ALL_RECORDS.filter(r => r.petugas === activePic);
+      const totalMine = myRecords.length;
+      const doneMine = myRecords.filter(r => r.statusBA === "Selesai" && r.statusPK === "Selesai").length;
+      const remainingMine = totalMine - doneMine;
+      const pctMine = totalMine > 0 ? ((doneMine / totalMine) * 100).toFixed(1) : "0.0";
+
+      const firstName = activePic.split(" ")[0];
+      document.getElementById("personalPicPctBadge").textContent = `${pctMine}% Tuntas`;
+      document.getElementById("personalPicGreeting").textContent = remainingMine === 0 && totalMine > 0
+        ? `Luar biasa ${firstName}! Seluruh ${totalMine} berkas Anda sudah 100% tuntas.`
+        : `Halo ${firstName}, sisa ${remainingMine} berkas lagi untuk tuntas 100%!`;
+      document.getElementById("personalPicSubtext").textContent =
+        `PIC: ${activePic} • Total tanggung jawab: ${totalMine} berkas • Selesai lengkap: ${doneMine} • Belum/Proses/Kendala: ${remainingMine}`;
+
+      const curStatus = document.getElementById("filterStatus").value;
+      const btnText = document.getElementById("btnMyRemainingText");
+      if (curStatus === "NOT_SELESAI") {
+        btnText.textContent = `Menampilkan Sisa Tugas (${remainingMine})`;
+      } else {
+        btnText.textContent = `Tampilkan Sisa Tugas Saya (${remainingMine})`;
+      }
+
+      banner.classList.remove("hidden");
+    }
+
+    function toggleMyRemainingFilter() {
+      const activePic = document.getElementById("activePicSelect").value;
+      if (activePic && activePic !== "ALL") {
+        document.getElementById("filterOfficer").value = activePic;
+      }
+      const stEl = document.getElementById("filterStatus");
+      stEl.value = (stEl.value === "NOT_SELESAI") ? "ALL" : "NOT_SELESAI";
+      updatePersonalPicBanner();
+      applyFilters();
+    }
+
+    function showAllMyFiles() {
+      const activePic = document.getElementById("activePicSelect").value;
+      if (activePic && activePic !== "ALL") {
+        document.getElementById("filterOfficer").value = activePic;
+      }
+      document.getElementById("filterStatus").value = "ALL";
+      updatePersonalPicBanner();
+      applyFilters();
     }
 
     function setConnectionStatus(state, text) {
@@ -793,6 +1099,12 @@
           ? "px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap bg-slate-900 text-white dark:bg-indigo-600 shadow-xs"
           : "px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700";
       }
+      if (tabNum === 1 && ALL_RECORDS.length > 0) {
+        renderDashboard();
+      }
+      if (tabNum === 2) {
+        updatePersonalPicBanner();
+      }
       if (tabNum === 3) {
         renderBoxOverview();
       }
@@ -845,6 +1157,7 @@
           document.getElementById("syncStatusText").textContent = `Sinkron: ${res.serverTime || "Baru saja"}`;
           bar.classList.add("hidden");
 
+          updatePersonalPicBanner();
           renderDashboard();
           applyFilters(true);
           if (!document.getElementById("tab3").classList.contains("hidden")) {
@@ -888,7 +1201,7 @@
       return "BELUM";
     }
 
-    // Point 3: Anomaly Check Helpers
+    // Anomaly Check Helpers
     function isDoneNoBox(r) {
       return (r.statusBA === "Selesai" && r.statusPK === "Selesai" && !r.lokasiBox);
     }
@@ -900,6 +1213,169 @@
     }
     function isPartialStatus(r) {
       return ((r.statusBA === "Selesai" && r.statusPK === "Belum") || (r.statusPK === "Selesai" && r.statusBA === "Belum"));
+    }
+
+    // Render Chart.js Visual Analytics
+    function renderCharts(officerStats, selesai, proses, kendala, belum, total) {
+      const isDark = document.documentElement.classList.contains("dark");
+      const textColor = isDark ? "#cbd5e1" : "#334155";
+      const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(15, 23, 42, 0.06)";
+
+      // 1. Horizontal Stacked Bar Chart: BA Selesai vs PK Selesai vs Sisa Dokumen
+      const barCtx = document.getElementById("officerChartCanvas");
+      if (barCtx) {
+        const labels = OFFICERS.map(n => n.split(" ")[0]); // Nama depan agar ringkas
+        const fullNames = OFFICERS;
+        const baData = OFFICERS.map(n => officerStats[n]?.baDone || 0);
+        const pkData = OFFICERS.map(n => officerStats[n]?.pkDone || 0);
+        // Sisa dokumen (dari total 2x dokumen per berkas)
+        const remData = OFFICERS.map(n => {
+          const st = officerStats[n];
+          if (!st) return 0;
+          return Math.max(0, (st.total * 2) - (st.baDone + st.pkDone));
+        });
+
+        if (OFFICER_CHART) {
+          OFFICER_CHART.destroy();
+        }
+
+        OFFICER_CHART = new Chart(barCtx, {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "BA Selesai",
+                data: baData,
+                backgroundColor: "#4f46e5",
+                borderRadius: 4,
+                barPercentage: 0.72
+              },
+              {
+                label: "PK Selesai",
+                data: pkData,
+                backgroundColor: "#10b981",
+                borderRadius: 4,
+                barPercentage: 0.72
+              },
+              {
+                label: "Sisa Belum Selesai (BA+PK)",
+                data: remData,
+                backgroundColor: isDark ? "#334155" : "#e2e8f0",
+                borderRadius: 4,
+                barPercentage: 0.72
+              }
+            ]
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: "index",
+              intersect: false
+            },
+            plugins: {
+              legend: {
+                position: "top",
+                align: "end",
+                labels: {
+                  color: textColor,
+                  boxWidth: 12,
+                  boxHeight: 12,
+                  usePointStyle: true,
+                  pointStyle: "circle",
+                  font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: "600" }
+                }
+              },
+              tooltip: {
+                backgroundColor: isDark ? "#0f172a" : "#1e293b",
+                titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: "700" },
+                bodyFont: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
+                callbacks: {
+                  title: (items) => {
+                    const idx = items[0].dataIndex;
+                    const st = officerStats[fullNames[idx]];
+                    return `${fullNames[idx]} (${st ? st.total : 0} Berkas)`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                stacked: true,
+                grid: { color: gridColor },
+                ticks: {
+                  color: textColor,
+                  font: { family: "'Plus Jakarta Sans', sans-serif", size: 10 }
+                }
+              },
+              y: {
+                stacked: true,
+                grid: { display: false },
+                ticks: {
+                  color: textColor,
+                  font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: "700" }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // 2. Doughnut Chart: Komposisi Status Keseluruhan
+      const doughnutCtx = document.getElementById("statusDoughnutCanvas");
+      if (doughnutCtx) {
+        const selesaiPct = total > 0 ? Math.round((selesai / total) * 100) : 0;
+        document.getElementById("doughnutCenterPct").textContent = `${selesaiPct}%`;
+        document.getElementById("legSelesai").textContent = selesai.toLocaleString("id-ID");
+        document.getElementById("legProses").textContent = proses.toLocaleString("id-ID");
+        document.getElementById("legKendala").textContent = kendala.toLocaleString("id-ID");
+        document.getElementById("legBelum").textContent = belum.toLocaleString("id-ID");
+
+        if (STATUS_DOUGHNUT_CHART) {
+          STATUS_DOUGHNUT_CHART.destroy();
+        }
+
+        STATUS_DOUGHNUT_CHART = new Chart(doughnutCtx, {
+          type: "doughnut",
+          data: {
+            labels: ["Selesai Lengkap", "Dalam Proses", "Ada Kendala", "Belum Diproses"],
+            datasets: [{
+              data: [selesai, proses, kendala, belum],
+              backgroundColor: [
+                "#10b981", // Emerald
+                "#f59e0b", // Amber
+                "#f43f5e", // Rose
+                isDark ? "#475569" : "#cbd5e1" // Slate
+              ],
+              borderColor: isDark ? "#0f172a" : "#ffffff",
+              borderWidth: 3,
+              hoverOffset: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "72%",
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: isDark ? "#0f172a" : "#1e293b",
+                titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: "700" },
+                bodyFont: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
+                callbacks: {
+                  label: (ctx) => {
+                    const val = ctx.parsed || 0;
+                    const pct = total > 0 ? ((val / total) * 100).toFixed(1) : "0.0";
+                    return ` ${ctx.label}: ${val.toLocaleString("id-ID")} berkas (${pct}%)`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
     }
 
     function renderDashboard() {
@@ -978,6 +1454,9 @@
       document.getElementById("pkSummaryText").textContent = `${pkDone.toLocaleString("id-ID")} / ${total.toLocaleString("id-ID")} (${pkPct}%)`;
       document.getElementById("pkProgressBar").style.width = `${pkPct}%`;
 
+      // Render Charts
+      renderCharts(officerStats, selesai, proses, kendala, belum, total);
+
       // Render Officer Cards
       const grid = document.getElementById("officersGrid");
       grid.innerHTML = "";
@@ -990,9 +1469,12 @@
         const rangeNo = o.total ? `No. ${o.minNo}–${o.maxNo}` : "-";
 
         const card = document.createElement("div");
-        card.className = "bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 hover:border-slate-900 dark:hover:border-indigo-500 hover:shadow-md cursor-pointer transition flex flex-col justify-between";
+        card.className = "bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-md cursor-pointer transition flex flex-col justify-between group";
         card.onclick = () => {
           document.getElementById("filterOfficer").value = o.name;
+          document.getElementById("activePicSelect").value = o.name;
+          localStorage.setItem("SIMON_BAPK_ACTIVE_PIC", o.name);
+          updatePersonalPicBanner();
           switchTab(2);
           applyFilters();
         };
@@ -1000,7 +1482,7 @@
         card.innerHTML = `
           <div>
             <div class="flex items-center justify-between gap-2">
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Petugas #${idx + 1}</span>
+              <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-950 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition">Petugas #${idx + 1}</span>
               <span class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">${abjad}</span>
             </div>
             <h3 class="font-extrabold text-slate-900 dark:text-white text-sm mt-2">${escapeHtml(o.name)}</h3>
@@ -1012,7 +1494,7 @@
               <span class="text-emerald-600 dark:text-emerald-400">${pct}%</span>
             </div>
             <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-              <div class="h-full bg-emerald-500 transition-all duration-300" style="width:${pct}%"></div>
+              <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300" style="width:${pct}%"></div>
             </div>
           </div>
         `;
@@ -1026,8 +1508,8 @@
       } else {
         kendalaContainer.innerHTML = kendalaList.slice(0, 15).map(r => `
           <div class="py-2.5 flex items-center justify-between gap-2 hover:bg-slate-50 dark:hover:bg-slate-800/60 px-2 rounded-lg">
-            <div class="min-w-0">
-              <p class="font-bold text-slate-900 dark:text-slate-100 truncate">${escapeHtml(r.nama)} <span class="font-normal text-slate-400">(${escapeHtml(r.petugas)})</span></p>
+            <div class="min-w-0 cursor-pointer" onclick="openProfileDrawer('${escapeAttr(r.nip)}')">
+              <p class="font-bold text-slate-900 dark:text-slate-100 truncate hover:text-indigo-600 dark:hover:text-indigo-400">${escapeHtml(r.nama)} <span class="font-normal text-slate-400">(${escapeHtml(r.petugas)})</span></p>
               <p class="text-[11px] text-rose-600 dark:text-rose-400 truncate">${escapeHtml(r.keterangan || "Status kendala tanpa catatan")}</p>
             </div>
             <button onclick="openEditModal('${escapeAttr(r.nip)}')" class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-900 dark:bg-indigo-600 text-white text-[11px] font-bold hover:bg-slate-700 dark:hover:bg-indigo-500">
@@ -1048,9 +1530,9 @@
         recentContainer.innerHTML = '<p class="py-6 text-center text-slate-400">Belum ada riwayat pembaruan.</p>';
       } else {
         recentContainer.innerHTML = recentList.map(r => `
-          <div class="py-2.5 flex items-center justify-between gap-2 px-1">
+          <div class="py-2.5 flex items-center justify-between gap-2 px-1 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg" onclick="openProfileDrawer('${escapeAttr(r.nip)}')">
             <div class="min-w-0">
-              <p class="font-bold text-slate-800 dark:text-slate-200 truncate">${escapeHtml(r.nama)}</p>
+              <p class="font-bold text-slate-800 dark:text-slate-200 truncate hover:text-indigo-600 dark:hover:text-indigo-400">${escapeHtml(r.nama)}</p>
               <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">PIC: ${escapeHtml(r.petugas)} • BA: ${r.statusBA} | PK: ${r.statusPK}</p>
             </div>
             <span class="shrink-0 text-[10px] font-mono text-slate-400">${escapeHtml(r.updatedAt.slice(5, 16))}</span>
@@ -1079,7 +1561,8 @@
       FILTERED_RECORDS = ALL_RECORDS.filter(r => {
         if (off !== "ALL" && r.petugas !== off) return false;
         if (st !== "ALL") {
-          if (st === "DONE_NO_BOX" && !isDoneNoBox(r)) return false;
+          if (st === "NOT_SELESAI" && getCategory(r) === "SELESAI") return false;
+          else if (st === "DONE_NO_BOX" && !isDoneNoBox(r)) return false;
           else if (st === "BOX_NOT_DONE" && !isBoxNotDone(r)) return false;
           else if (st === "KENDALA_NO_NOTE" && !isKendalaNoNote(r)) return false;
           else if (st === "PARTIAL_STATUS" && !isPartialStatus(r)) return false;
@@ -1108,18 +1591,22 @@
       });
 
       if (!keepPage) CURRENT_PAGE = 1;
+      updatePersonalPicBanner();
       renderTable();
     }
 
     function resetFilters() {
       document.getElementById("searchInput").value = "";
       document.getElementById("filterOfficer").value = "ALL";
+      document.getElementById("activePicSelect").value = "ALL";
+      localStorage.setItem("SIMON_BAPK_ACTIVE_PIC", "ALL");
       document.getElementById("filterStatus").value = "ALL";
       document.getElementById("filterBox").value = "ALL";
       document.getElementById("filterUnit").value = "ALL";
       SORT_FIELD = "no";
       SORT_ASC = true;
       clearSelection();
+      updatePersonalPicBanner();
       applyFilters();
     }
 
@@ -1136,6 +1623,20 @@
       if (isKendalaNoNote(r)) return "Anomali: Status Kendala tanpa catatan keterangan";
       if (isPartialStatus(r)) return "Anomali: Salah satu BA/PK Selesai, pasangannya masih Belum";
       return "";
+    }
+
+    // Subtle Row Highlighting Classes
+    function getRowHighlightClass(cat) {
+      if (cat === "SELESAI") {
+        return "bg-emerald-50/45 hover:bg-emerald-100/50 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/35";
+      }
+      if (cat === "KENDALA") {
+        return "bg-rose-50/55 hover:bg-rose-100/55 dark:bg-rose-950/25 dark:hover:bg-rose-950/40";
+      }
+      if (cat === "PROSES") {
+        return "bg-amber-50/40 hover:bg-amber-100/45 dark:bg-amber-950/15 dark:hover:bg-amber-950/30";
+      }
+      return "hover:bg-slate-50 dark:hover:bg-slate-800/50";
     }
 
     function renderTable() {
@@ -1162,22 +1663,26 @@
       for (let i = start; i < end; i++) {
         const r = FILTERED_RECORDS[i];
         const checked = SELECTED_NIPS[r.nip] ? "checked" : "";
-        const isDone = (r.statusBA === "Selesai" && r.statusPK === "Selesai");
+        const cat = getCategory(r);
+        const isDone = (cat === "SELESAI");
+        const rowClass = getRowHighlightClass(cat);
         const anomMsg = getAnomalyWarning(r);
         const titleHover = r.updatedAt ? `Terakhir diubah: ${r.updatedAt}` : "Belum pernah diubah";
 
         html += `
-          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" title="${escapeAttr(titleHover)}">
+          <tr class="${rowClass} transition-colors" title="${escapeAttr(titleHover)}">
             <td class="p-3 text-center">
               <input type="checkbox" ${checked} onchange="toggleSelectOne('${escapeAttr(r.nip)}', this.checked)" class="rounded" />
             </td>
             <td class="p-3 text-center font-semibold text-slate-500 dark:text-slate-400">${r.no}</td>
             <td class="p-3">
-              <div class="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                <span>${escapeHtml(r.nama)}</span>
-                ${anomMsg ? `<span title="${escapeAttr(anomMsg)}" class="inline-flex items-center px-1.5 py-0.2 text-[10px] font-bold rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">!</span>` : ""}
+              <div onclick="openProfileDrawer('${escapeAttr(r.nip)}')" class="cursor-pointer group inline-block">
+                <div class="font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition flex items-center gap-1.5">
+                  <span class="underline decoration-dotted decoration-slate-300 dark:decoration-slate-600 underline-offset-2 group-hover:decoration-indigo-500">${escapeHtml(r.nama)}</span>
+                  ${anomMsg ? `<span title="${escapeAttr(anomMsg)}" class="inline-flex items-center px-1.5 py-0.2 text-[10px] font-bold rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">!</span>` : ""}
+                </div>
+                <div class="text-[11px] text-slate-500 dark:text-slate-400 font-mono group-hover:text-indigo-500 transition">NIP: ${escapeHtml(r.nip)}</div>
               </div>
-              <div class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">NIP: ${escapeHtml(r.nip)}</div>
             </td>
             <td class="p-3">
               <div class="text-slate-800 dark:text-slate-200 font-medium">${escapeHtml(r.unitKerja)}</div>
@@ -1212,6 +1717,103 @@
       tbody.innerHTML = html;
     }
 
+    // =========================================================================
+    // SLIDE-OVER DRAWER (KARTU PROFIL DETAIL GURU)
+    // =========================================================================
+    function openProfileDrawer(nip) {
+      const rec = ALL_RECORDS.find(r => r.nip === nip);
+      if (!rec) return;
+
+      DRAWER_CURRENT_NIP = rec.nip;
+      const cat = getCategory(rec);
+
+      document.getElementById("drawerNoBadge").textContent = `Urut #${rec.no}`;
+      const overallEl = document.getElementById("drawerOverallStatus");
+      if (cat === "SELESAI") {
+        overallEl.textContent = "Selesai Lengkap";
+        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/25 text-emerald-200 border border-emerald-400/40";
+      } else if (cat === "KENDALA") {
+        overallEl.textContent = "Ada Kendala";
+        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/25 text-rose-200 border border-rose-400/40";
+      } else if (cat === "PROSES") {
+        overallEl.textContent = "Dalam Proses";
+        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/25 text-amber-200 border border-amber-400/40";
+      } else {
+        overallEl.textContent = "Belum Diproses";
+        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/15 text-slate-200 border border-white/20";
+      }
+
+      document.getElementById("drawerNama").textContent = rec.nama || "-";
+      document.getElementById("drawerNip").textContent = rec.nip || "-";
+      document.getElementById("btnCopyNipText").textContent = "Salin NIP";
+      document.getElementById("drawerJabatan").textContent = rec.jabatan || "Guru Ahli Pertama";
+      document.getElementById("drawerUnitKerja").textContent = rec.unitKerja || "-";
+      document.getElementById("drawerPetugas").textContent = rec.petugas || "-";
+      document.getElementById("drawerLokasiBox").textContent = rec.lokasiBox || "Belum masuk Box";
+      document.getElementById("drawerStatusBA").innerHTML = statusBadge(rec.statusBA);
+      document.getElementById("drawerStatusPK").innerHTML = statusBadge(rec.statusPK);
+      document.getElementById("drawerKeterangan").textContent = rec.keterangan || "Tidak ada catatan tambahan.";
+      document.getElementById("drawerUpdatedAt").textContent = rec.updatedAt
+        ? `Diperbarui pada: ${rec.updatedAt}`
+        : "Belum ada riwayat perubahan status di sistem.";
+
+      document.getElementById("drawerEditBtn").onclick = () => {
+        closeProfileDrawer();
+        openEditModal(rec.nip);
+      };
+
+      const drawer = document.getElementById("profileDrawer");
+      const backdrop = document.getElementById("profileDrawerBackdrop");
+      const panel = document.getElementById("profileDrawerPanel");
+
+      drawer.classList.remove("hidden");
+      requestAnimationFrame(() => {
+        backdrop.classList.remove("opacity-0");
+        backdrop.classList.add("opacity-100");
+        panel.classList.remove("translate-x-full");
+        panel.classList.add("translate-x-0");
+      });
+    }
+
+    function closeProfileDrawer() {
+      const drawer = document.getElementById("profileDrawer");
+      if (drawer.classList.contains("hidden")) return;
+
+      const backdrop = document.getElementById("profileDrawerBackdrop");
+      const panel = document.getElementById("profileDrawerPanel");
+
+      backdrop.classList.remove("opacity-100");
+      backdrop.classList.add("opacity-0");
+      panel.classList.remove("translate-x-0");
+      panel.classList.add("translate-x-full");
+
+      setTimeout(() => {
+        drawer.classList.add("hidden");
+      }, 280);
+    }
+
+    async function copyDrawerNip() {
+      if (!DRAWER_CURRENT_NIP) return;
+      try {
+        await navigator.clipboard.writeText(DRAWER_CURRENT_NIP);
+        document.getElementById("btnCopyNipText").textContent = "Tersalin!";
+        showToast(`NIP ${DRAWER_CURRENT_NIP} berhasil disalin ke clipboard.`);
+        setTimeout(() => {
+          document.getElementById("btnCopyNipText").textContent = "Salin NIP";
+        }, 2000);
+      } catch (e) {
+        // Fallback jika clipboard API dibatasi
+        const temp = document.createElement("input");
+        temp.value = DRAWER_CURRENT_NIP;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+        document.getElementById("btnCopyNipText").textContent = "Tersalin!";
+        showToast(`NIP ${DRAWER_CURRENT_NIP} disalin.`);
+      }
+    }
+
     async function quickComplete(nip) {
       const rec = ALL_RECORDS.find(r => r.nip === nip);
       if (!rec) return;
@@ -1231,6 +1833,7 @@
           rec.statusBA = "Selesai";
           rec.statusPK = "Selesai";
           rec.updatedAt = res.updatedAt || "";
+          updatePersonalPicBanner();
           renderDashboard();
           applyFilters(true);
           showToast(`Selesai! ${rec.nama} tersimpan ke Sheets.`);
@@ -1323,7 +1926,6 @@
       const btn = document.getElementById("btnTogglePetugasLock");
       const hint = document.getElementById("petugasLockHint");
 
-      // Kunci otomatis jika berkas sudah punya Petugas Verifikator dan belum dibuka Admin
       const shouldLock = hasAssignedPetugas && !IS_ADMIN_PETUGAS_UNLOCKED;
       sel.disabled = shouldLock;
 
@@ -1425,6 +2027,7 @@
           }
           populateDynamicFilters();
           closeEditModal();
+          updatePersonalPicBanner();
           renderDashboard();
           applyFilters(true);
           showToast("Tersimpan real-time ke Google Sheets!");
@@ -1485,6 +2088,7 @@
           document.getElementById("bulkNoteInput").value = "";
           populateDynamicFilters();
           updateBulkBar();
+          updatePersonalPicBanner();
           renderDashboard();
           applyFilters(true);
           showToast(`${res.updatedCount || nips.length} berkas berhasil diperbarui di Google Sheets!`);
@@ -1522,7 +2126,7 @@
         const list = boxMap[b];
         const doneCount = list.filter(x => x.statusBA === "Selesai" && x.statusPK === "Selesai").length;
         return `
-          <div onclick="selectBoxForDetail('${escapeAttr(b)}')" class="bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3.5 hover:border-slate-900 dark:hover:border-indigo-500 cursor-pointer transition">
+          <div onclick="selectBoxForDetail('${escapeAttr(b)}')" class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-3.5 hover:border-indigo-500 dark:hover:border-indigo-500 cursor-pointer transition">
             <div class="flex items-center justify-between">
               <span class="text-xs font-extrabold text-indigo-700 dark:text-indigo-400">${escapeHtml(b)}</span>
               <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">${list.length} Berkas</span>
