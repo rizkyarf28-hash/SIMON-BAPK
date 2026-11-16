@@ -84,7 +84,7 @@
               <span id="connText">Sinkron...</span>
             </span>
           </div>
-          <p class="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:block">Monitoring BA &amp; PK Guru Sekolah Rakyat</p>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:block">Sistem Ambil Bebas &amp; Target Kuota • Guru Sekolah Rakyat</p>
         </div>
       </div>
 
@@ -152,17 +152,17 @@
   <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-7 flex-1">
 
     <!-- ===================================================================== -->
-    <!-- TAB 1: RINGKASAN & ANALITIK VISUAL (BERSIH & RINGKAS)                 -->
+    <!-- TAB 1: RINGKASAN & ANALITIK VISUAL                                    -->
     <!-- ===================================================================== -->
     <section id="tab1" class="space-y-6">
 
-      <!-- 4 Core KPI Cards (Clean & Spacious) -->
+      <!-- 4 Core KPI Cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5">
-          <p class="text-xs font-semibold text-slate-400 dark:text-slate-500">Total Berkas</p>
-          <div class="flex items-baseline justify-between mt-2">
+        <div onclick="jumpToUnclaimed()" class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-700 p-5 cursor-pointer transition">
+          <p class="text-xs font-semibold text-slate-400 dark:text-slate-500">Total Berkas (Pool)</p>
+          <div class="flex items-baseline justify-between mt-2 gap-1">
             <p id="kpiTotal" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</p>
-            <span id="kpiBoxSub" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 cursor-pointer hover:underline" onclick="switchTab(3)">0 Box &rarr;</span>
+            <span id="kpiPoolSub" class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">0 bebas &rarr;</span>
           </div>
         </div>
 
@@ -176,7 +176,7 @@
 
         <div class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5">
           <p class="text-xs font-semibold text-amber-600 dark:text-amber-400">Proses &amp; Belum</p>
-          <div class="flex items-baseline justify-between mt-2">
+          <div class="flex items-baseline justify-between mt-2 gap-1">
             <p id="kpiPending" class="text-3xl font-extrabold text-slate-800 dark:text-slate-200">0</p>
             <span id="kpiPendingDetail" class="text-[11px] text-slate-400">0 proses • 0 belum</span>
           </div>
@@ -191,14 +191,14 @@
         </div>
       </div>
 
-      <!-- Visual Charts Section (Clean 2-Column Layout) -->
+      <!-- Visual Charts Section -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <!-- Stacked Horizontal Bar Chart: BA vs PK per Petugas -->
+        <!-- Stacked Horizontal Bar Chart: Capaian vs Target Kuota -->
         <div class="lg:col-span-8 clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-6">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
             <div>
-              <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Capaian Verifikasi per Petugas (BA vs PK)</h2>
-              <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Perbandingan dokumen BA Selesai, PK Selesai, dan sisa berkas per PIC</p>
+              <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Capaian &amp; Target Kuota per Petugas (BA vs PK)</h2>
+              <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Target merata 121 berkas (3 petugas) &amp; 120 berkas (8 petugas) dari Pool Bebas</p>
             </div>
             <div class="flex items-center gap-3 text-xs font-bold">
               <span class="text-indigo-600 dark:text-indigo-400">BA: <span id="baPctInline">0%</span></span>
@@ -247,15 +247,21 @@
         </div>
       </div>
 
-      <!-- 11 Petugas Verifikator (Compact Clean Grid) -->
+      <!-- 11 Petugas Verifikator (Target Kuota & Realisasi) -->
       <div>
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Daftar 11 Petugas Verifikator <span class="font-normal text-slate-400 text-xs ml-1">(Klik untuk buka tugas)</span></h2>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">
+            Target Kuota &amp; Capaian 11 Verifikator
+            <span class="font-normal text-slate-400 text-xs ml-1">(Klik kartu untuk mulai ambil &amp; verifikasi berkas)</span>
+          </h2>
+          <button onclick="jumpToUnclaimed()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/70 dark:hover:bg-indigo-900/70 text-indigo-700 dark:text-indigo-300 transition">
+            Lihat Berkas Bebas (<span id="unclaimedQuickCount">0</span>) &rarr;
+          </button>
         </div>
         <div id="officersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5"></div>
       </div>
 
-      <!-- Collapsible / Minimalist Audit & Kendala Footer Strip -->
+      <!-- Collapsible Audit & Kendala Footer Strip -->
       <details class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-4 group">
         <summary class="flex items-center justify-between cursor-pointer list-none text-xs font-bold text-slate-700 dark:text-slate-300">
           <div class="flex items-center gap-2">
@@ -286,29 +292,33 @@
     </section>
 
     <!-- ===================================================================== -->
-    <!-- TAB 2: VERIFIKASI BERKAS (FOKUS KERJA CEPAT & BERSIH)                 -->
+    <!-- TAB 2: VERIFIKASI BERKAS (SISTEM AMBIL BEBAS + KERJA CEPAT)           -->
     <!-- ===================================================================== -->
     <section id="tab2" class="hidden space-y-4">
 
       <!-- Personal PIC Focus Banner -->
       <div id="personalPicBanner" class="hidden clean-card bg-indigo-600 dark:bg-indigo-900/90 text-white p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h3 id="personalPicGreeting" class="text-sm sm:text-base font-extrabold">Halo Petugas, sisa 0 berkas lagi untuk tuntas 100%!</h3>
-          <p id="personalPicSubtext" class="text-xs text-indigo-100 mt-0.5">Progres Anda: 0% (0 dari 0 berkas selesai)</p>
+          <h3 id="personalPicGreeting" class="text-sm sm:text-base font-extrabold">Halo Petugas, kuota terambil: 0 / 121 berkas</h3>
+          <p id="personalPicSubtext" class="text-xs text-indigo-100 mt-0.5">Sisa kuota: 121 berkas • Selesai: 0 berkas (0%)</p>
         </div>
-        <div class="flex items-center gap-2 shrink-0">
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+          <button onclick="showUnclaimedForPic()"
+            class="px-3.5 py-2 rounded-xl text-xs font-extrabold bg-white text-indigo-900 hover:bg-indigo-50 transition shadow-2xs">
+            + Ambil Berkas Bebas (<span id="bannerUnclaimedCount">0</span>)
+          </button>
           <button id="btnMyRemaining" onclick="toggleMyRemainingFilter()"
-            class="px-3.5 py-2 rounded-xl text-xs font-extrabold bg-white text-indigo-900 hover:bg-indigo-50 transition">
-            <span id="btnMyRemainingText">Tampilkan Sisa Tugas Saya</span>
+            class="px-3 py-2 rounded-xl text-xs font-bold bg-indigo-500/40 hover:bg-indigo-500/60 text-white transition">
+            <span id="btnMyRemainingText">Sisa Tugas Saya (0)</span>
           </button>
           <button onclick="showAllMyFiles()"
             class="px-3 py-2 rounded-xl text-xs font-bold bg-indigo-500/40 hover:bg-indigo-500/60 text-white transition">
-            Semua
+            Tugas Saya (<span id="bannerMyTotalCount">0</span>)
           </button>
         </div>
       </div>
 
-      <!-- Compact Single-Row Filter Bar -->
+      <!-- Compact Filter Bar -->
       <div class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 space-y-3">
         <div class="flex flex-wrap items-center gap-2.5">
           <!-- Search Input -->
@@ -316,14 +326,15 @@
             <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <input id="searchInput" type="text" oninput="applyFilters()" placeholder="Cari nama guru, NIP, atau keterangan..."
+            <input id="searchInput" type="text" oninput="applyFilters()" placeholder="Cari nama guru dari box fisik, NIP, unit, atau catatan..."
               class="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-indigo-500" />
           </div>
 
-          <!-- Petugas Dropdown -->
+          <!-- Petugas / Pool Dropdown -->
           <select id="filterOfficer" onchange="onFilterOfficerChange()"
             class="px-3 py-2 text-xs font-semibold border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <option value="ALL">Semua Petugas</option>
+            <option value="ALL">Semua Berkas</option>
+            <option value="UNCLAIMED">Berkas Bebas (Belum Diambil)</option>
           </select>
 
           <!-- Status Dropdown -->
@@ -361,7 +372,7 @@
           </button>
         </div>
 
-        <!-- Bulk Action Toolbar (Hanya muncul saat ada checkbox dicentang) -->
+        <!-- Bulk Action Toolbar -->
         <div id="bulkToolbar" class="hidden pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2.5 bg-indigo-50/70 dark:bg-indigo-950/40 p-3 rounded-xl">
           <div class="flex items-center gap-2 text-xs font-bold text-indigo-900 dark:text-indigo-200">
             <span id="selectedCountBadge" class="px-2 py-0.5 bg-indigo-600 text-white rounded-md">0</span>
@@ -369,6 +380,10 @@
             <button onclick="clearSelection()" class="text-[11px] underline text-indigo-600 dark:text-indigo-400 ml-1">Batal</button>
           </div>
           <div class="flex flex-wrap items-center gap-2">
+            <button id="btnBulkClaim" onclick="submitBulkClaim()" class="px-3 py-1.5 text-xs font-extrabold bg-slate-900 hover:bg-slate-800 dark:bg-indigo-500 dark:hover:bg-indigo-400 text-white rounded-lg transition">
+              + Ambil untuk PIC Aktif
+            </button>
+            <span class="text-slate-300 dark:text-slate-700 hidden sm:inline">|</span>
             <select id="bulkStatusBA" class="px-2.5 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800">
               <option value="">BA...</option>
               <option value="Selesai">BA: Selesai</option>
@@ -410,7 +425,7 @@
                 <th onclick="sortTable('statusBA')" class="sortable hover:text-slate-900 dark:hover:text-white p-3.5 text-center">BA</th>
                 <th onclick="sortTable('statusPK')" class="sortable hover:text-slate-900 dark:hover:text-white p-3.5 text-center">PK</th>
                 <th class="p-3.5">Keterangan</th>
-                <th class="p-3.5 text-center w-24">Aksi</th>
+                <th class="p-3.5 text-center w-28">Aksi</th>
               </tr>
             </thead>
             <tbody id="tableBody" class="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs"></tbody>
@@ -481,7 +496,6 @@
     <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
       <div id="profileDrawerPanel" class="w-screen max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between translate-x-full">
         <div>
-          <!-- Minimalist Header -->
           <div class="p-6 border-b border-slate-100 dark:border-slate-800">
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-2">
@@ -495,7 +509,6 @@
 
             <h3 id="drawerNama" class="text-lg font-extrabold text-slate-900 dark:text-white leading-snug">-</h3>
 
-            <!-- Copy NIP Bar -->
             <div class="mt-3 flex items-center justify-between gap-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-xl px-3.5 py-2.5">
               <div>
                 <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">NIP PPPK</p>
@@ -507,7 +520,6 @@
             </div>
           </div>
 
-          <!-- Clean Info Rows -->
           <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(100vh-240px)] text-xs">
             <div class="space-y-3">
               <div>
@@ -554,20 +566,19 @@
           </div>
         </div>
 
-        <!-- Drawer Footer -->
         <div class="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
           <button onclick="closeProfileDrawer()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
             Tutup
           </button>
           <button id="drawerEditBtn" class="flex-1 px-4 py-2.5 rounded-xl text-xs font-extrabold bg-indigo-600 hover:bg-indigo-700 text-white transition">
-            Ubah Status &amp; Box
+            Ambil / Ubah Status
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Edit Modal (Clean & Focused) -->
+  <!-- Edit Modal -->
   <div id="editModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 no-print">
     <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 dark:border-slate-800 space-y-4">
       <div class="flex justify-between items-start gap-2">
@@ -589,7 +600,7 @@
                 Buka Kunci
               </button>
             </div>
-            <select id="modalPetugas" disabled class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-100 dark:bg-slate-800/60 text-slate-500 cursor-not-allowed"></select>
+            <select id="modalPetugas" class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"></select>
           </div>
           <div>
             <label class="block text-[11px] font-bold text-slate-500 mb-1">Lokasi Box</label>
@@ -653,6 +664,7 @@
       "Taufik Hadi", "Rafi Prakas", "Bentar Purnama", "Dilla Triyana",
       "Wira Oktoria", "Bayoe Angin", "Hikmah Mahatir"
     ];
+    let OFFICER_QUOTAS = {};
     let SELECTED_NIPS = {};
     let CURRENT_PAGE = 1;
     let PAGE_SIZE = 50;
@@ -665,6 +677,16 @@
     let OFFICER_CHART = null;
     let STATUS_DOUGHNUT_CHART = null;
     let DRAWER_CURRENT_NIP = "";
+
+    function getOfficerQuota(name) {
+      if (OFFICER_QUOTAS && OFFICER_QUOTAS[name]) return Number(OFFICER_QUOTAS[name]);
+      const total = ALL_RECORDS.length || 1323;
+      const num = OFFICERS.length || 11;
+      const base = Math.floor(total / num);
+      const rem = total % num;
+      const idx = OFFICERS.indexOf(name);
+      return idx >= 0 ? (base + (idx < rem ? 1 : 0)) : base;
+    }
 
     function initDarkMode() {
       const savedTheme = localStorage.getItem("SIMON_BAPK_THEME");
@@ -717,15 +739,20 @@
     function setActivePic() {
       const pic = document.getElementById("activePicSelect").value;
       localStorage.setItem("SIMON_BAPK_ACTIVE_PIC", pic);
-      document.getElementById("filterOfficer").value = pic;
+      if (pic === "ALL") {
+        document.getElementById("filterOfficer").value = "ALL";
+      } else {
+        const myCount = ALL_RECORDS.filter(r => r.petugas === pic).length;
+        document.getElementById("filterOfficer").value = myCount > 0 ? pic : "UNCLAIMED";
+      }
       updatePersonalPicBanner();
       applyFilters();
-      if (pic !== "ALL") showToast(`PIC Aktif: ${pic}`);
+      if (pic !== "ALL") showToast(`PIC Aktif: ${pic} (Target: ${getOfficerQuota(pic)} berkas)`);
     }
 
     function onFilterOfficerChange() {
       const off = document.getElementById("filterOfficer").value;
-      if (off !== "ALL" && OFFICERS.includes(off)) {
+      if (off !== "ALL" && off !== "UNCLAIMED" && OFFICERS.includes(off)) {
         document.getElementById("activePicSelect").value = off;
         localStorage.setItem("SIMON_BAPK_ACTIVE_PIC", off);
       }
@@ -742,25 +769,40 @@
         return;
       }
 
+      const quota = getOfficerQuota(activePic);
       const myRecords = ALL_RECORDS.filter(r => r.petugas === activePic);
-      const totalMine = myRecords.length;
+      const claimedMine = myRecords.length;
+      const sisaKuota = Math.max(0, quota - claimedMine);
       const doneMine = myRecords.filter(r => r.statusBA === "Selesai" && r.statusPK === "Selesai").length;
-      const remainingMine = totalMine - doneMine;
-      const pctMine = totalMine > 0 ? ((doneMine / totalMine) * 100).toFixed(1) : "0.0";
+      const remainingMine = claimedMine - doneMine;
+      const pctTarget = quota > 0 ? ((doneMine / quota) * 100).toFixed(1) : "0.0";
+      const unclaimedTotal = ALL_RECORDS.filter(r => !r.petugas).length;
 
       const firstName = activePic.split(" ")[0];
-      document.getElementById("personalPicGreeting").textContent = remainingMine === 0 && totalMine > 0
-        ? `Luar biasa ${firstName}! Semua ${totalMine} berkas Anda sudah tuntas 100%.`
-        : `Halo ${firstName}, sisa ${remainingMine} berkas lagi untuk tuntas 100%!`;
+      document.getElementById("personalPicGreeting").textContent =
+        `Halo ${firstName}, kuota terambil: ${claimedMine} / ${quota} berkas` +
+        (sisaKuota > 0 ? ` (sisa kuota ${sisaKuota})` : " (target kuota tercapai!)");
       document.getElementById("personalPicSubtext").textContent =
-        `Progres Anda: ${pctMine}% (${doneMine} dari ${totalMine} berkas selesai)`;
+        `Selesai tuntas: ${doneMine} dari ${claimedMine} berkas diambil (${pctTarget}% terhadap target kuota ${quota})`;
+
+      document.getElementById("bannerUnclaimedCount").textContent = unclaimedTotal.toLocaleString("id-ID");
+      document.getElementById("bannerMyTotalCount").textContent = claimedMine;
 
       const curStatus = document.getElementById("filterStatus").value;
-      document.getElementById("btnMyRemainingText").textContent = curStatus === "NOT_SELESAI"
-        ? `Sisa Tugas (${remainingMine})`
-        : `Tampilkan Sisa Tugas (${remainingMine})`;
+      document.getElementById("btnMyRemainingText").textContent =
+        (curStatus === "NOT_SELESAI" && document.getElementById("filterOfficer").value === activePic)
+          ? `Menampilkan Sisa (${remainingMine})`
+          : `Sisa Tugas Saya (${remainingMine})`;
 
       banner.classList.remove("hidden");
+    }
+
+    function showUnclaimedForPic() {
+      document.getElementById("filterOfficer").value = "UNCLAIMED";
+      document.getElementById("filterStatus").value = "ALL";
+      updatePersonalPicBanner();
+      applyFilters();
+      document.getElementById("searchInput").focus();
     }
 
     function toggleMyRemainingFilter() {
@@ -804,26 +846,42 @@
       const currentFilter = filterSel.value;
       const currentActive = activePicSel.value;
 
-      filterSel.innerHTML = `<option value="ALL">Semua Petugas</option>`;
+      const totalCount = ALL_RECORDS.length;
+      const unclaimedCount = ALL_RECORDS.filter(r => !r.petugas).length;
+
+      filterSel.innerHTML =
+        `<option value="ALL">Semua Berkas (${totalCount.toLocaleString("id-ID")})</option>` +
+        `<option value="UNCLAIMED">Berkas Bebas / Belum Diambil (${unclaimedCount.toLocaleString("id-ID")})</option>`;
       activePicSel.innerHTML = `<option value="ALL" class="dark:bg-slate-900">Semua (Admin)</option>`;
-      modalSel.innerHTML = "";
+      modalSel.innerHTML = `<option value="">-- Belum Diambil (Bebas) --</option>`;
 
       OFFICERS.forEach((name) => {
+        const claimed = ALL_RECORDS.filter(r => r.petugas === name).length;
+        const quota = getOfficerQuota(name);
+
         const o1 = document.createElement("option");
-        o1.value = name; o1.textContent = name;
+        o1.value = name;
+        o1.textContent = `${name} (${claimed}/${quota})`;
         filterSel.appendChild(o1);
 
         const o2 = document.createElement("option");
-        o2.value = name; o2.textContent = name;
+        o2.value = name;
+        o2.textContent = `${name} (${claimed}/${quota})`;
         modalSel.appendChild(o2);
 
         const o3 = document.createElement("option");
-        o3.value = name; o3.textContent = name; o3.className = "dark:bg-slate-900";
+        o3.value = name;
+        o3.textContent = name;
+        o3.className = "dark:bg-slate-900";
         activePicSel.appendChild(o3);
       });
 
-      if (currentFilter && (currentFilter === "ALL" || OFFICERS.includes(currentFilter))) filterSel.value = currentFilter;
-      if (currentActive && (currentActive === "ALL" || OFFICERS.includes(currentActive))) activePicSel.value = currentActive;
+      if (currentFilter && (currentFilter === "ALL" || currentFilter === "UNCLAIMED" || OFFICERS.includes(currentFilter))) {
+        filterSel.value = currentFilter;
+      }
+      if (currentActive && (currentActive === "ALL" || OFFICERS.includes(currentActive))) {
+        activePicSel.value = currentActive;
+      }
     }
 
     function populateDynamicFilters() {
@@ -870,7 +928,7 @@
       t.textContent = msg;
       t.classList.remove("hidden");
       clearTimeout(t._timer);
-      t._timer = setTimeout(() => t.classList.add("hidden"), 3000);
+      t._timer = setTimeout(() => t.classList.add("hidden"), 3600);
     }
 
     function switchTab(tabNum) {
@@ -886,6 +944,16 @@
       if (tabNum === 1 && ALL_RECORDS.length > 0) renderDashboard();
       if (tabNum === 2) updatePersonalPicBanner();
       if (tabNum === 3) renderBoxOverview();
+    }
+
+    function jumpToUnclaimed() {
+      document.getElementById("searchInput").value = "";
+      document.getElementById("filterOfficer").value = "UNCLAIMED";
+      document.getElementById("filterStatus").value = "ALL";
+      document.getElementById("filterBox").value = "ALL";
+      document.getElementById("filterUnit").value = "ALL";
+      switchTab(2);
+      applyFilters();
     }
 
     function jumpToKendala() {
@@ -921,8 +989,11 @@
           ALL_RECORDS = res.data || [];
           if (Array.isArray(res.officers) && res.officers.length > 0) {
             OFFICERS = res.officers;
-            populateOfficerDropdowns();
           }
+          if (res.quotas && typeof res.quotas === "object") {
+            OFFICER_QUOTAS = res.quotas;
+          }
+          populateOfficerDropdowns();
           populateDynamicFilters();
           setConnectionStatus("connected", `${ALL_RECORDS.length.toLocaleString("id-ID")} Berkas`);
           bar.classList.add("hidden");
@@ -979,9 +1050,10 @@
         const fullNames = OFFICERS;
         const baData = OFFICERS.map(n => officerStats[n]?.baDone || 0);
         const pkData = OFFICERS.map(n => officerStats[n]?.pkDone || 0);
-        const remData = OFFICERS.map(n => {
+        const remQuotaData = OFFICERS.map(n => {
           const st = officerStats[n];
-          return st ? Math.max(0, (st.total * 2) - (st.baDone + st.pkDone)) : 0;
+          if (!st) return 0;
+          return Math.max(0, (st.quota * 2) - (st.baDone + st.pkDone));
         });
 
         if (OFFICER_CHART) OFFICER_CHART.destroy();
@@ -993,7 +1065,7 @@
             datasets: [
               { label: "BA Selesai", data: baData, backgroundColor: "#4f46e5", borderRadius: 4, barPercentage: 0.65 },
               { label: "PK Selesai", data: pkData, backgroundColor: "#10b981", borderRadius: 4, barPercentage: 0.65 },
-              { label: "Sisa Belum Selesai", data: remData, backgroundColor: isDark ? "#1e293b" : "#f1f5f9", borderRadius: 4, barPercentage: 0.65 }
+              { label: "Sisa Target Kuota (BA+PK)", data: remQuotaData, backgroundColor: isDark ? "#1e293b" : "#f1f5f9", borderRadius: 4, barPercentage: 0.65 }
             ]
           },
           options: {
@@ -1019,7 +1091,9 @@
                   title: (items) => {
                     const idx = items[0].dataIndex;
                     const st = officerStats[fullNames[idx]];
-                    return `${fullNames[idx]} (${st ? st.total : 0} Berkas)`;
+                    return st
+                      ? `${fullNames[idx]} • Diambil: ${st.total}/${st.quota} berkas`
+                      : fullNames[idx];
                   }
                 }
               }
@@ -1067,13 +1141,19 @@
     function renderDashboard() {
       const total = ALL_RECORDS.length;
       let selesai = 0, proses = 0, kendala = 0, belum = 0;
-      let baDone = 0, pkDone = 0;
+      let baDone = 0, pkDone = 0, unclaimed = 0;
       let anomDoneNoBox = 0, anomBoxNotDone = 0, anomKendalaNoNote = 0, anomPartial = 0;
-      const boxSet = new Set();
 
       const officerStats = {};
       OFFICERS.forEach(name => {
-        officerStats[name] = { name, total: 0, baDone: 0, pkDone: 0, firstChar: "", lastChar: "" };
+        officerStats[name] = {
+          name,
+          quota: getOfficerQuota(name),
+          total: 0,
+          selesai: 0,
+          baDone: 0,
+          pkDone: 0
+        };
       });
 
       ALL_RECORDS.forEach(r => {
@@ -1085,7 +1165,7 @@
 
         if (r.statusBA === "Selesai") baDone++;
         if (r.statusPK === "Selesai") pkDone++;
-        if (r.lokasiBox) boxSet.add(r.lokasiBox);
+        if (!r.petugas) unclaimed++;
 
         if (isDoneNoBox(r)) anomDoneNoBox++;
         if (isBoxNotDone(r)) anomBoxNotDone++;
@@ -1095,16 +1175,17 @@
         const st = officerStats[r.petugas];
         if (st) {
           st.total++;
+          if (cat === "SELESAI") st.selesai++;
           if (r.statusBA === "Selesai") st.baDone++;
           if (r.statusPK === "Selesai") st.pkDone++;
-          const ch = r.nama ? r.nama.charAt(0).toUpperCase() : "";
-          if (!st.firstChar) st.firstChar = ch;
-          if (ch) st.lastChar = ch;
         }
       });
 
+      const claimedTotal = total - unclaimed;
       document.getElementById("kpiTotal").textContent = total.toLocaleString("id-ID");
-      document.getElementById("kpiBoxSub").textContent = `${boxSet.size} Box terisi →`;
+      document.getElementById("kpiPoolSub").textContent = `${unclaimed.toLocaleString("id-ID")} bebas • ${claimedTotal.toLocaleString("id-ID")} diambil`;
+      document.getElementById("unclaimedQuickCount").textContent = unclaimed.toLocaleString("id-ID");
+
       document.getElementById("kpiSelesai").textContent = selesai.toLocaleString("id-ID");
       document.getElementById("kpiSelesaiPct").textContent = total ? `${(selesai / total * 100).toFixed(1)}%` : "0%";
       document.getElementById("kpiPending").textContent = (proses + belum).toLocaleString("id-ID");
@@ -1123,32 +1204,39 @@
 
       renderCharts(officerStats, selesai, proses, kendala, belum, total);
 
-      // Clean Officer Cards
+      // Officer Quota & Progress Cards
       const grid = document.getElementById("officersGrid");
       grid.innerHTML = "";
       OFFICERS.forEach((name) => {
         const o = officerStats[name];
-        const pct = o.total ? Math.round(((o.baDone + o.pkDone) / (2 * o.total)) * 100) : 0;
-        const abjad = (o.firstChar && o.lastChar) ? `${o.firstChar}–${o.lastChar}` : "-";
+        const sisaKuota = Math.max(0, o.quota - o.total);
+        const pct = o.quota ? Math.min(100, Math.round(((o.baDone + o.pkDone) / (2 * o.quota)) * 100)) : 0;
+        const quotaBadge = sisaKuota === 0
+          ? `<span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">Kuota Penuh</span>`
+          : `<span class="text-[11px] text-slate-400">Sisa kuota: ${sisaKuota}</span>`;
 
         const card = document.createElement("div");
         card.className = "clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-4 hover:border-indigo-500 cursor-pointer transition";
         card.onclick = () => {
-          document.getElementById("filterOfficer").value = o.name;
           document.getElementById("activePicSelect").value = o.name;
           localStorage.setItem("SIMON_BAPK_ACTIVE_PIC", o.name);
+          document.getElementById("filterOfficer").value = o.total > 0 ? o.name : "UNCLAIMED";
+          document.getElementById("filterStatus").value = "ALL";
           updatePersonalPicBanner();
           switchTab(2);
           applyFilters();
         };
 
         card.innerHTML = `
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between gap-2">
             <h3 class="font-bold text-slate-900 dark:text-white text-xs truncate">${escapeHtml(o.name)}</h3>
             <span class="text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400">${pct}%</span>
           </div>
-          <p class="text-[11px] text-slate-400 mt-0.5">${o.total} berkas • Abjad ${abjad}</p>
-          <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-3">
+          <div class="flex items-center justify-between mt-1.5">
+            <p class="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">Diambil: ${o.total} / ${o.quota}</p>
+            ${quotaBadge}
+          </div>
+          <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-2.5">
             <div class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width:${pct}%"></div>
           </div>
         `;
@@ -1170,7 +1258,9 @@
       const unit = document.getElementById("filterUnit").value;
 
       FILTERED_RECORDS = ALL_RECORDS.filter(r => {
-        if (off !== "ALL" && r.petugas !== off) return false;
+        if (off === "UNCLAIMED" && r.petugas) return false;
+        if (off !== "ALL" && off !== "UNCLAIMED" && r.petugas !== off) return false;
+
         if (st !== "ALL") {
           if (st === "NOT_SELESAI" && getCategory(r) === "SELESAI") return false;
           else if (st === "DONE_NO_BOX" && !isDoneNoBox(r)) return false;
@@ -1183,7 +1273,7 @@
         if (box !== "ALL" && box !== "EMPTY" && r.lokasiBox !== box) return false;
         if (unit !== "ALL" && r.unitKerja !== unit) return false;
         if (q) {
-          const hay = `${r.nama} ${r.nip} ${r.unitKerja} ${r.lokasiBox} ${r.keterangan}`.toLowerCase();
+          const hay = `${r.nama} ${r.nip} ${r.unitKerja} ${r.lokasiBox} ${r.keterangan} ${r.petugas}`.toLowerCase();
           if (!hay.includes(q)) return false;
         }
         return true;
@@ -1253,6 +1343,34 @@
         const checked = SELECTED_NIPS[r.nip] ? "checked" : "";
         const cat = getCategory(r);
         const isDone = (cat === "SELESAI");
+        const isUnclaimed = !r.petugas;
+
+        const picCell = isUnclaimed
+          ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">Bebas</span>`
+          : `<span class="text-slate-700 dark:text-slate-300 font-semibold" title="${escapeAttr(r.petugas)}">${escapeHtml(r.petugas.split(" ")[0])}</span>`;
+
+        const actionCell = isUnclaimed
+          ? `<div class="inline-flex items-center gap-1">
+              <button onclick="claimSingleFile('${escapeAttr(r.nip)}')" title="Ambil Berkas Ini"
+                class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold transition">
+                + Ambil
+              </button>
+              <button onclick="openEditModal('${escapeAttr(r.nip)}')" title="Detail / Ubah"
+                class="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] font-bold transition">
+                Ubah
+              </button>
+            </div>`
+          : `<div class="inline-flex items-center gap-1">
+              ${!isDone ? `
+                <button onclick="quickComplete('${escapeAttr(r.nip)}')" title="Selesai 1-Klik"
+                  class="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                </button>
+              ` : ""}
+              <button onclick="openEditModal('${escapeAttr(r.nip)}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-bold transition">
+                Ubah
+              </button>
+            </div>`;
 
         html += `
           <tr class="${getRowHighlightClass(cat)} transition-colors">
@@ -1270,27 +1388,108 @@
               <div class="text-slate-700 dark:text-slate-300">${escapeHtml(r.unitKerja)}</div>
               ${r.lokasiBox ? `<span class="inline-block mt-0.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-400">${escapeHtml(r.lokasiBox)}</span>` : ""}
             </td>
-            <td class="p-3.5 text-slate-600 dark:text-slate-400 font-medium">${escapeHtml(r.petugas.split(" ")[0])}</td>
+            <td class="p-3.5">${picCell}</td>
             <td class="p-3.5 text-center">${statusBadge(r.statusBA)}</td>
             <td class="p-3.5 text-center">${statusBadge(r.statusPK)}</td>
-            <td class="p-3.5 text-slate-500 dark:text-slate-400 max-w-[180px] truncate" title="${escapeAttr(r.keterangan || '')}">${escapeHtml(r.keterangan || "-")}</td>
-            <td class="p-3.5 text-center">
-              <div class="inline-flex items-center gap-1">
-                ${!isDone ? `
-                  <button onclick="quickComplete('${escapeAttr(r.nip)}')" title="Selesai 1-Klik"
-                    class="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                  </button>
-                ` : ""}
-                <button onclick="openEditModal('${escapeAttr(r.nip)}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-bold transition">
-                  Ubah
-                </button>
-              </div>
-            </td>
+            <td class="p-3.5 text-slate-500 dark:text-slate-400 max-w-[200px] truncate" title="${escapeAttr(r.keterangan || '')}">${escapeHtml(r.keterangan || "-")}</td>
+            <td class="p-3.5 text-center">${actionCell}</td>
           </tr>
         `;
       }
       tbody.innerHTML = html;
+    }
+
+    async function claimSingleFile(nip) {
+      const activePic = document.getElementById("activePicSelect").value;
+      const rec = ALL_RECORDS.find(r => r.nip === nip);
+      if (!rec) return;
+
+      if (!activePic || activePic === "ALL" || !OFFICERS.includes(activePic)) {
+        showToast("Pilih nama PIC Anda di pojok kanan atas, atau pilih petugas pada form ini.");
+        openEditModal(nip);
+        return;
+      }
+
+      showToast(`Mengambil berkas ${rec.nama} untuk ${activePic}...`);
+      try {
+        const res = await postToGas({
+          action: "claim",
+          nip: rec.nip,
+          petugas: activePic
+        });
+        if (res && res.status === "conflict") {
+          rec.petugas = res.currentPetugas || "";
+          populateOfficerDropdowns();
+          renderDashboard();
+          applyFilters(true);
+          showToast(`Bentrok! Berkas baru saja diambil oleh ${res.currentPetugas}.`);
+          return;
+        }
+        if (res && res.status === "success") {
+          rec.petugas = activePic;
+          rec.updatedAt = res.updatedAt || "";
+          populateOfficerDropdowns();
+          updatePersonalPicBanner();
+          renderDashboard();
+          applyFilters(true);
+          if (rec.keterangan) {
+            showToast(`Berhasil diambil! Catatan lama: "${rec.keterangan}" (silakan verifikasi ulang).`);
+          } else {
+            showToast(`Berkas ${rec.nama} berhasil diambil oleh ${activePic}!`);
+          }
+        } else {
+          showToast("Gagal mengambil berkas: " + (res ? res.message : "Error"));
+        }
+      } catch (err) {
+        showToast("Error: " + err.message);
+      }
+    }
+
+    async function submitBulkClaim() {
+      const nips = Object.keys(SELECTED_NIPS);
+      if (nips.length === 0) return;
+
+      const activePic = document.getElementById("activePicSelect").value;
+      if (!activePic || activePic === "ALL" || !OFFICERS.includes(activePic)) {
+        showToast("Pilih nama PIC Anda terlebih dahulu di pojok kanan atas!");
+        return;
+      }
+
+      const btn = document.getElementById("btnBulkClaim");
+      btn.disabled = true; btn.textContent = "Mengambil...";
+
+      try {
+        const res = await postToGas({
+          action: "bulk_update",
+          claimOnly: true,
+          petugas: activePic,
+          nips: nips
+        });
+        if (res && res.status === "success") {
+          const conflictSet = new Set((res.skippedConflicts || []).map(s => s.split(" (")[0]));
+          ALL_RECORDS.forEach(r => {
+            if (SELECTED_NIPS[r.nip] && !r.petugas && !conflictSet.has(r.nama)) {
+              r.petugas = activePic;
+              r.updatedAt = res.updatedAt || "";
+            }
+          });
+          SELECTED_NIPS = {};
+          populateOfficerDropdowns();
+          updateBulkBar();
+          updatePersonalPicBanner();
+          renderDashboard();
+          applyFilters(true);
+          let msg = `${res.updatedCount} berkas berhasil diambil oleh ${activePic}.`;
+          if (res.skippedConflicts && res.skippedConflicts.length > 0) {
+            msg += ` (${res.skippedConflicts.length} dilewati karena sudah diambil petugas lain)`;
+          }
+          showToast(msg);
+        }
+      } catch (err) {
+        showToast("Error: " + err.message);
+      } finally {
+        btn.disabled = false; btn.textContent = "+ Ambil untuk PIC Aktif";
+      }
     }
 
     // Slide-over Drawer (Kartu Profil Guru)
@@ -1322,7 +1521,7 @@
       document.getElementById("btnCopyNipText").textContent = "Salin NIP";
       document.getElementById("drawerJabatan").textContent = rec.jabatan || "Guru Ahli Pertama";
       document.getElementById("drawerUnitKerja").textContent = rec.unitKerja || "-";
-      document.getElementById("drawerPetugas").textContent = rec.petugas || "-";
+      document.getElementById("drawerPetugas").textContent = rec.petugas || "Belum Diambil (Pool Bebas)";
       document.getElementById("drawerLokasiBox").textContent = rec.lokasiBox || "Belum masuk Box";
       document.getElementById("drawerStatusBA").innerHTML = statusBadge(rec.statusBA);
       document.getElementById("drawerStatusPK").innerHTML = statusBadge(rec.statusPK);
@@ -1373,21 +1572,34 @@
       const rec = ALL_RECORDS.find(r => r.nip === nip);
       if (!rec) return;
 
+      const activePic = document.getElementById("activePicSelect").value;
+      const targetPetugas = rec.petugas || ((activePic && activePic !== "ALL") ? activePic : "");
+
       showToast(`Menyelesaikan ${rec.nama}...`);
       try {
         const res = await postToGas({
           action: "update",
           nip: rec.nip,
-          petugas: rec.petugas,
+          petugas: targetPetugas,
           lokasiBox: rec.lokasiBox,
           statusBA: "Selesai",
           statusPK: "Selesai",
           keterangan: rec.keterangan
         });
+        if (res && res.status === "conflict") {
+          rec.petugas = res.currentPetugas || "";
+          populateOfficerDropdowns();
+          renderDashboard();
+          applyFilters(true);
+          showToast(`Bentrok! Berkas ini dipegang oleh ${res.currentPetugas}.`);
+          return;
+        }
         if (res && res.status === "success") {
+          rec.petugas = targetPetugas;
           rec.statusBA = "Selesai";
           rec.statusPK = "Selesai";
           rec.updatedAt = res.updatedAt || "";
+          populateOfficerDropdowns();
           updatePersonalPicBanner();
           renderDashboard();
           applyFilters(true);
@@ -1460,13 +1672,14 @@
       sel.className = shouldLock
         ? "w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-100 dark:bg-slate-800/60 text-slate-500 cursor-not-allowed"
         : "w-full px-3 py-2 text-xs border border-indigo-400 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100";
-      btn.textContent = shouldLock ? "Buka Kunci" : "Kunci";
+      btn.textContent = shouldLock ? "Buka Kunci" : (hasAssignedPetugas ? "Kunci" : "Bebas Pilih");
     }
 
     function toggleAdminPetugasUnlock() {
       const nip = document.getElementById("modalNip").value;
       const rec = ALL_RECORDS.find(r => r.nip === nip);
       const hasAssigned = Boolean(rec && rec.petugas && OFFICERS.includes(rec.petugas));
+      if (!hasAssigned) return;
 
       if (IS_ADMIN_PETUGAS_UNLOCKED) {
         IS_ADMIN_PETUGAS_UNLOCKED = false;
@@ -1488,10 +1701,19 @@
       const rec = ALL_RECORDS.find(r => r.nip === nip);
       if (!rec) return;
 
+      const activePic = document.getElementById("activePicSelect").value;
       document.getElementById("modalNip").value = rec.nip;
       document.getElementById("modalGuruName").textContent = rec.nama;
       document.getElementById("modalGuruMeta").textContent = `${rec.nip} • ${rec.unitKerja}`;
-      document.getElementById("modalPetugas").value = rec.petugas;
+
+      if (rec.petugas) {
+        document.getElementById("modalPetugas").value = rec.petugas;
+      } else if (activePic && activePic !== "ALL" && OFFICERS.includes(activePic)) {
+        document.getElementById("modalPetugas").value = activePic;
+      } else {
+        document.getElementById("modalPetugas").value = "";
+      }
+
       document.getElementById("modalLokasiBox").value = rec.lokasiBox || "";
       document.getElementById("modalStatusBA").value = rec.statusBA || "Belum";
       document.getElementById("modalStatusPK").value = rec.statusPK || "Belum";
@@ -1520,15 +1742,31 @@
         lokasiBox: document.getElementById("modalLokasiBox").value.trim().toUpperCase(),
         statusBA: document.getElementById("modalStatusBA").value,
         statusPK: document.getElementById("modalStatusPK").value,
-        keterangan: document.getElementById("modalKeterangan").value
+        keterangan: document.getElementById("modalKeterangan").value,
+        forceOverride: IS_ADMIN_PETUGAS_UNLOCKED
       };
 
       try {
         const res = await postToGas(payload);
+        if (res && res.status === "conflict") {
+          if (existingRec) existingRec.petugas = res.currentPetugas || "";
+          populateOfficerDropdowns();
+          closeEditModal();
+          renderDashboard();
+          applyFilters(true);
+          showToast(`Bentrok! Berkas ini baru saja diambil oleh ${res.currentPetugas}.`);
+          return;
+        }
         if (res && res.status === "success") {
           if (existingRec) {
-            Object.assign(existingRec, payload, { updatedAt: res.updatedAt || "" });
+            existingRec.petugas = payload.petugas;
+            existingRec.lokasiBox = payload.lokasiBox;
+            existingRec.statusBA = payload.statusBA;
+            existingRec.statusPK = payload.statusPK;
+            existingRec.keterangan = payload.keterangan;
+            existingRec.updatedAt = res.updatedAt || "";
           }
+          populateOfficerDropdowns();
           populateDynamicFilters();
           closeEditModal();
           updatePersonalPicBanner();
@@ -1690,12 +1928,23 @@
         "Status_BA": r.statusBA, "Status_PK": r.statusPK, "Keterangan": r.keterangan, "Updated_At": r.updatedAt
       }));
       const rekapRows = OFFICERS.map((name, idx) => {
+        const quota = getOfficerQuota(name);
         const subset = ALL_RECORDS.filter(r => r.petugas === name);
         const baDone = subset.filter(r => r.statusBA === "Selesai").length;
         const pkDone = subset.filter(r => r.statusPK === "Selesai").length;
         const kendala = subset.filter(r => r.statusBA === "Kendala" || r.statusPK === "Kendala").length;
-        const pct = subset.length ? Number((((baDone + pkDone) / (2 * subset.length)) * 100).toFixed(1)) : 0;
-        return { "No": idx + 1, "Nama_Petugas": name, "Total_Berkas": subset.length, "BA_Selesai": baDone, "PK_Selesai": pkDone, "Ada_Kendala": kendala, "Progres_Persen": pct };
+        const pct = quota ? Number((((baDone + pkDone) / (2 * quota)) * 100).toFixed(1)) : 0;
+        return {
+          "No": idx + 1,
+          "Nama_Petugas": name,
+          "Target_Kuota": quota,
+          "Berkas_Diambil": subset.length,
+          "Sisa_Kuota": Math.max(0, quota - subset.length),
+          "BA_Selesai": baDone,
+          "PK_Selesai": pkDone,
+          "Ada_Kendala": kendala,
+          "Progres_Persen": pct
+        };
       });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dataRows), "Data_Berkas_Guru");
