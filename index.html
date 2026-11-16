@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SIMON-BAPK 2025 | Monitoring Berita Acara & Perjanjian Kerja Guru Sekolah Rakyat</title>
+  <title>SIMON-BAPK 2025 | Monitoring BA &amp; PK Guru Sekolah Rakyat</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -19,12 +19,12 @@
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
-    .bento-card {
-      border-radius: 1.15rem;
-      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.03);
+    .clean-card {
+      border-radius: 1.25rem;
+      box-shadow: 0 2px 14px -2px rgba(15, 23, 42, 0.04);
     }
-    .dark .bento-card {
-      box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.35);
+    .dark .clean-card {
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
     }
     th.sortable {
       cursor: pointer;
@@ -38,18 +38,17 @@
       background: transparent;
     }
     ::-webkit-scrollbar-thumb {
-      background: #94a3b8;
+      background: #cbd5e1;
       border-radius: 9999px;
     }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #64748b;
+    .dark ::-webkit-scrollbar-thumb {
+      background: #334155;
     }
-    /* Slide-over drawer transition */
     #profileDrawerBackdrop {
-      transition: opacity 0.25s ease;
+      transition: opacity 0.22s ease;
     }
     #profileDrawerPanel {
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     }
     @media print {
       body * { visibility: hidden; }
@@ -67,42 +66,65 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-slate-50 to-indigo-50/30 text-slate-900 dark:from-slate-950 dark:via-slate-950 dark:to-indigo-950/20 dark:text-slate-100 transition-colors duration-200">
+<body class="min-h-screen flex flex-col bg-slate-50/70 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
 
-  <!-- Sticky Top Header -->
-  <header class="bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80 sticky top-0 z-30 no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3.5">
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-indigo-700 dark:from-indigo-500 dark:to-violet-600 text-white flex items-center justify-center font-extrabold text-base tracking-tight shadow-md shadow-indigo-500/15">
+  <!-- Minimalist Sticky Top Header -->
+  <header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800 sticky top-0 z-30 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <!-- Brand -->
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-extrabold text-sm shadow-xs">
           SB
         </div>
         <div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <h1 class="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg tracking-tight">SIMON-BAPK 2025</h1>
-            <span id="connBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800">
-              <span id="connDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-              <span id="connText">Menghubungkan...</span>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base tracking-tight">SIMON-BAPK 2025</h1>
+            <span id="connBadge" class="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+              <span id="connDot" class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+              <span id="connText">Sinkron...</span>
             </span>
           </div>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Monitoring Berita Acara &amp; Perjanjian Kerja Guru Sekolah Rakyat • 11 Petugas</p>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:block">Monitoring BA &amp; PK Guru Sekolah Rakyat</p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2 flex-wrap">
-        <span id="syncStatusText" class="text-xs text-slate-500 dark:text-slate-400 hidden xl:inline mr-1">Menunggu sinkronisasi...</span>
+      <!-- Center Segmented Navigation -->
+      <nav class="hidden md:flex items-center bg-slate-100/90 dark:bg-slate-800/90 p-1 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+        <button id="btnTab1" onclick="switchTab(1)" class="px-4 py-1.5 rounded-lg text-xs font-bold transition">Ringkasan</button>
+        <button id="btnTab2" onclick="switchTab(2)" class="px-4 py-1.5 rounded-lg text-xs font-bold transition">Verifikasi Berkas</button>
+        <button id="btnTab3" onclick="switchTab(3)" class="px-4 py-1.5 rounded-lg text-xs font-bold transition">Box Arsip</button>
+      </nav>
 
-        <!-- Identitas Petugas Aktif (Remember My PIC) -->
-        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/80 dark:to-violet-950/60 border border-indigo-200/80 dark:border-indigo-800 shadow-2xs">
-          <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-          <span class="text-[11px] font-bold text-indigo-900 dark:text-indigo-300">PIC Aktif:</span>
-          <select id="activePicSelect" onchange="setActivePic()" class="text-xs font-extrabold text-indigo-950 dark:text-indigo-100 bg-transparent focus:outline-none cursor-pointer">
+      <!-- Right Controls (Clean & Compact) -->
+      <div class="flex items-center gap-2">
+        <!-- PIC Aktif -->
+        <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-50/80 dark:bg-indigo-950/70 border border-indigo-200/70 dark:border-indigo-800">
+          <span class="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 hidden sm:inline">PIC:</span>
+          <select id="activePicSelect" onchange="setActivePic()" class="text-xs font-bold text-indigo-950 dark:text-indigo-100 bg-transparent focus:outline-none cursor-pointer max-w-[130px] sm:max-w-none">
             <option value="ALL" class="dark:bg-slate-900">Semua (Admin)</option>
           </select>
         </div>
 
+        <!-- Refresh Icon Button -->
+        <button onclick="fetchDataFromSheet(true)" title="Segarkan Data dari Google Sheets"
+          class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </button>
+
+        <!-- Export Icon Button -->
+        <button onclick="exportExcelReport()" title="Download Laporan Excel (.xlsx)"
+          class="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span class="hidden sm:inline">Excel</span>
+        </button>
+
         <!-- Dark Mode Toggle -->
-        <button id="themeToggleBtn" onclick="toggleDarkMode()" title="Ganti Mode Terang / Gelap"
-          class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-300 border border-slate-200 dark:border-slate-700 transition">
+        <button id="themeToggleBtn" onclick="toggleDarkMode()" title="Mode Gelap / Terang"
+          class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-amber-300 transition">
           <svg id="iconSun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
@@ -110,142 +132,78 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
           </svg>
         </button>
-
-        <label class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer select-none">
-          <input id="autoSyncToggle" type="checkbox" checked onchange="toggleAutoSync()" class="rounded text-indigo-600 focus:ring-0" />
-          <span>Auto-Sync 30d</span>
-        </label>
-
-        <button onclick="fetchDataFromSheet(true)" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          <span>Segarkan</span>
-        </button>
-
-        <button onclick="exportExcelReport()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white transition flex items-center gap-1.5 shadow-sm shadow-emerald-600/20">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-          <span>Export Excel (.xlsx)</span>
-        </button>
       </div>
     </div>
 
-    <!-- Navigation Tabs -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-3 flex items-center justify-between gap-2 overflow-x-auto">
-      <div class="flex items-center gap-2">
-        <button id="btnTab1" onclick="switchTab(1)" class="px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
-          1. Dasbor &amp; Analitik Visual
-        </button>
-        <button id="btnTab2" onclick="switchTab(2)" class="px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
-          2. Kertas Kerja &amp; Verifikasi Berkas
-        </button>
-        <button id="btnTab3" onclick="switchTab(3)" class="px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
-          3. Rekap &amp; Daftar Isi Box Arsip
-        </button>
-      </div>
-      <div class="hidden md:flex items-center gap-2 text-[11px] text-slate-400 dark:text-slate-500">
-        <span>Pintasan: <kbd class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-600 dark:text-slate-300 font-mono">/</kbd> Cari</span>
-        <span>•</span>
-        <span><kbd class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-600 dark:text-slate-300 font-mono">Esc</kbd> Tutup Panel</span>
-      </div>
+    <!-- Mobile Navigation Bar -->
+    <div class="md:hidden px-4 pb-2.5 flex items-center gap-1.5 overflow-x-auto">
+      <button id="mBtnTab1" onclick="switchTab(1)" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-center transition">Ringkasan</button>
+      <button id="mBtnTab2" onclick="switchTab(2)" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-center transition">Verifikasi</button>
+      <button id="mBtnTab3" onclick="switchTab(3)" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-center transition">Box Arsip</button>
     </div>
   </header>
 
-  <!-- Status / Alert Banner -->
-  <div id="loadingBar" class="w-full bg-indigo-50 dark:bg-indigo-950/60 border-b border-indigo-100 dark:border-indigo-900 px-4 py-2 text-center text-xs font-semibold text-indigo-700 dark:text-indigo-300 no-print">
-    Memuat data real-time dari Google Spreadsheet (Data_Master)...
+  <!-- Loading Banner -->
+  <div id="loadingBar" class="w-full bg-indigo-50 dark:bg-indigo-950/60 px-4 py-1.5 text-center text-xs font-medium text-indigo-700 dark:text-indigo-300 no-print">
+    Memuat data dari Google Spreadsheet...
   </div>
 
-  <!-- Main Content -->
-  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex-1">
+  <!-- Main Container -->
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-7 flex-1">
 
     <!-- ===================================================================== -->
-    <!-- TAB 1: DASBOR & ANALITIK VISUAL                                       -->
+    <!-- TAB 1: RINGKASAN & ANALITIK VISUAL (BERSIH & RINGKAS)                 -->
     <!-- ===================================================================== -->
     <section id="tab1" class="space-y-6">
-      <!-- KPI Bento Grid -->
-      <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 relative overflow-hidden">
-          <div class="absolute right-3 top-3 w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          </div>
-          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Berkas Guru</p>
-          <p id="kpiTotal" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">0</p>
-          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Urut Abjad A – Z</p>
-        </div>
 
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 border-l-4 border-l-emerald-500 relative overflow-hidden">
-          <p class="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Selesai Lengkap</p>
-          <p id="kpiSelesai" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">0</p>
-          <p id="kpiSelesaiPct" class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">0%</p>
-        </div>
-
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 border-l-4 border-l-amber-500">
-          <p class="text-xs font-semibold text-amber-700 dark:text-amber-400">Dalam Proses</p>
-          <p id="kpiProses" class="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">0</p>
-          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Parsial / sedang cek</p>
-        </div>
-
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 border-l-4 border-l-rose-500 cursor-pointer hover:bg-rose-50/40 dark:hover:bg-rose-950/25 transition" onclick="jumpToKendala()">
-          <p class="text-xs font-semibold text-rose-700 dark:text-rose-400">Ada Kendala</p>
-          <p id="kpiKendala" class="text-2xl sm:text-3xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">0</p>
-          <p class="text-[11px] text-rose-500 dark:text-rose-400 font-semibold mt-1">Klik lihat daftar &rarr;</p>
-        </div>
-
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 border-l-4 border-l-slate-400">
-          <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">Belum Diproses</p>
-          <p id="kpiBelum" class="text-2xl sm:text-3xl font-extrabold text-slate-700 dark:text-slate-200 mt-1">0</p>
-          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Menunggu giliran</p>
-        </div>
-
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 border-l-4 border-l-indigo-500 cursor-pointer hover:bg-indigo-50/40 dark:hover:bg-indigo-950/25 transition" onclick="switchTab(3)">
-          <p class="text-xs font-semibold text-indigo-700 dark:text-indigo-400">Box Arsip Terisi</p>
-          <p id="kpiBoxCount" class="text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-1">0</p>
-          <p id="kpiBoxSub" class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">0 berkas ber-box</p>
-        </div>
-      </div>
-
-      <!-- Progress Bar Terpisah BA vs PK -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5">
-          <div class="flex justify-between items-center mb-2.5">
-            <span class="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
-              Progres Berita Acara (BA)
-            </span>
-            <span id="baSummaryText" class="text-xs font-extrabold text-indigo-600 dark:text-indigo-400">0 / 0 (0%)</span>
-          </div>
-          <div class="w-full h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5">
-            <div id="baProgressBar" class="h-full bg-gradient-to-r from-indigo-600 to-violet-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
+      <!-- 4 Core KPI Cards (Clean & Spacious) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5">
+          <p class="text-xs font-semibold text-slate-400 dark:text-slate-500">Total Berkas</p>
+          <div class="flex items-baseline justify-between mt-2">
+            <p id="kpiTotal" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</p>
+            <span id="kpiBoxSub" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 cursor-pointer hover:underline" onclick="switchTab(3)">0 Box &rarr;</span>
           </div>
         </div>
-        <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5">
-          <div class="flex justify-between items-center mb-2.5">
-            <span class="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-              Progres Perjanjian Kerja (PK)
-            </span>
-            <span id="pkSummaryText" class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">0 / 0 (0%)</span>
+
+        <div class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5">
+          <p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Selesai Lengkap</p>
+          <div class="flex items-baseline justify-between mt-2">
+            <p id="kpiSelesai" class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">0</p>
+            <span id="kpiSelesaiPct" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">0%</span>
           </div>
-          <div class="w-full h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5">
-            <div id="pkProgressBar" class="h-full bg-gradient-to-r from-emerald-600 to-teal-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
+        </div>
+
+        <div class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5">
+          <p class="text-xs font-semibold text-amber-600 dark:text-amber-400">Proses &amp; Belum</p>
+          <div class="flex items-baseline justify-between mt-2">
+            <p id="kpiPending" class="text-3xl font-extrabold text-slate-800 dark:text-slate-200">0</p>
+            <span id="kpiPendingDetail" class="text-[11px] text-slate-400">0 proses • 0 belum</span>
+          </div>
+        </div>
+
+        <div onclick="jumpToKendala()" class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 hover:border-rose-400 dark:hover:border-rose-700 p-5 cursor-pointer transition">
+          <p class="text-xs font-semibold text-rose-600 dark:text-rose-400">Perlu Tindak Lanjut</p>
+          <div class="flex items-baseline justify-between mt-2">
+            <p id="kpiKendala" class="text-3xl font-extrabold text-rose-600 dark:text-rose-400">0</p>
+            <span class="text-xs font-semibold text-rose-500">Lihat Kendala &rarr;</span>
           </div>
         </div>
       </div>
 
-      <!-- NEW: Grafik Visual (Chart.js) — Horizontal Stacked Bar Chart & Doughnut Status Chart -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <!-- Horizontal Stacked Bar Chart: BA vs PK per Petugas -->
-        <div class="lg:col-span-8 bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 flex flex-col justify-between">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+      <!-- Visual Charts Section (Clean 2-Column Layout) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- Stacked Horizontal Bar Chart: BA vs PK per Petugas -->
+        <div class="lg:col-span-8 clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-6">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
             <div>
-              <h2 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">Grafik Kinerja</span>
-                <span>Perbandingan Capaian BA vs PK per Petugas</span>
-              </h2>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Visualisasi jumlah dokumen BA Selesai, PK Selesai, dan sisa yang belum diproses oleh tiap PIC.</p>
+              <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Capaian Verifikasi per Petugas (BA vs PK)</h2>
+              <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Perbandingan dokumen BA Selesai, PK Selesai, dan sisa berkas per PIC</p>
+            </div>
+            <div class="flex items-center gap-3 text-xs font-bold">
+              <span class="text-indigo-600 dark:text-indigo-400">BA: <span id="baPctInline">0%</span></span>
+              <span class="text-slate-300 dark:text-slate-700">|</span>
+              <span class="text-emerald-600 dark:text-emerald-400">PK: <span id="pkPctInline">0%</span></span>
             </div>
           </div>
           <div class="relative w-full h-80">
@@ -253,348 +211,261 @@
           </div>
         </div>
 
-        <!-- Doughnut Chart: Komposisi Status Keseluruhan -->
-        <div class="lg:col-span-4 bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 flex flex-col justify-between">
-          <div class="mb-2">
-            <h2 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">Komposisi</span>
-              <span>Proporsi Status Berkas</span>
-            </h2>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Sebaran status Selesai, Proses, Kendala, dan Belum.</p>
+        <!-- Doughnut Chart: Status Composition -->
+        <div class="lg:col-span-4 clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-6 flex flex-col justify-between">
+          <div>
+            <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Komposisi Status Berkas</h2>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Proporsi keseluruhan dari total berkas</p>
           </div>
-          <div class="relative w-full h-60 flex items-center justify-center">
+
+          <div class="relative w-full h-56 my-2 flex items-center justify-center">
             <canvas id="statusDoughnutCanvas"></canvas>
             <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
               <span id="doughnutCenterPct" class="text-2xl font-extrabold text-slate-900 dark:text-white">0%</span>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tuntas</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Selesai</span>
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px]">
-            <div class="flex items-center justify-between px-2 py-1 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/40">
-              <span class="font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Selesai</span>
-              <span id="legSelesai" class="font-extrabold text-emerald-700 dark:text-emerald-300">0</span>
+
+          <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div class="flex items-center justify-between py-1 px-2">
+              <span class="text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Selesai</span>
+              <span id="legSelesai" class="font-bold text-slate-800 dark:text-slate-200">0</span>
             </div>
-            <div class="flex items-center justify-between px-2 py-1 rounded-lg bg-amber-50/70 dark:bg-amber-950/40">
-              <span class="font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Proses</span>
-              <span id="legProses" class="font-extrabold text-amber-700 dark:text-amber-300">0</span>
+            <div class="flex items-center justify-between py-1 px-2">
+              <span class="text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Proses</span>
+              <span id="legProses" class="font-bold text-slate-800 dark:text-slate-200">0</span>
             </div>
-            <div class="flex items-center justify-between px-2 py-1 rounded-lg bg-rose-50/70 dark:bg-rose-950/40">
-              <span class="font-semibold text-rose-800 dark:text-rose-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-500"></span>Kendala</span>
-              <span id="legKendala" class="font-extrabold text-rose-700 dark:text-rose-300">0</span>
+            <div class="flex items-center justify-between py-1 px-2">
+              <span class="text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-500"></span>Kendala</span>
+              <span id="legKendala" class="font-bold text-slate-800 dark:text-slate-200">0</span>
             </div>
-            <div class="flex items-center justify-between px-2 py-1 rounded-lg bg-slate-100/80 dark:bg-slate-800">
-              <span class="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-400"></span>Belum</span>
-              <span id="legBelum" class="font-extrabold text-slate-700 dark:text-slate-300">0</span>
+            <div class="flex items-center justify-between py-1 px-2">
+              <span class="text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"></span>Belum</span>
+              <span id="legBelum" class="font-bold text-slate-800 dark:text-slate-200">0</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Audit Checker / Deteksi Anomali Data Otomatis -->
-      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <div>
-            <h2 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800">Audit Checker</span>
-              <span>Deteksi Anomali &amp; Validasi Kebersihan Data</span>
-            </h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Klik kartu anomali di bawah untuk langsung menyaring dan memperbaiki data yang belum konsisten.</p>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div onclick="jumpToAnomaly('DONE_NO_BOX')" class="p-3.5 rounded-xl border border-amber-200/80 dark:border-amber-900/70 bg-amber-50/60 dark:bg-amber-950/30 hover:border-amber-500 cursor-pointer transition">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold text-amber-800 dark:text-amber-300">Selesai Tanpa Nomor Box</span>
-              <span id="anomDoneNoBox" class="text-lg font-extrabold text-amber-700 dark:text-amber-400">0</span>
-            </div>
-            <p class="text-[11px] text-amber-700/80 dark:text-amber-400/70 mt-1">BA &amp; PK Selesai tapi Lokasi Box kosong</p>
-          </div>
-
-          <div onclick="jumpToAnomaly('BOX_NOT_DONE')" class="p-3.5 rounded-xl border border-indigo-200/80 dark:border-indigo-900/70 bg-indigo-50/60 dark:bg-indigo-950/30 hover:border-indigo-500 cursor-pointer transition">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold text-indigo-800 dark:text-indigo-300">Sudah Ber-Box Belum Selesai</span>
-              <span id="anomBoxNotDone" class="text-lg font-extrabold text-indigo-700 dark:text-indigo-400">0</span>
-            </div>
-            <p class="text-[11px] text-indigo-700/80 dark:text-indigo-400/70 mt-1">Sudah masuk Box tapi BA/PK belum Selesai</p>
-          </div>
-
-          <div onclick="jumpToAnomaly('KENDALA_NO_NOTE')" class="p-3.5 rounded-xl border border-rose-200/80 dark:border-rose-900/70 bg-rose-50/60 dark:bg-rose-950/30 hover:border-rose-500 cursor-pointer transition">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold text-rose-800 dark:text-rose-300">Kendala Tanpa Keterangan</span>
-              <span id="anomKendalaNoNote" class="text-lg font-extrabold text-rose-700 dark:text-rose-400">0</span>
-            </div>
-            <p class="text-[11px] text-rose-700/80 dark:text-rose-400/70 mt-1">Status Kendala tapi kolom catatan kosong</p>
-          </div>
-
-          <div onclick="jumpToAnomaly('PARTIAL_STATUS')" class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 hover:border-slate-500 cursor-pointer transition">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">Status BA &amp; PK Timpang</span>
-              <span id="anomPartial" class="text-lg font-extrabold text-slate-800 dark:text-slate-200">0</span>
-            </div>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Salah satu Selesai, pasangannya masih Belum</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 11 Officer Cards -->
+      <!-- 11 Petugas Verifikator (Compact Clean Grid) -->
       <div>
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <div>
-            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Beban Kerja &amp; Progres 11 Petugas Verifikator</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Klik kartu petugas untuk langsung membuka daftar berkas tanggung jawabnya.</p>
-          </div>
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Daftar 11 Petugas Verifikator <span class="font-normal text-slate-400 text-xs ml-1">(Klik untuk buka tugas)</span></h2>
         </div>
-        <div id="officersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+        <div id="officersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5"></div>
       </div>
 
-      <!-- Pantauan Kendala Terpusat & Aktivitas Terbaru -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div class="lg:col-span-7 bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h3 class="text-sm font-extrabold text-rose-700 dark:text-rose-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-                <span>Pantauan Berkas Kendala Terpusat</span>
-              </h3>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400">Daftar berkas yang membutuhkan tindak lanjut segera</p>
-            </div>
-            <button onclick="jumpToKendala()" class="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 transition">
-              Lihat Semua Kendala
-            </button>
+      <!-- Collapsible / Minimalist Audit & Kendala Footer Strip -->
+      <details class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-4 group">
+        <summary class="flex items-center justify-between cursor-pointer list-none text-xs font-bold text-slate-700 dark:text-slate-300">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span>Pantauan Kendala &amp; Audit Kebersihan Data (<span id="totalAnomalyBadge">0</span> temuan)</span>
           </div>
-          <div id="kendalaListContainer" class="divide-y divide-slate-100 dark:divide-slate-800 max-h-64 overflow-y-auto text-xs">
-            <p class="py-6 text-center text-slate-400">Tidak ada berkas berkendala saat ini.</p>
-          </div>
+          <span class="text-indigo-600 dark:text-indigo-400 group-open:rotate-180 transition-transform">&#9662;</span>
+        </summary>
+        <div class="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <button onclick="jumpToAnomaly('DONE_NO_BOX')" class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-left transition">
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Selesai Tanpa Box</p>
+            <p id="anomDoneNoBox" class="text-lg font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">0</p>
+          </button>
+          <button onclick="jumpToAnomaly('BOX_NOT_DONE')" class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-left transition">
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Ber-Box Belum Selesai</p>
+            <p id="anomBoxNotDone" class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5">0</p>
+          </button>
+          <button onclick="jumpToAnomaly('KENDALA_NO_NOTE')" class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-left transition">
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Kendala Tanpa Catatan</p>
+            <p id="anomKendalaNoNote" class="text-lg font-extrabold text-rose-600 dark:text-rose-400 mt-0.5">0</p>
+          </button>
+          <button onclick="jumpToAnomaly('PARTIAL_STATUS')" class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition">
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Status BA &amp; PK Timpang</p>
+            <p id="anomPartial" class="text-lg font-extrabold text-slate-700 dark:text-slate-200 mt-0.5">0</p>
+          </button>
         </div>
-
-        <div class="lg:col-span-5 bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5">
-          <div class="mb-3">
-            <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Aktivitas Verifikasi Terakhir</h3>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">10 pembaruan data terbaru berdasarkan waktu simpan</p>
-          </div>
-          <div id="recentActivityContainer" class="divide-y divide-slate-100 dark:divide-slate-800 max-h-64 overflow-y-auto text-xs">
-            <p class="py-6 text-center text-slate-400">Belum ada riwayat pembaruan.</p>
-          </div>
-        </div>
-      </div>
+      </details>
     </section>
 
     <!-- ===================================================================== -->
-    <!-- TAB 2: KERTAS KERJA & VERIFIKASI BERKAS                               -->
+    <!-- TAB 2: VERIFIKASI BERKAS (FOKUS KERJA CEPAT & BERSIH)                 -->
     <!-- ===================================================================== -->
     <section id="tab2" class="hidden space-y-4">
 
-      <!-- NEW: Personal PIC Banner ("Berkas Saya Saja" & "Belum Selesai Saja") -->
-      <div id="personalPicBanner" class="hidden bento-card bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 dark:from-indigo-900 dark:via-indigo-950 dark:to-violet-950 text-white p-4 sm:p-5 border border-indigo-500/40 shadow-md">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div class="space-y-1">
-            <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-md bg-white/15 text-white backdrop-blur-xs">Mode Fokus PIC</span>
-              <span id="personalPicPctBadge" class="text-xs font-extrabold text-emerald-300">0% Tuntas</span>
-            </div>
-            <h3 id="personalPicGreeting" class="text-base sm:text-lg font-extrabold tracking-tight">Halo Petugas, sisa 0 berkas lagi untuk tuntas 100%!</h3>
-            <p id="personalPicSubtext" class="text-xs text-indigo-100/90">Total tanggung jawab: 0 berkas • Selesai lengkap: 0 • Belum/Proses/Kendala: 0</p>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-2 shrink-0">
-            <button id="btnMyRemaining" onclick="toggleMyRemainingFilter()"
-              class="px-3.5 py-2 rounded-xl text-xs font-extrabold bg-white text-indigo-900 hover:bg-indigo-50 shadow-sm transition flex items-center gap-1.5">
-              <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              <span id="btnMyRemainingText">Tampilkan Sisa Tugas Saya</span>
-            </button>
-            <button onclick="showAllMyFiles()"
-              class="px-3.5 py-2 rounded-xl text-xs font-bold bg-white/15 hover:bg-white/25 text-white border border-white/20 transition">
-              Semua Berkas Saya
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Filter & Search Bar -->
-      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 space-y-3">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
-          <div class="lg:col-span-3">
-            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Cari Nama / NIP / Ket.</label>
-            <input id="searchInput" type="text" oninput="applyFilters()" placeholder="Tekan / untuk cari..."
-              class="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-          </div>
-          <div class="lg:col-span-2">
-            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Petugas (11 Orang)</label>
-            <select id="filterOfficer" onchange="onFilterOfficerChange()"
-              class="w-full px-2.5 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <option value="ALL">Semua Petugas</option>
-            </select>
-          </div>
-          <div class="lg:col-span-2">
-            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Status &amp; Audit</label>
-            <select id="filterStatus" onchange="applyFilters()"
-              class="w-full px-2.5 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <option value="ALL">Semua Status</option>
-              <option value="NOT_SELESAI">Belum Selesai (Sisa Tugas)</option>
-              <option value="SELESAI">Selesai (BA &amp; PK)</option>
-              <option value="PROSES">Dalam Proses</option>
-              <option value="KENDALA">Ada Kendala</option>
-              <option value="BELUM">Belum Diproses</option>
-              <optgroup label="--- Audit Anomali ---">
-                <option value="DONE_NO_BOX">Selesai Tanpa Box</option>
-                <option value="BOX_NOT_DONE">Ber-Box Belum Selesai</option>
-                <option value="KENDALA_NO_NOTE">Kendala Tanpa Catatan</option>
-                <option value="PARTIAL_STATUS">Status BA &amp; PK Timpang</option>
-              </optgroup>
-            </select>
-          </div>
-          <div class="lg:col-span-2">
-            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Lokasi Box Arsip</label>
-            <select id="filterBox" onchange="applyFilters()"
-              class="w-full px-2.5 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <option value="ALL">Semua Box</option>
-              <option value="EMPTY">Belum Ber-Box</option>
-            </select>
-          </div>
-          <div class="lg:col-span-2">
-            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Unit Sekolah Rakyat</label>
-            <select id="filterUnit" onchange="applyFilters()"
-              class="w-full px-2.5 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <option value="ALL">Semua Unit</option>
-            </select>
-          </div>
-          <div class="lg:col-span-1 flex items-end">
-            <button onclick="resetFilters()" title="Reset semua filter" class="w-full px-2.5 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition">
-              Reset
-            </button>
-          </div>
-        </div>
-
-        <!-- Legend Pembeda Warna Baris -->
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-slate-500 dark:text-slate-400">
-          <div class="flex flex-wrap items-center gap-3">
-            <span class="font-semibold">Penanda Warna Baris:</span>
-            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-700"></span>BA &amp; PK Selesai</span>
-            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700"></span>Dalam Proses</span>
-            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-rose-100/80 dark:bg-rose-950/70 border border-rose-300 dark:border-rose-700"></span>Ada Kendala</span>
-            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700"></span>Belum Diproses</span>
-          </div>
-          <span class="text-indigo-600 dark:text-indigo-400 font-semibold">Tip: Klik Nama Guru atau NIP untuk melihat Kartu Profil &amp; Salin NIP</span>
-        </div>
-
-        <!-- Bulk Action Toolbar -->
-        <div id="bulkToolbar" class="hidden pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2.5 bg-indigo-50/80 dark:bg-indigo-950/50 p-3.5 rounded-xl">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2 text-xs font-bold text-indigo-950 dark:text-indigo-200">
-              <span id="selectedCountBadge" class="px-2.5 py-0.5 bg-indigo-600 text-white rounded-md">0</span>
-              <span>berkas dipilih</span>
-              <button onclick="clearSelection()" class="text-[11px] underline text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 ml-1">Batal pilih</button>
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
-              <select id="bulkStatusBA" class="px-2.5 py-1.5 text-xs border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-medium">
-                <option value="">-- Status BA --</option>
-                <option value="Selesai">BA: Selesai</option>
-                <option value="Proses">BA: Proses</option>
-                <option value="Kendala">BA: Kendala</option>
-                <option value="Belum">BA: Belum</option>
-              </select>
-              <select id="bulkStatusPK" class="px-2.5 py-1.5 text-xs border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-medium">
-                <option value="">-- Status PK --</option>
-                <option value="Selesai">PK: Selesai</option>
-                <option value="Proses">PK: Proses</option>
-                <option value="Kendala">PK: Kendala</option>
-                <option value="Belum">PK: Belum</option>
-              </select>
-              <input id="bulkLokasiBoxInput" type="text" placeholder="Lokasi Box (mis. BOX 1)..."
-                class="px-2.5 py-1.5 text-xs border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 w-40" />
-              <input id="bulkNoteInput" type="text" placeholder="Catatan massal..."
-                class="px-2.5 py-1.5 text-xs border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 w-44" />
-              <button id="btnBulkSave" onclick="submitBulkUpdate()" class="px-3.5 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-xs transition">
-                Simpan Massal
-              </button>
-            </div>
-          </div>
-          <!-- Quick Note Chips untuk Bulk -->
-          <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
-            <span class="text-indigo-800 dark:text-indigo-300 font-semibold">Template Catatan Cepat:</span>
-            <button type="button" onclick="appendBulkChip('TTE Lengkap')" class="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">TTE Lengkap</button>
-            <button type="button" onclick="appendBulkChip('Belum TTE')" class="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">Belum TTE</button>
-            <button type="button" onclick="appendBulkChip('Scan Buram')" class="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">Scan Buram</button>
-            <button type="button" onclick="appendBulkChip('Berkas Fisik Menyusul')" class="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">Berkas Fisik Menyusul</button>
-            <button type="button" onclick="appendBulkChip('Salah NIP/Nama')" class="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">Salah NIP/Nama</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Data Table -->
-      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-slate-900 dark:bg-slate-800 text-white text-[11px] uppercase tracking-wider">
-                <th class="p-3 w-10 text-center">
-                  <input id="selectAllPage" type="checkbox" onclick="toggleSelectPage(this)" class="rounded" title="Pilih semua di halaman ini" />
-                </th>
-                <th onclick="sortTable('no')" class="sortable hover:bg-slate-800 dark:hover:bg-slate-700 p-3 w-14 text-center">No <span id="sortIcon_no" class="opacity-60">&#8597;</span></th>
-                <th onclick="sortTable('nama')" class="sortable hover:bg-slate-800 dark:hover:bg-slate-700 p-3">Nama Guru &amp; NIP <span id="sortIcon_nama" class="opacity-60">&#8597;</span></th>
-                <th onclick="sortTable('lokasiBox')" class="sortable hover:bg-slate-800 dark:hover:bg-slate-700 p-3">Unit Sekolah Rakyat &amp; Box <span id="sortIcon_lokasiBox" class="opacity-60">&#8597;</span></th>
-                <th onclick="sortTable('petugas')" class="sortable hover:bg-slate-800 dark:hover:bg-slate-700 p-3">Petugas PIC <span id="sortIcon_petugas" class="opacity-60">&#8597;</span></th>
-                <th onclick="sortTable('statusBA')" class="sortable hover:bg-slate-800 dark:hover:bg-slate-700 p-3 text-center">Status BA <span id="sortIcon_statusBA" class="opacity-60">&#8597;</span></th>
-                <th onclick="sortTable('statusPK')" class="sortable hover:bg-slate-800 dark:hover:bg-slate-700 p-3 text-center">Status PK <span id="sortIcon_statusPK" class="opacity-60">&#8597;</span></th>
-                <th class="p-3">Keterangan</th>
-                <th class="p-3 text-center w-28">Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody" class="divide-y divide-slate-200/80 dark:divide-slate-800 text-xs"></tbody>
-          </table>
-        </div>
-
-        <!-- Pagination Footer -->
-        <div class="p-3.5 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-            <span id="paginationInfo">Menampilkan 0 - 0 dari 0 data</span>
-            <select id="pageSizeSelect" onchange="changePageSize()" class="px-2 py-1 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">
-              <option value="25">25 / hal</option>
-              <option value="50" selected>50 / hal</option>
-              <option value="100">100 / hal</option>
-              <option value="250">250 / hal</option>
-            </select>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button onclick="prevPage()" class="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold transition">Sebelumnya</button>
-            <span id="pageIndicator" class="px-3 py-1.5 font-bold text-slate-700 dark:text-slate-300">Hal 1 / 1</span>
-            <button onclick="nextPage()" class="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold transition">Berikutnya</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================================================================== -->
-    <!-- TAB 3: REKAP & DAFTAR ISI BOX ARSIP (SIAP CETAK LABEL)                -->
-    <!-- ===================================================================== -->
-    <section id="tab3" class="hidden space-y-5">
-      <div class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 flex flex-wrap items-center justify-between gap-4 no-print">
+      <!-- Personal PIC Focus Banner -->
+      <div id="personalPicBanner" class="hidden clean-card bg-indigo-600 dark:bg-indigo-900/90 text-white p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Rekapitulasi &amp; Daftar Isi Box Arsip</h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pilih nomor boks arsip untuk melihat rincian daftar nama guru di dalamnya atau mencetak label boks.</p>
+          <h3 id="personalPicGreeting" class="text-sm sm:text-base font-extrabold">Halo Petugas, sisa 0 berkas lagi untuk tuntas 100%!</h3>
+          <p id="personalPicSubtext" class="text-xs text-indigo-100 mt-0.5">Progres Anda: 0% (0 dari 0 berkas selesai)</p>
         </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <select id="boxDetailSelect" onchange="renderBoxDetail()" class="px-3.5 py-2 text-xs font-bold border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <option value="">-- Pilih Lokasi Box --</option>
-          </select>
-          <button onclick="printBoxLabel()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white transition flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-            </svg>
-            <span>Cetak Daftar Isi Box</span>
+        <div class="flex items-center gap-2 shrink-0">
+          <button id="btnMyRemaining" onclick="toggleMyRemainingFilter()"
+            class="px-3.5 py-2 rounded-xl text-xs font-extrabold bg-white text-indigo-900 hover:bg-indigo-50 transition">
+            <span id="btnMyRemainingText">Tampilkan Sisa Tugas Saya</span>
+          </button>
+          <button onclick="showAllMyFiles()"
+            class="px-3 py-2 rounded-xl text-xs font-bold bg-indigo-500/40 hover:bg-indigo-500/60 text-white transition">
+            Semua
           </button>
         </div>
       </div>
 
-      <!-- Ringkasan Kartu Semua Box -->
+      <!-- Compact Single-Row Filter Bar -->
+      <div class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 space-y-3">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <!-- Search Input -->
+          <div class="relative flex-1 min-w-[200px]">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input id="searchInput" type="text" oninput="applyFilters()" placeholder="Cari nama guru, NIP, atau keterangan..."
+              class="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-indigo-500" />
+          </div>
+
+          <!-- Petugas Dropdown -->
+          <select id="filterOfficer" onchange="onFilterOfficerChange()"
+            class="px-3 py-2 text-xs font-semibold border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="ALL">Semua Petugas</option>
+          </select>
+
+          <!-- Status Dropdown -->
+          <select id="filterStatus" onchange="applyFilters()"
+            class="px-3 py-2 text-xs font-semibold border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="ALL">Semua Status</option>
+            <option value="NOT_SELESAI">Sisa Tugas (Belum Selesai)</option>
+            <option value="SELESAI">Selesai (BA &amp; PK)</option>
+            <option value="PROSES">Dalam Proses</option>
+            <option value="KENDALA">Ada Kendala</option>
+            <option value="BELUM">Belum Diproses</option>
+            <optgroup label="Audit Anomali">
+              <option value="DONE_NO_BOX">Selesai Tanpa Box</option>
+              <option value="BOX_NOT_DONE">Ber-Box Belum Selesai</option>
+              <option value="KENDALA_NO_NOTE">Kendala Tanpa Catatan</option>
+              <option value="PARTIAL_STATUS">BA &amp; PK Timpang</option>
+            </optgroup>
+          </select>
+
+          <!-- Box Dropdown -->
+          <select id="filterBox" onchange="applyFilters()"
+            class="px-3 py-2 text-xs font-semibold border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="ALL">Semua Box</option>
+            <option value="EMPTY">Belum Ber-Box</option>
+          </select>
+
+          <!-- Unit Dropdown -->
+          <select id="filterUnit" onchange="applyFilters()"
+            class="px-3 py-2 text-xs font-semibold border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 max-w-[180px]">
+            <option value="ALL">Semua Unit</option>
+          </select>
+
+          <button onclick="resetFilters()" class="px-3 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition">
+            Reset
+          </button>
+        </div>
+
+        <!-- Bulk Action Toolbar (Hanya muncul saat ada checkbox dicentang) -->
+        <div id="bulkToolbar" class="hidden pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2.5 bg-indigo-50/70 dark:bg-indigo-950/40 p-3 rounded-xl">
+          <div class="flex items-center gap-2 text-xs font-bold text-indigo-900 dark:text-indigo-200">
+            <span id="selectedCountBadge" class="px-2 py-0.5 bg-indigo-600 text-white rounded-md">0</span>
+            <span>dipilih</span>
+            <button onclick="clearSelection()" class="text-[11px] underline text-indigo-600 dark:text-indigo-400 ml-1">Batal</button>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="bulkStatusBA" class="px-2.5 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800">
+              <option value="">BA...</option>
+              <option value="Selesai">BA: Selesai</option>
+              <option value="Proses">BA: Proses</option>
+              <option value="Kendala">BA: Kendala</option>
+              <option value="Belum">BA: Belum</option>
+            </select>
+            <select id="bulkStatusPK" class="px-2.5 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800">
+              <option value="">PK...</option>
+              <option value="Selesai">PK: Selesai</option>
+              <option value="Proses">PK: Proses</option>
+              <option value="Kendala">PK: Kendala</option>
+              <option value="Belum">PK: Belum</option>
+            </select>
+            <input id="bulkLokasiBoxInput" type="text" placeholder="Box (mis. BOX 1)"
+              class="px-2.5 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 w-32" />
+            <input id="bulkNoteInput" type="text" placeholder="Catatan..."
+              class="px-2.5 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 w-36" />
+            <button id="btnBulkSave" onclick="submitBulkUpdate()" class="px-3.5 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition">
+              Simpan Massal
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clean Data Table -->
+      <div class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50/90 dark:bg-slate-800/80 border-b border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-[11px] font-bold uppercase tracking-wider">
+                <th class="p-3.5 w-10 text-center">
+                  <input id="selectAllPage" type="checkbox" onclick="toggleSelectPage(this)" class="rounded border-slate-300" />
+                </th>
+                <th onclick="sortTable('no')" class="sortable hover:text-slate-900 dark:hover:text-white p-3.5 w-14 text-center">No</th>
+                <th onclick="sortTable('nama')" class="sortable hover:text-slate-900 dark:hover:text-white p-3.5">Nama Guru &amp; NIP</th>
+                <th onclick="sortTable('lokasiBox')" class="sortable hover:text-slate-900 dark:hover:text-white p-3.5">Unit &amp; Box</th>
+                <th onclick="sortTable('petugas')" class="sortable hover:text-slate-900 dark:hover:text-white p-3.5">PIC</th>
+                <th onclick="sortTable('statusBA')" class="sortable hover:text-slate-900 dark:hover:text-white p-3.5 text-center">BA</th>
+                <th onclick="sortTable('statusPK')" class="sortable hover:text-slate-900 dark:hover:text-white p-3.5 text-center">PK</th>
+                <th class="p-3.5">Keterangan</th>
+                <th class="p-3.5 text-center w-24">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody" class="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs"></tbody>
+          </table>
+        </div>
+
+        <!-- Minimalist Pagination & Legend -->
+        <div class="px-4 py-3 bg-slate-50/60 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-3 text-slate-500 dark:text-slate-400">
+            <span id="paginationInfo">0 data</span>
+            <select id="pageSizeSelect" onchange="changePageSize()" class="px-2 py-1 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-xs">
+              <option value="25">25</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+            </select>
+            <div class="hidden sm:flex items-center gap-2.5 text-[11px] pl-2 border-l border-slate-200 dark:border-slate-700">
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-200 dark:bg-emerald-800"></span>Selesai</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-200 dark:bg-amber-800"></span>Proses</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-200 dark:bg-rose-800"></span>Kendala</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button onclick="prevPage()" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 font-semibold transition">&larr;</button>
+            <span id="pageIndicator" class="px-2.5 py-1.5 font-bold text-slate-700 dark:text-slate-300">1 / 1</span>
+            <button onclick="nextPage()" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 font-semibold transition">&rarr;</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 3: BOX ARSIP (BERSIH & SIAP CETAK)                                -->
+    <!-- ===================================================================== -->
+    <section id="tab3" class="hidden space-y-5">
+      <div class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5 flex flex-wrap items-center justify-between gap-4 no-print">
+        <div>
+          <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Daftar Isi Box Arsip</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Pilih nomor box untuk melihat daftar guru di dalamnya atau mencetak label.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <select id="boxDetailSelect" onchange="renderBoxDetail()" class="px-3.5 py-2 text-xs font-bold border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800">
+            <option value="">-- Pilih Box --</option>
+          </select>
+          <button onclick="printBoxLabel()" class="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition">
+            Cetak Daftar
+          </button>
+        </div>
+      </div>
+
       <div id="boxSummaryGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 no-print"></div>
 
-      <!-- Area Cetak Daftar Isi Box -->
-      <div id="printArea" class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6">
-        <div id="boxDetailContent" class="text-xs text-slate-500 dark:text-slate-400 text-center py-8">
-          Silakan pilih salah satu boks arsip di atas untuk menampilkan daftar isi berkas di dalamnya.
+      <div id="printArea" class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-6">
+        <div id="boxDetailContent" class="text-xs text-slate-400 text-center py-8">
+          Pilih salah satu box di atas untuk menampilkan daftar berkas.
         </div>
       </div>
     </section>
@@ -602,159 +473,136 @@
   </main>
 
   <!-- ===================================================================== -->
-  <!-- NEW: SLIDE-OVER DRAWER (KARTU PROFIL DETAIL GURU)                     -->
+  <!-- SLIDE-OVER DRAWER: KARTU PROFIL DETAIL GURU                           -->
   <!-- ===================================================================== -->
   <div id="profileDrawer" class="hidden fixed inset-0 z-50 overflow-hidden no-print">
-    <!-- Backdrop -->
-    <div id="profileDrawerBackdrop" onclick="closeProfileDrawer()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs opacity-0"></div>
+    <div id="profileDrawerBackdrop" onclick="closeProfileDrawer()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs opacity-0"></div>
 
-    <!-- Drawer Panel -->
     <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
       <div id="profileDrawerPanel" class="w-screen max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between translate-x-full">
-        <!-- Drawer Header -->
         <div>
-          <div class="p-6 bg-gradient-to-br from-slate-900 via-indigo-950 to-indigo-800 text-white relative">
-            <button onclick="closeProfileDrawer()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-lg font-bold transition">
-              &times;
-            </button>
-            <div class="flex items-center gap-2 mb-2">
-              <span id="drawerNoBadge" class="px-2.5 py-0.5 rounded-md bg-white/15 text-[11px] font-bold">Urut #0</span>
-              <span id="drawerOverallStatus" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">Status</span>
-            </div>
-            <h3 id="drawerNama" class="text-lg font-extrabold leading-snug pr-8">-</h3>
-
-            <!-- NIP + Tombol Salin NIP 1-Klik -->
-            <div class="mt-3 flex items-center justify-between gap-2 bg-white/10 border border-white/15 rounded-xl px-3 py-2">
-              <div>
-                <p class="text-[10px] uppercase tracking-wider text-indigo-200 font-semibold">Nomor Induk PPPK / NIP</p>
-                <p id="drawerNip" class="text-sm font-mono font-bold tracking-wide text-white">-</p>
+          <!-- Minimalist Header -->
+          <div class="p-6 border-b border-slate-100 dark:border-slate-800">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span id="drawerNoBadge" class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-bold">#0</span>
+                <span id="drawerOverallStatus" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold">Status</span>
               </div>
-              <button id="btnCopyNip" onclick="copyDrawerNip()"
-                class="px-3 py-1.5 rounded-lg bg-white text-slate-900 hover:bg-indigo-50 text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition shrink-0">
-                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
+              <button onclick="closeProfileDrawer()" class="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-700 text-lg font-bold transition">
+                &times;
+              </button>
+            </div>
+
+            <h3 id="drawerNama" class="text-lg font-extrabold text-slate-900 dark:text-white leading-snug">-</h3>
+
+            <!-- Copy NIP Bar -->
+            <div class="mt-3 flex items-center justify-between gap-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-xl px-3.5 py-2.5">
+              <div>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">NIP PPPK</p>
+                <p id="drawerNip" class="text-sm font-mono font-bold text-slate-800 dark:text-slate-100">-</p>
+              </div>
+              <button onclick="copyDrawerNip()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition">
                 <span id="btnCopyNipText">Salin NIP</span>
               </button>
             </div>
           </div>
 
-          <!-- Drawer Body -->
-          <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(100vh-230px)] text-xs">
-            <div class="grid grid-cols-1 gap-3">
-              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80">
-                <p class="text-[11px] font-bold text-slate-400 uppercase">Jabatan Fungsional</p>
-                <p id="drawerJabatan" class="text-sm font-bold text-slate-900 dark:text-white mt-0.5">-</p>
+          <!-- Clean Info Rows -->
+          <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(100vh-240px)] text-xs">
+            <div class="space-y-3">
+              <div>
+                <p class="text-[11px] text-slate-400">Jabatan</p>
+                <p id="drawerJabatan" class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">-</p>
               </div>
-
-              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80">
-                <p class="text-[11px] font-bold text-slate-400 uppercase">Unit Kerja / Sekolah Rakyat</p>
-                <p id="drawerUnitKerja" class="text-sm font-bold text-slate-900 dark:text-white mt-0.5">-</p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80">
-                <p class="text-[11px] font-bold text-slate-400 uppercase">Petugas Verifikator</p>
-                <p id="drawerPetugas" class="text-xs font-extrabold text-indigo-600 dark:text-indigo-400 mt-1">-</p>
-              </div>
-              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80">
-                <p class="text-[11px] font-bold text-slate-400 uppercase">Lokasi Box Arsip</p>
-                <p id="drawerLokasiBox" class="text-xs font-extrabold text-slate-900 dark:text-white mt-1">-</p>
+              <div>
+                <p class="text-[11px] text-slate-400">Unit Kerja Sekolah Rakyat</p>
+                <p id="drawerUnitKerja" class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">-</p>
               </div>
             </div>
 
-            <!-- Status BA & PK Cards -->
-            <div class="grid grid-cols-2 gap-3">
-              <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-                <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5">Berita Acara (BA)</p>
+            <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div>
+                <p class="text-[11px] text-slate-400">Petugas PIC</p>
+                <p id="drawerPetugas" class="font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">-</p>
+              </div>
+              <div>
+                <p class="text-[11px] text-slate-400">Lokasi Box Arsip</p>
+                <p id="drawerLokasiBox" class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">-</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div>
+                <p class="text-[11px] text-slate-400 mb-1">Berita Acara (BA)</p>
                 <div id="drawerStatusBA">-</div>
               </div>
-              <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-                <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5">Perjanjian Kerja (PK)</p>
+              <div>
+                <p class="text-[11px] text-slate-400 mb-1">Perjanjian Kerja (PK)</p>
                 <div id="drawerStatusPK">-</div>
               </div>
             </div>
 
-            <!-- Catatan / Keterangan -->
-            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80">
-              <p class="text-[11px] font-bold text-slate-400 uppercase">Keterangan / Catatan Verifikasi</p>
-              <p id="drawerKeterangan" class="text-xs text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">-</p>
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
+              <p class="text-[11px] text-slate-400">Catatan Verifikasi</p>
+              <p id="drawerKeterangan" class="text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">-</p>
             </div>
 
-            <!-- Riwayat Perubahan Status -->
-            <div class="p-3.5 rounded-xl border border-indigo-100 dark:border-indigo-900/60 bg-indigo-50/40 dark:bg-indigo-950/20">
-              <p class="text-[11px] font-bold text-indigo-800 dark:text-indigo-300 uppercase flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span>Riwayat Sinkronisasi Terakhir</span>
-              </p>
-              <p id="drawerUpdatedAt" class="text-xs font-mono text-slate-600 dark:text-slate-400 mt-1">Belum pernah diperbarui</p>
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
+              <p class="text-[11px] text-slate-400">Terakhir Diperbarui</p>
+              <p id="drawerUpdatedAt" class="font-mono text-slate-500 dark:text-slate-400 mt-0.5">-</p>
             </div>
           </div>
         </div>
 
         <!-- Drawer Footer -->
-        <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between gap-2">
-          <button onclick="closeProfileDrawer()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">
+        <div class="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
+          <button onclick="closeProfileDrawer()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
             Tutup
           </button>
-          <button id="drawerEditBtn" onclick="" class="flex-1 px-4 py-2.5 rounded-xl text-xs font-extrabold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition flex items-center justify-center gap-1.5">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-            <span>Ubah Status &amp; Box Arsip</span>
+          <button id="drawerEditBtn" class="flex-1 px-4 py-2.5 rounded-xl text-xs font-extrabold bg-indigo-600 hover:bg-indigo-700 text-white transition">
+            Ubah Status &amp; Box
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Edit Modal -->
-  <div id="editModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 no-print">
+  <!-- Edit Modal (Clean & Focused) -->
+  <div id="editModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 no-print">
     <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 dark:border-slate-800 space-y-4">
       <div class="flex justify-between items-start gap-2">
         <div>
-          <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Update Verifikasi Real-Time</span>
-          <h3 id="modalGuruName" class="text-base font-extrabold text-slate-900 dark:text-white mt-0.5">-</h3>
-          <p id="modalGuruMeta" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">-</p>
-          <p id="modalLastUpdated" class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5"></p>
+          <h3 id="modalGuruName" class="text-base font-extrabold text-slate-900 dark:text-white">-</h3>
+          <p id="modalGuruMeta" class="text-xs text-slate-400 mt-0.5">-</p>
         </div>
-        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-bold text-xl leading-none">&times;</button>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
       </div>
 
       <input type="hidden" id="modalNip" />
 
       <div class="space-y-3">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-3">
           <div>
             <div class="flex items-center justify-between mb-1">
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                <span>Petugas Verifikator</span>
-                <span id="petugasLockBadge" class="inline-flex items-center gap-0.5 px-1.5 py-0.2 text-[10px] font-bold rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
-                  &#128274; Terkunci
-                </span>
-              </label>
-              <button type="button" id="btnTogglePetugasLock" onclick="toggleAdminPetugasUnlock()"
-                class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
-                Buka Kunci (Admin)
+              <label class="text-[11px] font-bold text-slate-500">Petugas PIC</label>
+              <button type="button" id="btnTogglePetugasLock" onclick="toggleAdminPetugasUnlock()" class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                Buka Kunci
               </button>
             </div>
-            <select id="modalPetugas" disabled
-              class="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 cursor-not-allowed opacity-90"></select>
-            <p id="petugasLockHint" class="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
-              Pembagian PIC sudah dikunci agar tidak tertukar.
-            </p>
+            <select id="modalPetugas" disabled class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-100 dark:bg-slate-800/60 text-slate-500 cursor-not-allowed"></select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Lokasi Box Arsip</label>
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">Lokasi Box</label>
             <input id="modalLokasiBox" list="existingBoxesList" type="text" placeholder="Contoh: BOX 1"
-              class="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             <datalist id="existingBoxesList"></datalist>
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Status Berita Acara (BA)</label>
-            <select id="modalStatusBA" class="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">Status BA</label>
+            <select id="modalStatusBA" class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800">
               <option value="Belum">Belum</option>
               <option value="Proses">Proses</option>
               <option value="Selesai">Selesai</option>
@@ -762,8 +610,8 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Status Perjanjian Kerja (PK)</label>
-            <select id="modalStatusPK" class="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">Status PK</label>
+            <select id="modalStatusPK" class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800">
               <option value="Belum">Belum</option>
               <option value="Proses">Proses</option>
               <option value="Selesai">Selesai</option>
@@ -773,36 +621,27 @@
         </div>
 
         <div>
-          <div class="flex items-center justify-between mb-1">
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Keterangan / Catatan Berkas</label>
-            <button type="button" onclick="document.getElementById('modalKeterangan').value=''" class="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">Kosongkan</button>
-          </div>
-          <textarea id="modalKeterangan" rows="2" placeholder="Contoh: TTE lengkap, atau Belum scan fisik..."
-            class="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl"></textarea>
-          <!-- Quick Chips Template Catatan -->
+          <label class="block text-[11px] font-bold text-slate-500 mb-1">Keterangan</label>
+          <textarea id="modalKeterangan" rows="2" placeholder="Catatan singkat..."
+            class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"></textarea>
           <div class="flex flex-wrap gap-1.5 mt-1.5">
-            <button type="button" onclick="appendModalChip('TTE Lengkap')" class="px-2 py-0.5 text-[11px] rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100">+ TTE Lengkap</button>
-            <button type="button" onclick="appendModalChip('Belum TTE')" class="px-2 py-0.5 text-[11px] rounded-full bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100">+ Belum TTE</button>
-            <button type="button" onclick="appendModalChip('Scan Buram')" class="px-2 py-0.5 text-[11px] rounded-full bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 hover:bg-rose-100">+ Scan Buram</button>
-            <button type="button" onclick="appendModalChip('Salah NIP/Nama')" class="px-2 py-0.5 text-[11px] rounded-full bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 hover:bg-rose-100">+ Salah NIP/Nama</button>
-            <button type="button" onclick="appendModalChip('Fisik Menyusul')" class="px-2 py-0.5 text-[11px] rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200">+ Fisik Menyusul</button>
+            <button type="button" onclick="appendModalChip('TTE Lengkap')" class="px-2 py-0.5 text-[10px] rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50">+ TTE Lengkap</button>
+            <button type="button" onclick="appendModalChip('Belum TTE')" class="px-2 py-0.5 text-[10px] rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50">+ Belum TTE</button>
+            <button type="button" onclick="appendModalChip('Scan Buram')" class="px-2 py-0.5 text-[10px] rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50">+ Scan Buram</button>
+            <button type="button" onclick="appendModalChip('Fisik Menyusul')" class="px-2 py-0.5 text-[10px] rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50">+ Fisik Menyusul</button>
           </div>
         </div>
       </div>
 
       <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeEditModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200">
-          Batal
-        </button>
-        <button id="btnSaveSingle" onclick="saveSingleEdit()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white">
-          Simpan ke Spreadsheet
-        </button>
+        <button onclick="closeEditModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Batal</button>
+        <button id="btnSaveSingle" onclick="saveSingleEdit()" class="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white">Simpan</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast Notification -->
-  <div id="toast" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900 dark:bg-indigo-600 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-lg max-w-sm no-print"></div>
+  <!-- Toast -->
+  <div id="toast" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900 dark:bg-indigo-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg max-w-sm no-print"></div>
 
   <script>
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw6U7vqmEd5n8thqt8jOmFFt1XJZ1KjdBZBRhv6H-mgGroGxM3ypKe5yaHGYasgGkIP/exec";
@@ -820,30 +659,24 @@
     let AUTO_SYNC_TIMER = null;
     let SORT_FIELD = "no";
     let SORT_ASC = true;
-    let CURRENT_TAB = 1;
     const ADMIN_UNLOCK_PIN = "2025";
     let IS_ADMIN_PETUGAS_UNLOCKED = false;
 
-    // Chart.js Instances
     let OFFICER_CHART = null;
     let STATUS_DOUGHNUT_CHART = null;
     let DRAWER_CURRENT_NIP = "";
 
-    // Dark Mode Initialization
     function initDarkMode() {
       const savedTheme = localStorage.getItem("SIMON_BAPK_THEME");
       const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const isDark = savedTheme ? (savedTheme === "dark") : prefersDark;
-      applyTheme(isDark);
+      applyTheme(savedTheme ? (savedTheme === "dark") : prefersDark);
     }
 
     function applyTheme(isDark) {
       document.documentElement.classList.toggle("dark", isDark);
       document.getElementById("iconSun").classList.toggle("hidden", !isDark);
       document.getElementById("iconMoon").classList.toggle("hidden", isDark);
-      if (ALL_RECORDS.length > 0) {
-        renderDashboard();
-      }
+      if (ALL_RECORDS.length > 0) renderDashboard();
     }
 
     function toggleDarkMode() {
@@ -863,10 +696,13 @@
       }
       updatePersonalPicBanner();
       fetchDataFromSheet(false);
-      toggleAutoSync();
+      AUTO_SYNC_TIMER = setInterval(() => {
+        if (document.getElementById("editModal").classList.contains("hidden")) {
+          fetchDataFromSheet(false, true);
+        }
+      }, 30000);
     });
 
-    // Keyboard shortcuts: '/' to focus search, 'Esc' to close modal/drawer
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         closeEditModal();
@@ -884,14 +720,11 @@
       document.getElementById("filterOfficer").value = pic;
       updatePersonalPicBanner();
       applyFilters();
-      if (pic !== "ALL") {
-        showToast(`Mode PIC Aktif: ${pic}`);
-      }
+      if (pic !== "ALL") showToast(`PIC Aktif: ${pic}`);
     }
 
     function onFilterOfficerChange() {
       const off = document.getElementById("filterOfficer").value;
-      // Sinkronkan PIC Aktif jika user memilih petugas spesifik di filter
       if (off !== "ALL" && OFFICERS.includes(off)) {
         document.getElementById("activePicSelect").value = off;
         localStorage.setItem("SIMON_BAPK_ACTIVE_PIC", off);
@@ -916,29 +749,23 @@
       const pctMine = totalMine > 0 ? ((doneMine / totalMine) * 100).toFixed(1) : "0.0";
 
       const firstName = activePic.split(" ")[0];
-      document.getElementById("personalPicPctBadge").textContent = `${pctMine}% Tuntas`;
       document.getElementById("personalPicGreeting").textContent = remainingMine === 0 && totalMine > 0
-        ? `Luar biasa ${firstName}! Seluruh ${totalMine} berkas Anda sudah 100% tuntas.`
+        ? `Luar biasa ${firstName}! Semua ${totalMine} berkas Anda sudah tuntas 100%.`
         : `Halo ${firstName}, sisa ${remainingMine} berkas lagi untuk tuntas 100%!`;
       document.getElementById("personalPicSubtext").textContent =
-        `PIC: ${activePic} • Total tanggung jawab: ${totalMine} berkas • Selesai lengkap: ${doneMine} • Belum/Proses/Kendala: ${remainingMine}`;
+        `Progres Anda: ${pctMine}% (${doneMine} dari ${totalMine} berkas selesai)`;
 
       const curStatus = document.getElementById("filterStatus").value;
-      const btnText = document.getElementById("btnMyRemainingText");
-      if (curStatus === "NOT_SELESAI") {
-        btnText.textContent = `Menampilkan Sisa Tugas (${remainingMine})`;
-      } else {
-        btnText.textContent = `Tampilkan Sisa Tugas Saya (${remainingMine})`;
-      }
+      document.getElementById("btnMyRemainingText").textContent = curStatus === "NOT_SELESAI"
+        ? `Sisa Tugas (${remainingMine})`
+        : `Tampilkan Sisa Tugas (${remainingMine})`;
 
       banner.classList.remove("hidden");
     }
 
     function toggleMyRemainingFilter() {
       const activePic = document.getElementById("activePicSelect").value;
-      if (activePic && activePic !== "ALL") {
-        document.getElementById("filterOfficer").value = activePic;
-      }
+      if (activePic && activePic !== "ALL") document.getElementById("filterOfficer").value = activePic;
       const stEl = document.getElementById("filterStatus");
       stEl.value = (stEl.value === "NOT_SELESAI") ? "ALL" : "NOT_SELESAI";
       updatePersonalPicBanner();
@@ -947,9 +774,7 @@
 
     function showAllMyFiles() {
       const activePic = document.getElementById("activePicSelect").value;
-      if (activePic && activePic !== "ALL") {
-        document.getElementById("filterOfficer").value = activePic;
-      }
+      if (activePic && activePic !== "ALL") document.getElementById("filterOfficer").value = activePic;
       document.getElementById("filterStatus").value = "ALL";
       updatePersonalPicBanner();
       applyFilters();
@@ -958,32 +783,17 @@
     function setConnectionStatus(state, text) {
       const badge = document.getElementById("connBadge");
       const dot = document.getElementById("connDot");
-      const label = document.getElementById("connText");
-      label.textContent = text;
+      document.getElementById("connText").textContent = text;
 
       if (state === "connected") {
-        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800";
-        dot.className = "w-2 h-2 rounded-full bg-emerald-500";
+        badge.className = "inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300";
+        dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500";
       } else if (state === "error") {
-        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-800";
-        dot.className = "w-2 h-2 rounded-full bg-rose-500";
+        badge.className = "inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300";
+        dot.className = "w-1.5 h-1.5 rounded-full bg-rose-500";
       } else {
-        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800";
-        dot.className = "w-2 h-2 rounded-full bg-amber-500 animate-pulse";
-      }
-    }
-
-    function toggleAutoSync() {
-      if (AUTO_SYNC_TIMER) {
-        clearInterval(AUTO_SYNC_TIMER);
-        AUTO_SYNC_TIMER = null;
-      }
-      if (document.getElementById("autoSyncToggle").checked) {
-        AUTO_SYNC_TIMER = setInterval(() => {
-          if (document.getElementById("editModal").classList.contains("hidden")) {
-            fetchDataFromSheet(false, true);
-          }
-        }, 30000);
+        badge.className = "inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300";
+        dot.className = "w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse";
       }
     }
 
@@ -994,34 +804,26 @@
       const currentFilter = filterSel.value;
       const currentActive = activePicSel.value;
 
-      filterSel.innerHTML = `<option value="ALL">Semua Petugas (${OFFICERS.length})</option>`;
+      filterSel.innerHTML = `<option value="ALL">Semua Petugas</option>`;
       activePicSel.innerHTML = `<option value="ALL" class="dark:bg-slate-900">Semua (Admin)</option>`;
       modalSel.innerHTML = "";
 
-      OFFICERS.forEach((name, idx) => {
-        const opt1 = document.createElement("option");
-        opt1.value = name;
-        opt1.textContent = `${idx + 1}. ${name}`;
-        filterSel.appendChild(opt1);
+      OFFICERS.forEach((name) => {
+        const o1 = document.createElement("option");
+        o1.value = name; o1.textContent = name;
+        filterSel.appendChild(o1);
 
-        const opt2 = document.createElement("option");
-        opt2.value = name;
-        opt2.textContent = name;
-        modalSel.appendChild(opt2);
+        const o2 = document.createElement("option");
+        o2.value = name; o2.textContent = name;
+        modalSel.appendChild(o2);
 
-        const opt3 = document.createElement("option");
-        opt3.value = name;
-        opt3.textContent = name;
-        opt3.className = "dark:bg-slate-900";
-        activePicSel.appendChild(opt3);
+        const o3 = document.createElement("option");
+        o3.value = name; o3.textContent = name; o3.className = "dark:bg-slate-900";
+        activePicSel.appendChild(o3);
       });
 
-      if (currentFilter && (currentFilter === "ALL" || OFFICERS.includes(currentFilter))) {
-        filterSel.value = currentFilter;
-      }
-      if (currentActive && (currentActive === "ALL" || OFFICERS.includes(currentActive))) {
-        activePicSel.value = currentActive;
-      }
+      if (currentFilter && (currentFilter === "ALL" || OFFICERS.includes(currentFilter))) filterSel.value = currentFilter;
+      if (currentActive && (currentActive === "ALL" || OFFICERS.includes(currentActive))) activePicSel.value = currentActive;
     }
 
     function populateDynamicFilters() {
@@ -1042,44 +844,25 @@
       const curDetailBox = boxDetailSel.value;
 
       filterBoxSel.innerHTML = `<option value="ALL">Semua Box (${sortedBoxes.length})</option><option value="EMPTY">Belum Ber-Box</option>`;
-      boxDetailSel.innerHTML = `<option value="">-- Pilih Lokasi Box (${sortedBoxes.length}) --</option>`;
+      boxDetailSel.innerHTML = `<option value="">-- Pilih Box (${sortedBoxes.length}) --</option>`;
       datalist.innerHTML = "";
 
       sortedBoxes.forEach(b => {
-        const o1 = document.createElement("option");
-        o1.value = b;
-        o1.textContent = b;
-        filterBoxSel.appendChild(o1);
-
-        const o2 = document.createElement("option");
-        o2.value = b;
-        o2.textContent = b;
-        boxDetailSel.appendChild(o2);
-
-        const o3 = document.createElement("option");
-        o3.value = b;
-        datalist.appendChild(o3);
+        const o1 = document.createElement("option"); o1.value = b; o1.textContent = b; filterBoxSel.appendChild(o1);
+        const o2 = document.createElement("option"); o2.value = b; o2.textContent = b; boxDetailSel.appendChild(o2);
+        const o3 = document.createElement("option"); o3.value = b; datalist.appendChild(o3);
       });
 
-      if (curBox === "ALL" || curBox === "EMPTY" || sortedBoxes.includes(curBox)) {
-        filterBoxSel.value = curBox;
-      }
-      if (sortedBoxes.includes(curDetailBox)) {
-        boxDetailSel.value = curDetailBox;
-      }
+      if (curBox === "ALL" || curBox === "EMPTY" || sortedBoxes.includes(curBox)) filterBoxSel.value = curBox;
+      if (sortedBoxes.includes(curDetailBox)) boxDetailSel.value = curDetailBox;
 
       const filterUnitSel = document.getElementById("filterUnit");
       const curUnit = filterUnitSel.value;
-      filterUnitSel.innerHTML = `<option value="ALL">Semua Unit (${sortedUnits.length})</option>`;
+      filterUnitSel.innerHTML = `<option value="ALL">Semua Unit</option>`;
       sortedUnits.forEach(u => {
-        const o = document.createElement("option");
-        o.value = u;
-        o.textContent = u;
-        filterUnitSel.appendChild(o);
+        const o = document.createElement("option"); o.value = u; o.textContent = u; filterUnitSel.appendChild(o);
       });
-      if (curUnit === "ALL" || sortedUnits.includes(curUnit)) {
-        filterUnitSel.value = curUnit;
-      }
+      if (curUnit === "ALL" || sortedUnits.includes(curUnit)) filterUnitSel.value = curUnit;
     }
 
     function showToast(msg) {
@@ -1087,27 +870,22 @@
       t.textContent = msg;
       t.classList.remove("hidden");
       clearTimeout(t._timer);
-      t._timer = setTimeout(() => t.classList.add("hidden"), 3500);
+      t._timer = setTimeout(() => t.classList.add("hidden"), 3000);
     }
 
     function switchTab(tabNum) {
-      CURRENT_TAB = tabNum;
       for (let i = 1; i <= 3; i++) {
         document.getElementById("tab" + i).classList.toggle("hidden", i !== tabNum);
         const btn = document.getElementById("btnTab" + i);
-        btn.className = (i === tabNum)
-          ? "px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap bg-slate-900 text-white dark:bg-indigo-600 shadow-xs"
-          : "px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700";
+        const mBtn = document.getElementById("mBtnTab" + i);
+        const activeClass = "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs";
+        const idleClass = "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200";
+        if (btn) btn.className = `px-4 py-1.5 rounded-lg text-xs font-bold transition ${i === tabNum ? activeClass : idleClass}`;
+        if (mBtn) mBtn.className = `flex-1 py-1.5 rounded-lg text-xs font-bold text-center transition ${i === tabNum ? "bg-indigo-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"}`;
       }
-      if (tabNum === 1 && ALL_RECORDS.length > 0) {
-        renderDashboard();
-      }
-      if (tabNum === 2) {
-        updatePersonalPicBanner();
-      }
-      if (tabNum === 3) {
-        renderBoxOverview();
-      }
+      if (tabNum === 1 && ALL_RECORDS.length > 0) renderDashboard();
+      if (tabNum === 2) updatePersonalPicBanner();
+      if (tabNum === 3) renderBoxOverview();
     }
 
     function jumpToKendala() {
@@ -1128,8 +906,7 @@
     async function fetchDataFromSheet(manual = false, silent = false) {
       const bar = document.getElementById("loadingBar");
       if (!silent) {
-        setConnectionStatus("loading", "Menyinkronkan...");
-        bar.textContent = "Menyinkronkan data dari Google Spreadsheet (Data_Master)...";
+        setConnectionStatus("loading", "Sinkron...");
         bar.classList.remove("hidden");
       }
 
@@ -1138,13 +915,7 @@
         const url = `${GAS_WEB_APP_URL}${sep}mode=json&t=${Date.now()}`;
         const response = await fetch(url, { method: "GET", redirect: "follow" });
         const text = await response.text();
-
-        let res;
-        try {
-          res = JSON.parse(text);
-        } catch (parseErr) {
-          throw new Error("Respon bukan JSON. Pastikan akses Web App di-set ke 'Siapa saja (Anyone)'.");
-        }
+        const res = JSON.parse(text);
 
         if (res && res.status === "success") {
           ALL_RECORDS = res.data || [];
@@ -1153,8 +924,7 @@
             populateOfficerDropdowns();
           }
           populateDynamicFilters();
-          setConnectionStatus("connected", `Terhubung • ${ALL_RECORDS.length.toLocaleString("id-ID")} Berkas`);
-          document.getElementById("syncStatusText").textContent = `Sinkron: ${res.serverTime || "Baru saja"}`;
+          setConnectionStatus("connected", `${ALL_RECORDS.length.toLocaleString("id-ID")} Berkas`);
           bar.classList.add("hidden");
 
           updatePersonalPicBanner();
@@ -1164,16 +934,15 @@
             renderBoxOverview();
             renderBoxDetail();
           }
-          if (manual) showToast(`Data berhasil disinkronkan (${ALL_RECORDS.length.toLocaleString("id-ID")} berkas).`);
+          if (manual) showToast(`Data diperbarui (${ALL_RECORDS.length.toLocaleString("id-ID")} berkas).`);
         } else {
-          throw new Error((res && res.message) ? res.message : "Gagal memuat data dari Spreadsheet.");
+          throw new Error((res && res.message) ? res.message : "Gagal memuat data.");
         }
       } catch (err) {
-        setConnectionStatus("error", "Koneksi Terputus");
+        setConnectionStatus("error", "Offline");
         bar.textContent = "Gagal terhubung ke Google Sheets: " + err.message;
-        bar.className = "w-full bg-rose-50 dark:bg-rose-950/70 border-b border-rose-200 dark:border-rose-900 px-4 py-2 text-center text-xs font-semibold text-rose-700 dark:text-rose-300 no-print";
+        bar.className = "w-full bg-rose-50 dark:bg-rose-950 px-4 py-1.5 text-center text-xs font-medium text-rose-700 dark:text-rose-300 no-print";
         bar.classList.remove("hidden");
-        if (manual) showToast("Error: " + err.message);
       }
     }
 
@@ -1181,17 +950,10 @@
       const response = await fetch(GAS_WEB_APP_URL, {
         method: "POST",
         redirect: "follow",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payloadObj)
       });
-      const text = await response.text();
-      try {
-        return JSON.parse(text);
-      } catch (e) {
-        throw new Error("Server Apps Script gagal merespons JSON.");
-      }
+      return JSON.parse(await response.text());
     }
 
     function getCategory(rec) {
@@ -1201,97 +963,58 @@
       return "BELUM";
     }
 
-    // Anomaly Check Helpers
-    function isDoneNoBox(r) {
-      return (r.statusBA === "Selesai" && r.statusPK === "Selesai" && !r.lokasiBox);
-    }
-    function isBoxNotDone(r) {
-      return (Boolean(r.lokasiBox) && (r.statusBA !== "Selesai" || r.statusPK !== "Selesai"));
-    }
-    function isKendalaNoNote(r) {
-      return ((r.statusBA === "Kendala" || r.statusPK === "Kendala") && !r.keterangan);
-    }
-    function isPartialStatus(r) {
-      return ((r.statusBA === "Selesai" && r.statusPK === "Belum") || (r.statusPK === "Selesai" && r.statusBA === "Belum"));
-    }
+    function isDoneNoBox(r) { return (r.statusBA === "Selesai" && r.statusPK === "Selesai" && !r.lokasiBox); }
+    function isBoxNotDone(r) { return (Boolean(r.lokasiBox) && (r.statusBA !== "Selesai" || r.statusPK !== "Selesai")); }
+    function isKendalaNoNote(r) { return ((r.statusBA === "Kendala" || r.statusPK === "Kendala") && !r.keterangan); }
+    function isPartialStatus(r) { return ((r.statusBA === "Selesai" && r.statusPK === "Belum") || (r.statusPK === "Selesai" && r.statusBA === "Belum")); }
 
-    // Render Chart.js Visual Analytics
     function renderCharts(officerStats, selesai, proses, kendala, belum, total) {
       const isDark = document.documentElement.classList.contains("dark");
-      const textColor = isDark ? "#cbd5e1" : "#334155";
-      const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(15, 23, 42, 0.06)";
+      const textColor = isDark ? "#94a3b8" : "#64748b";
+      const gridColor = isDark ? "rgba(148, 163, 184, 0.08)" : "rgba(15, 23, 42, 0.05)";
 
-      // 1. Horizontal Stacked Bar Chart: BA Selesai vs PK Selesai vs Sisa Dokumen
       const barCtx = document.getElementById("officerChartCanvas");
       if (barCtx) {
-        const labels = OFFICERS.map(n => n.split(" ")[0]); // Nama depan agar ringkas
+        const labels = OFFICERS.map(n => n.split(" ")[0]);
         const fullNames = OFFICERS;
         const baData = OFFICERS.map(n => officerStats[n]?.baDone || 0);
         const pkData = OFFICERS.map(n => officerStats[n]?.pkDone || 0);
-        // Sisa dokumen (dari total 2x dokumen per berkas)
         const remData = OFFICERS.map(n => {
           const st = officerStats[n];
-          if (!st) return 0;
-          return Math.max(0, (st.total * 2) - (st.baDone + st.pkDone));
+          return st ? Math.max(0, (st.total * 2) - (st.baDone + st.pkDone)) : 0;
         });
 
-        if (OFFICER_CHART) {
-          OFFICER_CHART.destroy();
-        }
+        if (OFFICER_CHART) OFFICER_CHART.destroy();
 
         OFFICER_CHART = new Chart(barCtx, {
           type: "bar",
           data: {
             labels: labels,
             datasets: [
-              {
-                label: "BA Selesai",
-                data: baData,
-                backgroundColor: "#4f46e5",
-                borderRadius: 4,
-                barPercentage: 0.72
-              },
-              {
-                label: "PK Selesai",
-                data: pkData,
-                backgroundColor: "#10b981",
-                borderRadius: 4,
-                barPercentage: 0.72
-              },
-              {
-                label: "Sisa Belum Selesai (BA+PK)",
-                data: remData,
-                backgroundColor: isDark ? "#334155" : "#e2e8f0",
-                borderRadius: 4,
-                barPercentage: 0.72
-              }
+              { label: "BA Selesai", data: baData, backgroundColor: "#4f46e5", borderRadius: 4, barPercentage: 0.65 },
+              { label: "PK Selesai", data: pkData, backgroundColor: "#10b981", borderRadius: 4, barPercentage: 0.65 },
+              { label: "Sisa Belum Selesai", data: remData, backgroundColor: isDark ? "#1e293b" : "#f1f5f9", borderRadius: 4, barPercentage: 0.65 }
             ]
           },
           options: {
             indexAxis: "y",
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-              mode: "index",
-              intersect: false
-            },
+            interaction: { mode: "index", intersect: false },
             plugins: {
               legend: {
-                position: "top",
-                align: "end",
+                position: "bottom",
                 labels: {
                   color: textColor,
-                  boxWidth: 12,
-                  boxHeight: 12,
+                  boxWidth: 10,
+                  boxHeight: 10,
                   usePointStyle: true,
                   pointStyle: "circle",
                   font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: "600" }
                 }
               },
               tooltip: {
-                backgroundColor: isDark ? "#0f172a" : "#1e293b",
-                titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: "700" },
-                bodyFont: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
+                backgroundColor: "#0f172a",
                 callbacks: {
                   title: (items) => {
                     const idx = items[0].dataIndex;
@@ -1302,28 +1025,13 @@
               }
             },
             scales: {
-              x: {
-                stacked: true,
-                grid: { color: gridColor },
-                ticks: {
-                  color: textColor,
-                  font: { family: "'Plus Jakarta Sans', sans-serif", size: 10 }
-                }
-              },
-              y: {
-                stacked: true,
-                grid: { display: false },
-                ticks: {
-                  color: textColor,
-                  font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: "700" }
-                }
-              }
+              x: { stacked: true, grid: { color: gridColor }, border: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
+              y: { stacked: true, grid: { display: false }, border: { display: false }, ticks: { color: isDark ? "#e2e8f0" : "#334155", font: { size: 11, weight: "700" } } }
             }
           }
         });
       }
 
-      // 2. Doughnut Chart: Komposisi Status Keseluruhan
       const doughnutCtx = document.getElementById("statusDoughnutCanvas");
       if (doughnutCtx) {
         const selesaiPct = total > 0 ? Math.round((selesai / total) * 100) : 0;
@@ -1333,46 +1041,24 @@
         document.getElementById("legKendala").textContent = kendala.toLocaleString("id-ID");
         document.getElementById("legBelum").textContent = belum.toLocaleString("id-ID");
 
-        if (STATUS_DOUGHNUT_CHART) {
-          STATUS_DOUGHNUT_CHART.destroy();
-        }
+        if (STATUS_DOUGHNUT_CHART) STATUS_DOUGHNUT_CHART.destroy();
 
         STATUS_DOUGHNUT_CHART = new Chart(doughnutCtx, {
           type: "doughnut",
           data: {
-            labels: ["Selesai Lengkap", "Dalam Proses", "Ada Kendala", "Belum Diproses"],
+            labels: ["Selesai", "Proses", "Kendala", "Belum"],
             datasets: [{
               data: [selesai, proses, kendala, belum],
-              backgroundColor: [
-                "#10b981", // Emerald
-                "#f59e0b", // Amber
-                "#f43f5e", // Rose
-                isDark ? "#475569" : "#cbd5e1" // Slate
-              ],
+              backgroundColor: ["#10b981", "#f59e0b", "#f43f5e", isDark ? "#334155" : "#e2e8f0"],
               borderColor: isDark ? "#0f172a" : "#ffffff",
-              borderWidth: 3,
-              hoverOffset: 6
+              borderWidth: 3
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: "72%",
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                backgroundColor: isDark ? "#0f172a" : "#1e293b",
-                titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: "700" },
-                bodyFont: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
-                callbacks: {
-                  label: (ctx) => {
-                    const val = ctx.parsed || 0;
-                    const pct = total > 0 ? ((val / total) * 100).toFixed(1) : "0.0";
-                    return ` ${ctx.label}: ${val.toLocaleString("id-ID")} berkas (${pct}%)`;
-                  }
-                }
-              }
-            }
+            cutout: "74%",
+            plugins: { legend: { display: false } }
           }
         });
       }
@@ -1381,36 +1067,25 @@
     function renderDashboard() {
       const total = ALL_RECORDS.length;
       let selesai = 0, proses = 0, kendala = 0, belum = 0;
-      let baDone = 0, pkDone = 0, boxedCount = 0;
+      let baDone = 0, pkDone = 0;
       let anomDoneNoBox = 0, anomBoxNotDone = 0, anomKendalaNoNote = 0, anomPartial = 0;
-
       const boxSet = new Set();
-      const kendalaList = [];
 
       const officerStats = {};
       OFFICERS.forEach(name => {
-        officerStats[name] = {
-          name, total: 0, selesai: 0, baDone: 0, pkDone: 0, kendala: 0,
-          firstChar: "", lastChar: "", minNo: 999999, maxNo: 0
-        };
+        officerStats[name] = { name, total: 0, baDone: 0, pkDone: 0, firstChar: "", lastChar: "" };
       });
 
       ALL_RECORDS.forEach(r => {
         const cat = getCategory(r);
         if (cat === "SELESAI") selesai++;
-        else if (cat === "KENDALA") {
-          kendala++;
-          kendalaList.push(r);
-        }
+        else if (cat === "KENDALA") kendala++;
         else if (cat === "PROSES") proses++;
         else belum++;
 
         if (r.statusBA === "Selesai") baDone++;
         if (r.statusPK === "Selesai") pkDone++;
-        if (r.lokasiBox) {
-          boxedCount++;
-          boxSet.add(r.lokasiBox);
-        }
+        if (r.lokasiBox) boxSet.add(r.lokasiBox);
 
         if (isDoneNoBox(r)) anomDoneNoBox++;
         if (isBoxNotDone(r)) anomBoxNotDone++;
@@ -1420,56 +1095,44 @@
         const st = officerStats[r.petugas];
         if (st) {
           st.total++;
-          if (cat === "SELESAI") st.selesai++;
           if (r.statusBA === "Selesai") st.baDone++;
           if (r.statusPK === "Selesai") st.pkDone++;
-          if (cat === "KENDALA") st.kendala++;
           const ch = r.nama ? r.nama.charAt(0).toUpperCase() : "";
           if (!st.firstChar) st.firstChar = ch;
           if (ch) st.lastChar = ch;
-          if (r.no < st.minNo) st.minNo = r.no;
-          if (r.no > st.maxNo) st.maxNo = r.no;
         }
       });
 
       document.getElementById("kpiTotal").textContent = total.toLocaleString("id-ID");
+      document.getElementById("kpiBoxSub").textContent = `${boxSet.size} Box terisi →`;
       document.getElementById("kpiSelesai").textContent = selesai.toLocaleString("id-ID");
-      document.getElementById("kpiSelesaiPct").textContent = total ? `${(selesai / total * 100).toFixed(1)}% tuntas` : "0%";
-      document.getElementById("kpiProses").textContent = proses.toLocaleString("id-ID");
+      document.getElementById("kpiSelesaiPct").textContent = total ? `${(selesai / total * 100).toFixed(1)}%` : "0%";
+      document.getElementById("kpiPending").textContent = (proses + belum).toLocaleString("id-ID");
+      document.getElementById("kpiPendingDetail").textContent = `${proses} proses • ${belum} belum`;
       document.getElementById("kpiKendala").textContent = kendala.toLocaleString("id-ID");
-      document.getElementById("kpiBelum").textContent = belum.toLocaleString("id-ID");
-      document.getElementById("kpiBoxCount").textContent = `${boxSet.size} Box`;
-      document.getElementById("kpiBoxSub").textContent = `${boxedCount.toLocaleString("id-ID")} berkas terarsip`;
 
-      // Audit Checker KPIs
-      document.getElementById("anomDoneNoBox").textContent = anomDoneNoBox.toLocaleString("id-ID");
-      document.getElementById("anomBoxNotDone").textContent = anomBoxNotDone.toLocaleString("id-ID");
-      document.getElementById("anomKendalaNoNote").textContent = anomKendalaNoNote.toLocaleString("id-ID");
-      document.getElementById("anomPartial").textContent = anomPartial.toLocaleString("id-ID");
+      document.getElementById("baPctInline").textContent = total ? `${(baDone / total * 100).toFixed(1)}%` : "0%";
+      document.getElementById("pkPctInline").textContent = total ? `${(pkDone / total * 100).toFixed(1)}%` : "0%";
 
-      const baPct = total ? (baDone / total * 100).toFixed(1) : 0;
-      const pkPct = total ? (pkDone / total * 100).toFixed(1) : 0;
-      document.getElementById("baSummaryText").textContent = `${baDone.toLocaleString("id-ID")} / ${total.toLocaleString("id-ID")} (${baPct}%)`;
-      document.getElementById("baProgressBar").style.width = `${baPct}%`;
-      document.getElementById("pkSummaryText").textContent = `${pkDone.toLocaleString("id-ID")} / ${total.toLocaleString("id-ID")} (${pkPct}%)`;
-      document.getElementById("pkProgressBar").style.width = `${pkPct}%`;
+      const totalAnom = anomDoneNoBox + anomBoxNotDone + anomKendalaNoNote + anomPartial;
+      document.getElementById("totalAnomalyBadge").textContent = totalAnom;
+      document.getElementById("anomDoneNoBox").textContent = anomDoneNoBox;
+      document.getElementById("anomBoxNotDone").textContent = anomBoxNotDone;
+      document.getElementById("anomKendalaNoNote").textContent = anomKendalaNoNote;
+      document.getElementById("anomPartial").textContent = anomPartial;
 
-      // Render Charts
       renderCharts(officerStats, selesai, proses, kendala, belum, total);
 
-      // Render Officer Cards
+      // Clean Officer Cards
       const grid = document.getElementById("officersGrid");
       grid.innerHTML = "";
-      OFFICERS.forEach((name, idx) => {
+      OFFICERS.forEach((name) => {
         const o = officerStats[name];
         const pct = o.total ? Math.round(((o.baDone + o.pkDone) / (2 * o.total)) * 100) : 0;
-        const abjad = (o.firstChar && o.lastChar)
-          ? (o.firstChar === o.lastChar ? `Abjad ${o.firstChar}` : `Abjad ${o.firstChar} – ${o.lastChar}`)
-          : "Belum ada data";
-        const rangeNo = o.total ? `No. ${o.minNo}–${o.maxNo}` : "-";
+        const abjad = (o.firstChar && o.lastChar) ? `${o.firstChar}–${o.lastChar}` : "-";
 
         const card = document.createElement("div");
-        card.className = "bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-md cursor-pointer transition flex flex-col justify-between group";
+        card.className = "clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-4 hover:border-indigo-500 cursor-pointer transition";
         card.onclick = () => {
           document.getElementById("filterOfficer").value = o.name;
           document.getElementById("activePicSelect").value = o.name;
@@ -1480,74 +1143,22 @@
         };
 
         card.innerHTML = `
-          <div>
-            <div class="flex items-center justify-between gap-2">
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-950 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition">Petugas #${idx + 1}</span>
-              <span class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">${abjad}</span>
-            </div>
-            <h3 class="font-extrabold text-slate-900 dark:text-white text-sm mt-2">${escapeHtml(o.name)}</h3>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${o.total} berkas (${rangeNo})</p>
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-900 dark:text-white text-xs truncate">${escapeHtml(o.name)}</h3>
+            <span class="text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400">${pct}%</span>
           </div>
-          <div class="mt-4">
-            <div class="flex justify-between text-[11px] font-bold mb-1">
-              <span class="text-slate-600 dark:text-slate-400">BA: ${o.baDone} | PK: ${o.pkDone}</span>
-              <span class="text-emerald-600 dark:text-emerald-400">${pct}%</span>
-            </div>
-            <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300" style="width:${pct}%"></div>
-            </div>
+          <p class="text-[11px] text-slate-400 mt-0.5">${o.total} berkas • Abjad ${abjad}</p>
+          <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-3">
+            <div class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width:${pct}%"></div>
           </div>
         `;
         grid.appendChild(card);
       });
-
-      // Render Pantauan Kendala Terpusat
-      const kendalaContainer = document.getElementById("kendalaListContainer");
-      if (kendalaList.length === 0) {
-        kendalaContainer.innerHTML = '<p class="py-6 text-center text-slate-400">Tidak ada berkas berkendala saat ini.</p>';
-      } else {
-        kendalaContainer.innerHTML = kendalaList.slice(0, 15).map(r => `
-          <div class="py-2.5 flex items-center justify-between gap-2 hover:bg-slate-50 dark:hover:bg-slate-800/60 px-2 rounded-lg">
-            <div class="min-w-0 cursor-pointer" onclick="openProfileDrawer('${escapeAttr(r.nip)}')">
-              <p class="font-bold text-slate-900 dark:text-slate-100 truncate hover:text-indigo-600 dark:hover:text-indigo-400">${escapeHtml(r.nama)} <span class="font-normal text-slate-400">(${escapeHtml(r.petugas)})</span></p>
-              <p class="text-[11px] text-rose-600 dark:text-rose-400 truncate">${escapeHtml(r.keterangan || "Status kendala tanpa catatan")}</p>
-            </div>
-            <button onclick="openEditModal('${escapeAttr(r.nip)}')" class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-900 dark:bg-indigo-600 text-white text-[11px] font-bold hover:bg-slate-700 dark:hover:bg-indigo-500">
-              Tindak Lanjut
-            </button>
-          </div>
-        `).join("");
-      }
-
-      // Render Aktivitas Terakhir
-      const recentContainer = document.getElementById("recentActivityContainer");
-      const recentList = ALL_RECORDS
-        .filter(r => r.updatedAt)
-        .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)))
-        .slice(0, 10);
-
-      if (recentList.length === 0) {
-        recentContainer.innerHTML = '<p class="py-6 text-center text-slate-400">Belum ada riwayat pembaruan.</p>';
-      } else {
-        recentContainer.innerHTML = recentList.map(r => `
-          <div class="py-2.5 flex items-center justify-between gap-2 px-1 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg" onclick="openProfileDrawer('${escapeAttr(r.nip)}')">
-            <div class="min-w-0">
-              <p class="font-bold text-slate-800 dark:text-slate-200 truncate hover:text-indigo-600 dark:hover:text-indigo-400">${escapeHtml(r.nama)}</p>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">PIC: ${escapeHtml(r.petugas)} • BA: ${r.statusBA} | PK: ${r.statusPK}</p>
-            </div>
-            <span class="shrink-0 text-[10px] font-mono text-slate-400">${escapeHtml(r.updatedAt.slice(5, 16))}</span>
-          </div>
-        `).join("");
-      }
     }
 
     function sortTable(field) {
-      if (SORT_FIELD === field) {
-        SORT_ASC = !SORT_ASC;
-      } else {
-        SORT_FIELD = field;
-        SORT_ASC = true;
-      }
+      if (SORT_FIELD === field) SORT_ASC = !SORT_ASC;
+      else { SORT_FIELD = field; SORT_ASC = true; }
       applyFilters(true);
     }
 
@@ -1572,21 +1183,16 @@
         if (box !== "ALL" && box !== "EMPTY" && r.lokasiBox !== box) return false;
         if (unit !== "ALL" && r.unitKerja !== unit) return false;
         if (q) {
-          const hay = `${r.nama} ${r.nip} ${r.unitKerja} ${r.jabatan} ${r.lokasiBox} ${r.keterangan}`.toLowerCase();
+          const hay = `${r.nama} ${r.nip} ${r.unitKerja} ${r.lokasiBox} ${r.keterangan}`.toLowerCase();
           if (!hay.includes(q)) return false;
         }
         return true;
       });
 
       FILTERED_RECORDS.sort((a, b) => {
-        let valA = a[SORT_FIELD];
-        let valB = b[SORT_FIELD];
-        if (SORT_FIELD === "no") {
-          return SORT_ASC ? (Number(valA) - Number(valB)) : (Number(valB) - Number(valA));
-        }
-        valA = String(valA || "").toLowerCase();
-        valB = String(valB || "").toLowerCase();
-        const cmp = valA.localeCompare(valB, undefined, { numeric: true });
+        let valA = a[SORT_FIELD], valB = b[SORT_FIELD];
+        if (SORT_FIELD === "no") return SORT_ASC ? (Number(valA) - Number(valB)) : (Number(valB) - Number(valA));
+        const cmp = String(valA || "").toLowerCase().localeCompare(String(valB || "").toLowerCase(), undefined, { numeric: true });
         return SORT_ASC ? cmp : -cmp;
       });
 
@@ -1603,40 +1209,24 @@
       document.getElementById("filterStatus").value = "ALL";
       document.getElementById("filterBox").value = "ALL";
       document.getElementById("filterUnit").value = "ALL";
-      SORT_FIELD = "no";
-      SORT_ASC = true;
+      SORT_FIELD = "no"; SORT_ASC = true;
       clearSelection();
       updatePersonalPicBanner();
       applyFilters();
     }
 
     function statusBadge(val) {
-      if (val === "Selesai") return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-800">Selesai</span>';
-      if (val === "Proses") return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-800">Proses</span>';
-      if (val === "Kendala") return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/80 dark:text-rose-300 dark:border-rose-800">Kendala</span>';
-      return '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">Belum</span>';
+      if (val === "Selesai") return '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">Selesai</span>';
+      if (val === "Proses") return '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300">Proses</span>';
+      if (val === "Kendala") return '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300">Kendala</span>';
+      return '<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">Belum</span>';
     }
 
-    function getAnomalyWarning(r) {
-      if (isDoneNoBox(r)) return "Anomali: Sudah Selesai tetapi belum ada nomor Box";
-      if (isBoxNotDone(r)) return "Anomali: Sudah masuk Box tetapi status BA/PK belum Selesai";
-      if (isKendalaNoNote(r)) return "Anomali: Status Kendala tanpa catatan keterangan";
-      if (isPartialStatus(r)) return "Anomali: Salah satu BA/PK Selesai, pasangannya masih Belum";
-      return "";
-    }
-
-    // Subtle Row Highlighting Classes
     function getRowHighlightClass(cat) {
-      if (cat === "SELESAI") {
-        return "bg-emerald-50/45 hover:bg-emerald-100/50 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/35";
-      }
-      if (cat === "KENDALA") {
-        return "bg-rose-50/55 hover:bg-rose-100/55 dark:bg-rose-950/25 dark:hover:bg-rose-950/40";
-      }
-      if (cat === "PROSES") {
-        return "bg-amber-50/40 hover:bg-amber-100/45 dark:bg-amber-950/15 dark:hover:bg-amber-950/30";
-      }
-      return "hover:bg-slate-50 dark:hover:bg-slate-800/50";
+      if (cat === "SELESAI") return "bg-emerald-50/40 hover:bg-emerald-50/80 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/35";
+      if (cat === "KENDALA") return "bg-rose-50/50 hover:bg-rose-50/90 dark:bg-rose-950/25 dark:hover:bg-rose-950/40";
+      if (cat === "PROSES") return "bg-amber-50/35 hover:bg-amber-50/75 dark:bg-amber-950/15 dark:hover:bg-amber-950/30";
+      return "hover:bg-slate-50/90 dark:hover:bg-slate-800/40";
     }
 
     function renderTable() {
@@ -1648,14 +1238,12 @@
       const start = (CURRENT_PAGE - 1) * PAGE_SIZE;
       const end = Math.min(start + PAGE_SIZE, total);
 
-      document.getElementById("paginationInfo").textContent = total
-        ? `Menampilkan ${start + 1} - ${end} dari ${total.toLocaleString("id-ID")} data`
-        : "Tidak ada data yang cocok";
-      document.getElementById("pageIndicator").textContent = `Hal ${CURRENT_PAGE} / ${totalPages}`;
+      document.getElementById("paginationInfo").textContent = total ? `${start + 1}–${end} dari ${total.toLocaleString("id-ID")} berkas` : "0 berkas";
+      document.getElementById("pageIndicator").textContent = `${CURRENT_PAGE} / ${totalPages}`;
       document.getElementById("selectAllPage").checked = false;
 
       if (total === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="p-8 text-center text-slate-400">Tidak ada berkas ditemukan.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="p-10 text-center text-slate-400">Tidak ada berkas yang sesuai filter.</td></tr>';
         return;
       }
 
@@ -1665,48 +1253,36 @@
         const checked = SELECTED_NIPS[r.nip] ? "checked" : "";
         const cat = getCategory(r);
         const isDone = (cat === "SELESAI");
-        const rowClass = getRowHighlightClass(cat);
-        const anomMsg = getAnomalyWarning(r);
-        const titleHover = r.updatedAt ? `Terakhir diubah: ${r.updatedAt}` : "Belum pernah diubah";
 
         html += `
-          <tr class="${rowClass} transition-colors" title="${escapeAttr(titleHover)}">
-            <td class="p-3 text-center">
-              <input type="checkbox" ${checked} onchange="toggleSelectOne('${escapeAttr(r.nip)}', this.checked)" class="rounded" />
+          <tr class="${getRowHighlightClass(cat)} transition-colors">
+            <td class="p-3.5 text-center">
+              <input type="checkbox" ${checked} onchange="toggleSelectOne('${escapeAttr(r.nip)}', this.checked)" class="rounded border-slate-300" />
             </td>
-            <td class="p-3 text-center font-semibold text-slate-500 dark:text-slate-400">${r.no}</td>
-            <td class="p-3">
+            <td class="p-3.5 text-center text-slate-400 font-medium">${r.no}</td>
+            <td class="p-3.5">
               <div onclick="openProfileDrawer('${escapeAttr(r.nip)}')" class="cursor-pointer group inline-block">
-                <div class="font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition flex items-center gap-1.5">
-                  <span class="underline decoration-dotted decoration-slate-300 dark:decoration-slate-600 underline-offset-2 group-hover:decoration-indigo-500">${escapeHtml(r.nama)}</span>
-                  ${anomMsg ? `<span title="${escapeAttr(anomMsg)}" class="inline-flex items-center px-1.5 py-0.2 text-[10px] font-bold rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">!</span>` : ""}
-                </div>
-                <div class="text-[11px] text-slate-500 dark:text-slate-400 font-mono group-hover:text-indigo-500 transition">NIP: ${escapeHtml(r.nip)}</div>
+                <div class="font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">${escapeHtml(r.nama)}</div>
+                <div class="text-[11px] text-slate-400 font-mono">${escapeHtml(r.nip)}</div>
               </div>
             </td>
-            <td class="p-3">
-              <div class="text-slate-800 dark:text-slate-200 font-medium">${escapeHtml(r.unitKerja)}</div>
-              <div class="mt-0.5">
-                ${r.lokasiBox
-                  ? `<span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">${escapeHtml(r.lokasiBox)}</span>`
-                  : `<span class="text-[11px] text-slate-400 dark:text-slate-500 italic">Box belum diinput</span>`}
-              </div>
+            <td class="p-3.5">
+              <div class="text-slate-700 dark:text-slate-300">${escapeHtml(r.unitKerja)}</div>
+              ${r.lokasiBox ? `<span class="inline-block mt-0.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-400">${escapeHtml(r.lokasiBox)}</span>` : ""}
             </td>
-            <td class="p-3 font-semibold text-slate-700 dark:text-slate-300">${escapeHtml(r.petugas)}</td>
-            <td class="p-3 text-center">${statusBadge(r.statusBA)}</td>
-            <td class="p-3 text-center">${statusBadge(r.statusPK)}</td>
-            <td class="p-3 text-slate-600 dark:text-slate-400 max-w-xs truncate" title="${escapeAttr(r.keterangan || '')}">${escapeHtml(r.keterangan || "-")}</td>
-            <td class="p-3 text-center">
+            <td class="p-3.5 text-slate-600 dark:text-slate-400 font-medium">${escapeHtml(r.petugas.split(" ")[0])}</td>
+            <td class="p-3.5 text-center">${statusBadge(r.statusBA)}</td>
+            <td class="p-3.5 text-center">${statusBadge(r.statusPK)}</td>
+            <td class="p-3.5 text-slate-500 dark:text-slate-400 max-w-[180px] truncate" title="${escapeAttr(r.keterangan || '')}">${escapeHtml(r.keterangan || "-")}</td>
+            <td class="p-3.5 text-center">
               <div class="inline-flex items-center gap-1">
                 ${!isDone ? `
-                  <button onclick="quickComplete('${escapeAttr(r.nip)}')" title="Tandai BA & PK Selesai (1-Klik)"
+                  <button onclick="quickComplete('${escapeAttr(r.nip)}')" title="Selesai 1-Klik"
                     class="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                   </button>
                 ` : ""}
-                <button onclick="openEditModal('${escapeAttr(r.nip)}')" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white text-[11px] font-bold transition">
+                <button onclick="openEditModal('${escapeAttr(r.nip)}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-bold transition">
                   Ubah
                 </button>
               </div>
@@ -1717,9 +1293,7 @@
       tbody.innerHTML = html;
     }
 
-    // =========================================================================
-    // SLIDE-OVER DRAWER (KARTU PROFIL DETAIL GURU)
-    // =========================================================================
+    // Slide-over Drawer (Kartu Profil Guru)
     function openProfileDrawer(nip) {
       const rec = ALL_RECORDS.find(r => r.nip === nip);
       if (!rec) return;
@@ -1727,20 +1301,20 @@
       DRAWER_CURRENT_NIP = rec.nip;
       const cat = getCategory(rec);
 
-      document.getElementById("drawerNoBadge").textContent = `Urut #${rec.no}`;
+      document.getElementById("drawerNoBadge").textContent = `#${rec.no}`;
       const overallEl = document.getElementById("drawerOverallStatus");
       if (cat === "SELESAI") {
         overallEl.textContent = "Selesai Lengkap";
-        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/25 text-emerald-200 border border-emerald-400/40";
+        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300";
       } else if (cat === "KENDALA") {
         overallEl.textContent = "Ada Kendala";
-        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/25 text-rose-200 border border-rose-400/40";
+        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300";
       } else if (cat === "PROSES") {
         overallEl.textContent = "Dalam Proses";
-        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/25 text-amber-200 border border-amber-400/40";
+        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300";
       } else {
         overallEl.textContent = "Belum Diproses";
-        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/15 text-slate-200 border border-white/20";
+        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400";
       }
 
       document.getElementById("drawerNama").textContent = rec.nama || "-";
@@ -1752,10 +1326,8 @@
       document.getElementById("drawerLokasiBox").textContent = rec.lokasiBox || "Belum masuk Box";
       document.getElementById("drawerStatusBA").innerHTML = statusBadge(rec.statusBA);
       document.getElementById("drawerStatusPK").innerHTML = statusBadge(rec.statusPK);
-      document.getElementById("drawerKeterangan").textContent = rec.keterangan || "Tidak ada catatan tambahan.";
-      document.getElementById("drawerUpdatedAt").textContent = rec.updatedAt
-        ? `Diperbarui pada: ${rec.updatedAt}`
-        : "Belum ada riwayat perubahan status di sistem.";
+      document.getElementById("drawerKeterangan").textContent = rec.keterangan || "Tidak ada catatan.";
+      document.getElementById("drawerUpdatedAt").textContent = rec.updatedAt || "Belum ada riwayat perubahan";
 
       document.getElementById("drawerEditBtn").onclick = () => {
         closeProfileDrawer();
@@ -1765,60 +1337,43 @@
       const drawer = document.getElementById("profileDrawer");
       const backdrop = document.getElementById("profileDrawerBackdrop");
       const panel = document.getElementById("profileDrawerPanel");
-
       drawer.classList.remove("hidden");
       requestAnimationFrame(() => {
-        backdrop.classList.remove("opacity-0");
         backdrop.classList.add("opacity-100");
         panel.classList.remove("translate-x-full");
-        panel.classList.add("translate-x-0");
       });
     }
 
     function closeProfileDrawer() {
       const drawer = document.getElementById("profileDrawer");
       if (drawer.classList.contains("hidden")) return;
-
-      const backdrop = document.getElementById("profileDrawerBackdrop");
-      const panel = document.getElementById("profileDrawerPanel");
-
-      backdrop.classList.remove("opacity-100");
-      backdrop.classList.add("opacity-0");
-      panel.classList.remove("translate-x-0");
-      panel.classList.add("translate-x-full");
-
-      setTimeout(() => {
-        drawer.classList.add("hidden");
-      }, 280);
+      document.getElementById("profileDrawerBackdrop").classList.remove("opacity-100");
+      document.getElementById("profileDrawerPanel").classList.add("translate-x-full");
+      setTimeout(() => drawer.classList.add("hidden"), 260);
     }
 
     async function copyDrawerNip() {
       if (!DRAWER_CURRENT_NIP) return;
       try {
         await navigator.clipboard.writeText(DRAWER_CURRENT_NIP);
-        document.getElementById("btnCopyNipText").textContent = "Tersalin!";
-        showToast(`NIP ${DRAWER_CURRENT_NIP} berhasil disalin ke clipboard.`);
-        setTimeout(() => {
-          document.getElementById("btnCopyNipText").textContent = "Salin NIP";
-        }, 2000);
       } catch (e) {
-        // Fallback jika clipboard API dibatasi
         const temp = document.createElement("input");
         temp.value = DRAWER_CURRENT_NIP;
         document.body.appendChild(temp);
         temp.select();
         document.execCommand("copy");
         document.body.removeChild(temp);
-        document.getElementById("btnCopyNipText").textContent = "Tersalin!";
-        showToast(`NIP ${DRAWER_CURRENT_NIP} disalin.`);
       }
+      document.getElementById("btnCopyNipText").textContent = "Tersalin!";
+      showToast(`NIP ${DRAWER_CURRENT_NIP} disalin.`);
+      setTimeout(() => { document.getElementById("btnCopyNipText").textContent = "Salin NIP"; }, 1800);
     }
 
     async function quickComplete(nip) {
       const rec = ALL_RECORDS.find(r => r.nip === nip);
       if (!rec) return;
 
-      showToast(`Menyelesaikan berkas ${rec.nama}...`);
+      showToast(`Menyelesaikan ${rec.nama}...`);
       try {
         const res = await postToGas({
           action: "update",
@@ -1836,9 +1391,7 @@
           updatePersonalPicBanner();
           renderDashboard();
           applyFilters(true);
-          showToast(`Selesai! ${rec.nama} tersimpan ke Sheets.`);
-        } else {
-          throw new Error((res && res.message) ? res.message : "Gagal menyimpan.");
+          showToast(`Selesai! ${rec.nama} tersimpan.`);
         }
       } catch (err) {
         showToast("Gagal: " + err.message);
@@ -1846,13 +1399,8 @@
     }
 
     function escapeHtml(str) {
-      return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+      return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }
-
     function escapeAttr(str) {
       return String(str || "").replace(/'/g, "'").replace(/"/g, "&quot;");
     }
@@ -1862,20 +1410,10 @@
       CURRENT_PAGE = 1;
       renderTable();
     }
-
-    function prevPage() {
-      if (CURRENT_PAGE > 1) {
-        CURRENT_PAGE--;
-        renderTable();
-      }
-    }
-
+    function prevPage() { if (CURRENT_PAGE > 1) { CURRENT_PAGE--; renderTable(); } }
     function nextPage() {
       const totalPages = Math.max(1, Math.ceil(FILTERED_RECORDS.length / PAGE_SIZE));
-      if (CURRENT_PAGE < totalPages) {
-        CURRENT_PAGE++;
-        renderTable();
-      }
+      if (CURRENT_PAGE < totalPages) { CURRENT_PAGE++; renderTable(); }
     }
 
     function toggleSelectOne(nip, isChecked) {
@@ -1914,34 +1452,15 @@
       el.value = cur ? `${cur}; ${text}` : text;
     }
 
-    function appendBulkChip(text) {
-      const el = document.getElementById("bulkNoteInput");
-      const cur = el.value.trim();
-      el.value = cur ? `${cur}; ${text}` : text;
-    }
-
     function applyPetugasLockState(hasAssignedPetugas) {
       const sel = document.getElementById("modalPetugas");
-      const badge = document.getElementById("petugasLockBadge");
       const btn = document.getElementById("btnTogglePetugasLock");
-      const hint = document.getElementById("petugasLockHint");
-
       const shouldLock = hasAssignedPetugas && !IS_ADMIN_PETUGAS_UNLOCKED;
       sel.disabled = shouldLock;
-
-      if (shouldLock) {
-        sel.className = "w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 cursor-not-allowed opacity-90";
-        badge.innerHTML = "&#128274; Terkunci";
-        badge.className = "inline-flex items-center gap-0.5 px-1.5 py-0.2 text-[10px] font-bold rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200";
-        btn.textContent = "Buka Kunci (Admin)";
-        hint.textContent = "Pembagian PIC dikunci agar tidak diubah sembarangan.";
-      } else {
-        sel.className = "w-full px-3 py-2 text-xs border border-indigo-400 dark:border-indigo-500 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100";
-        badge.innerHTML = "&#128275; Terbuka";
-        badge.className = "inline-flex items-center gap-0.5 px-1.5 py-0.2 text-[10px] font-bold rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300";
-        btn.textContent = "Kunci Kembali";
-        hint.textContent = "Mode Admin aktif: Anda dapat memindahkan PIC verifikator.";
-      }
+      sel.className = shouldLock
+        ? "w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-100 dark:bg-slate-800/60 text-slate-500 cursor-not-allowed"
+        : "w-full px-3 py-2 text-xs border border-indigo-400 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100";
+      btn.textContent = shouldLock ? "Buka Kunci" : "Kunci";
     }
 
     function toggleAdminPetugasUnlock() {
@@ -1951,22 +1470,17 @@
 
       if (IS_ADMIN_PETUGAS_UNLOCKED) {
         IS_ADMIN_PETUGAS_UNLOCKED = false;
-        if (rec && rec.petugas) {
-          document.getElementById("modalPetugas").value = rec.petugas;
-        }
+        if (rec && rec.petugas) document.getElementById("modalPetugas").value = rec.petugas;
         applyPetugasLockState(hasAssigned);
-        showToast("Kolom Petugas Verifikator dikunci kembali.");
         return;
       }
-
-      const inputPin = prompt("Masukkan PIN Admin untuk membuka kunci perubahan Petugas Verifikator:");
-      if (inputPin === null) return;
-      if (inputPin.trim() === ADMIN_UNLOCK_PIN) {
+      const inputPin = prompt("Masukkan PIN Admin (2025):");
+      if (inputPin && inputPin.trim() === ADMIN_UNLOCK_PIN) {
         IS_ADMIN_PETUGAS_UNLOCKED = true;
         applyPetugasLockState(hasAssigned);
-        showToast("Kunci dibuka. Silakan ubah Petugas Verifikator jika diperlukan.");
-      } else {
-        showToast("PIN Admin salah! Perubahan Petugas Verifikator tetap dikunci.");
+        showToast("Kunci PIC dibuka.");
+      } else if (inputPin !== null) {
+        showToast("PIN Admin salah.");
       }
     }
 
@@ -1976,16 +1490,14 @@
 
       document.getElementById("modalNip").value = rec.nip;
       document.getElementById("modalGuruName").textContent = rec.nama;
-      document.getElementById("modalGuruMeta").textContent = `NIP: ${rec.nip} • ${rec.unitKerja}`;
-      document.getElementById("modalLastUpdated").textContent = rec.updatedAt ? `Terakhir diubah: ${rec.updatedAt}` : "";
+      document.getElementById("modalGuruMeta").textContent = `${rec.nip} • ${rec.unitKerja}`;
       document.getElementById("modalPetugas").value = rec.petugas;
       document.getElementById("modalLokasiBox").value = rec.lokasiBox || "";
       document.getElementById("modalStatusBA").value = rec.statusBA || "Belum";
       document.getElementById("modalStatusPK").value = rec.statusPK || "Belum";
       document.getElementById("modalKeterangan").value = rec.keterangan || "";
 
-      const hasAssigned = Boolean(rec.petugas && OFFICERS.includes(rec.petugas));
-      applyPetugasLockState(hasAssigned);
+      applyPetugasLockState(Boolean(rec.petugas && OFFICERS.includes(rec.petugas)));
       document.getElementById("editModal").classList.remove("hidden");
     }
 
@@ -1995,18 +1507,16 @@
 
     async function saveSingleEdit() {
       const btn = document.getElementById("btnSaveSingle");
-      btn.disabled = true;
-      btn.textContent = "Menyimpan...";
+      btn.disabled = true; btn.textContent = "Menyimpan...";
 
       const nipVal = document.getElementById("modalNip").value;
       const existingRec = ALL_RECORDS.find(r => r.nip === nipVal);
       const isLocked = existingRec && existingRec.petugas && OFFICERS.includes(existingRec.petugas) && !IS_ADMIN_PETUGAS_UNLOCKED;
-      const finalPetugas = isLocked ? existingRec.petugas : document.getElementById("modalPetugas").value;
 
       const payload = {
         action: "update",
         nip: nipVal,
-        petugas: finalPetugas,
+        petugas: isLocked ? existingRec.petugas : document.getElementById("modalPetugas").value,
         lokasiBox: document.getElementById("modalLokasiBox").value.trim().toUpperCase(),
         statusBA: document.getElementById("modalStatusBA").value,
         statusPK: document.getElementById("modalStatusPK").value,
@@ -2016,29 +1526,20 @@
       try {
         const res = await postToGas(payload);
         if (res && res.status === "success") {
-          const rec = ALL_RECORDS.find(r => r.nip === payload.nip);
-          if (rec) {
-            rec.petugas = payload.petugas;
-            rec.lokasiBox = payload.lokasiBox;
-            rec.statusBA = payload.statusBA;
-            rec.statusPK = payload.statusPK;
-            rec.keterangan = payload.keterangan;
-            rec.updatedAt = res.updatedAt || "";
+          if (existingRec) {
+            Object.assign(existingRec, payload, { updatedAt: res.updatedAt || "" });
           }
           populateDynamicFilters();
           closeEditModal();
           updatePersonalPicBanner();
           renderDashboard();
           applyFilters(true);
-          showToast("Tersimpan real-time ke Google Sheets!");
-        } else {
-          throw new Error((res && res.message) ? res.message : "Gagal menyimpan data.");
+          showToast("Tersimpan ke Google Sheets.");
         }
       } catch (err) {
-        showToast("Gagal menyimpan: " + err.message);
+        showToast("Gagal: " + err.message);
       } finally {
-        btn.disabled = false;
-        btn.textContent = "Simpan ke Spreadsheet";
+        btn.disabled = false; btn.textContent = "Simpan";
       }
     }
 
@@ -2052,25 +1553,15 @@
       const keterangan = document.getElementById("bulkNoteInput").value.trim();
 
       if (!statusBA && !statusPK && !lokasiBox && !keterangan) {
-        showToast("Pilih atau isi minimal satu perubahan (Box, BA, PK, atau Catatan).");
+        showToast("Isi minimal satu perubahan.");
         return;
       }
 
       const btn = document.getElementById("btnBulkSave");
-      btn.disabled = true;
-      btn.textContent = "Menyimpan...";
-      showToast(`Menyimpan ${nips.length} berkas ke Spreadsheet...`);
+      btn.disabled = true; btn.textContent = "Menyimpan...";
 
       try {
-        const res = await postToGas({
-          action: "bulk_update",
-          nips,
-          lokasiBox,
-          statusBA,
-          statusPK,
-          keterangan
-        });
-
+        const res = await postToGas({ action: "bulk_update", nips, lokasiBox, statusBA, statusPK, keterangan });
         if (res && res.status === "success") {
           ALL_RECORDS.forEach(r => {
             if (SELECTED_NIPS[r.nip]) {
@@ -2091,21 +1582,15 @@
           updatePersonalPicBanner();
           renderDashboard();
           applyFilters(true);
-          showToast(`${res.updatedCount || nips.length} berkas berhasil diperbarui di Google Sheets!`);
-        } else {
-          throw new Error((res && res.message) ? res.message : "Gagal update massal.");
+          showToast(`${nips.length} berkas berhasil diperbarui.`);
         }
       } catch (err) {
         showToast("Error: " + err.message);
       } finally {
-        btn.disabled = false;
-        btn.textContent = "Simpan Massal";
+        btn.disabled = false; btn.textContent = "Simpan Massal";
       }
     }
 
-    // =========================================================================
-    // TAB 3: REKAP & DAFTAR ISI BOX ARSIP
-    // =========================================================================
     function renderBoxOverview() {
       const boxMap = {};
       ALL_RECORDS.forEach(r => {
@@ -2118,7 +1603,7 @@
       const grid = document.getElementById("boxSummaryGrid");
 
       if (boxes.length === 0) {
-        grid.innerHTML = '<div class="col-span-full bento-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 text-center text-xs text-slate-400">Belum ada berkas yang diberi nomor Lokasi Box.</div>';
+        grid.innerHTML = '<div class="col-span-full clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-6 text-center text-xs text-slate-400">Belum ada berkas ber-Box.</div>';
         return;
       }
 
@@ -2126,12 +1611,12 @@
         const list = boxMap[b];
         const doneCount = list.filter(x => x.statusBA === "Selesai" && x.statusPK === "Selesai").length;
         return `
-          <div onclick="selectBoxForDetail('${escapeAttr(b)}')" class="bento-card bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-3.5 hover:border-indigo-500 dark:hover:border-indigo-500 cursor-pointer transition">
+          <div onclick="selectBoxForDetail('${escapeAttr(b)}')" class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 hover:border-indigo-500 cursor-pointer transition">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-extrabold text-indigo-700 dark:text-indigo-400">${escapeHtml(b)}</span>
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">${list.length} Berkas</span>
+              <span class="text-xs font-extrabold text-indigo-600 dark:text-indigo-400">${escapeHtml(b)}</span>
+              <span class="text-[11px] font-bold text-slate-500">${list.length}</span>
             </div>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">Tuntas BA &amp; PK: <strong class="text-emerald-600 dark:text-emerald-400">${doneCount}</strong>/${list.length}</p>
+            <p class="text-[11px] text-slate-400 mt-1">Tuntas: ${doneCount}/${list.length}</p>
           </div>
         `;
       }).join("");
@@ -2146,47 +1631,41 @@
       const boxName = document.getElementById("boxDetailSelect").value;
       const container = document.getElementById("boxDetailContent");
       if (!boxName) {
-        container.innerHTML = '<div class="text-xs text-slate-500 dark:text-slate-400 text-center py-8">Silakan pilih salah satu boks arsip di atas untuk menampilkan daftar isi berkas di dalamnya.</div>';
+        container.innerHTML = '<div class="text-xs text-slate-400 text-center py-8">Pilih salah satu box di atas untuk menampilkan daftar berkas.</div>';
         return;
       }
 
       const items = ALL_RECORDS.filter(r => r.lokasiBox === boxName).sort((a, b) => a.no - b.no);
       container.innerHTML = `
         <div class="text-left space-y-4">
-          <div class="border-b-2 border-slate-900 dark:border-slate-700 pb-3 flex flex-wrap items-center justify-between gap-2">
+          <div class="border-b border-slate-200 dark:border-slate-800 pb-3 flex items-center justify-between">
             <div>
-              <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">DAFTAR ISI BOKS ARSIP AKTIF • SIMON-BAPK 2025</p>
-              <h3 class="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">${escapeHtml(boxName)}</h3>
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">DAFTAR ISI BOX ARSIP • SIMON-BAPK 2025</p>
+              <h3 class="text-lg font-extrabold text-slate-900 dark:text-white mt-0.5">${escapeHtml(boxName)}</h3>
             </div>
-            <div class="text-right">
-              <span class="px-3 py-1 rounded-lg bg-slate-900 dark:bg-indigo-600 text-white text-xs font-bold">Total: ${items.length} Berkas</span>
-            </div>
+            <span class="px-3 py-1 rounded-lg bg-slate-900 dark:bg-indigo-600 text-white text-xs font-bold">${items.length} Berkas</span>
           </div>
 
           <table class="w-full text-left border-collapse text-xs">
             <thead>
-              <tr class="bg-slate-100 dark:bg-slate-800 border-y border-slate-300 dark:border-slate-700 text-[11px] uppercase text-slate-700 dark:text-slate-300">
+              <tr class="border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase text-slate-400">
                 <th class="p-2 w-10 text-center">No</th>
-                <th class="p-2 w-12 text-center">Urut</th>
                 <th class="p-2">Nama Guru</th>
                 <th class="p-2">NIP</th>
-                <th class="p-2">Unit Sekolah Rakyat</th>
+                <th class="p-2">Unit Kerja</th>
                 <th class="p-2 text-center">BA</th>
                 <th class="p-2 text-center">PK</th>
-                <th class="p-2">PIC</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
               ${items.map((r, idx) => `
                 <tr>
-                  <td class="p-2 text-center font-semibold">${idx + 1}</td>
-                  <td class="p-2 text-center text-slate-500 dark:text-slate-400">${r.no}</td>
-                  <td class="p-2 font-bold text-slate-900 dark:text-slate-100">${escapeHtml(r.nama)}</td>
-                  <td class="p-2 font-mono text-slate-600 dark:text-slate-400">${escapeHtml(r.nip)}</td>
-                  <td class="p-2 text-slate-700 dark:text-slate-300">${escapeHtml(r.unitKerja)}</td>
+                  <td class="p-2 text-center text-slate-400">${idx + 1}</td>
+                  <td class="p-2 font-bold text-slate-800 dark:text-slate-100">${escapeHtml(r.nama)}</td>
+                  <td class="p-2 font-mono text-slate-500">${escapeHtml(r.nip)}</td>
+                  <td class="p-2 text-slate-600 dark:text-slate-300">${escapeHtml(r.unitKerja)}</td>
                   <td class="p-2 text-center font-semibold">${escapeHtml(r.statusBA)}</td>
                   <td class="p-2 text-center font-semibold">${escapeHtml(r.statusPK)}</td>
-                  <td class="p-2 text-slate-600 dark:text-slate-400">${escapeHtml(r.petugas)}</td>
                 </tr>
               `).join("")}
             </tbody>
@@ -2196,56 +1675,31 @@
     }
 
     function printBoxLabel() {
-      const boxName = document.getElementById("boxDetailSelect").value;
-      if (!boxName) {
-        showToast("Pilih nomor Box terlebih dahulu sebelum mencetak.");
+      if (!document.getElementById("boxDetailSelect").value) {
+        showToast("Pilih nomor Box terlebih dahulu.");
         return;
       }
       window.print();
     }
 
     function exportExcelReport() {
-      if (!ALL_RECORDS.length) {
-        showToast("Belum ada data untuk diekspor.");
-        return;
-      }
-
+      if (!ALL_RECORDS.length) return;
       const dataRows = ALL_RECORDS.map(r => ({
-        "No": r.no,
-        "NIP": r.nip,
-        "Nama_Guru": r.nama,
-        "Jabatan": r.jabatan,
-        "Unit_Kerja": r.unitKerja,
-        "Lokasi_Box": r.lokasiBox,
-        "Petugas_Verifikator": r.petugas,
-        "Status_BA": r.statusBA,
-        "Status_PK": r.statusPK,
-        "Keterangan": r.keterangan,
-        "Updated_At": r.updatedAt
+        "No": r.no, "NIP": r.nip, "Nama_Guru": r.nama, "Jabatan": r.jabatan,
+        "Unit_Kerja": r.unitKerja, "Lokasi_Box": r.lokasiBox, "Petugas_Verifikator": r.petugas,
+        "Status_BA": r.statusBA, "Status_PK": r.statusPK, "Keterangan": r.keterangan, "Updated_At": r.updatedAt
       }));
-
       const rekapRows = OFFICERS.map((name, idx) => {
         const subset = ALL_RECORDS.filter(r => r.petugas === name);
         const baDone = subset.filter(r => r.statusBA === "Selesai").length;
         const pkDone = subset.filter(r => r.statusPK === "Selesai").length;
         const kendala = subset.filter(r => r.statusBA === "Kendala" || r.statusPK === "Kendala").length;
         const pct = subset.length ? Number((((baDone + pkDone) / (2 * subset.length)) * 100).toFixed(1)) : 0;
-        return {
-          "No": idx + 1,
-          "Nama_Petugas": name,
-          "Total_Berkas": subset.length,
-          "BA_Selesai": baDone,
-          "PK_Selesai": pkDone,
-          "Ada_Kendala": kendala,
-          "Progres_Persen": pct
-        };
+        return { "No": idx + 1, "Nama_Petugas": name, "Total_Berkas": subset.length, "BA_Selesai": baDone, "PK_Selesai": pkDone, "Ada_Kendala": kendala, "Progres_Persen": pct };
       });
-
       const wb = XLSX.utils.book_new();
-      const wsData = XLSX.utils.json_to_sheet(dataRows);
-      const wsRekap = XLSX.utils.json_to_sheet(rekapRows);
-      XLSX.utils.book_append_sheet(wb, wsData, "Data_Berkas_Guru");
-      XLSX.utils.book_append_sheet(wb, wsRekap, "Rekap_11_Petugas");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dataRows), "Data_Berkas_Guru");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rekapRows), "Rekap_11_Petugas");
       XLSX.writeFile(wb, "Laporan_SIMON_BAPK_2025.xlsx");
     }
   </script>
