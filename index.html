@@ -68,7 +68,7 @@
     </div>
   </header>
 
-  <!-- PANEL KHUSUS MODE ADMIN (MUNCUL SETELAH INPUT PIN 2025) -->
+  <!-- PANEL KHUSUS MODE ADMIN -->
   <section id="adminControlPanel" class="hidden bg-rose-950/95 text-white border-b-2 border-rose-500 shadow-inner">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2">
@@ -115,7 +115,7 @@
           class="flex items-center justify-between p-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-left shadow transition cursor-pointer">
           <div>
             <div class="text-xs font-bold">🔍 Audit Data Otomatis</div>
-            <div class="text-[11px] text-indigo-100">Cek Gagal TTE, Box kosong, & anomali</div>
+            <div class="text-[11px] text-indigo-100">Cek Gagal TTE, Selesai tanpa verifikator</div>
           </div>
           <span class="text-lg">📋</span>
         </button>
@@ -126,7 +126,7 @@
   <!-- MAIN CONTAINER -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
 
-    <!-- WORKSPACE VERIFIKATOR AKTIF (AMBIL OTOMATIS TANPA CENTANG) -->
+    <!-- WORKSPACE VERIFIKATOR AKTIF -->
     <section class="bg-white dark:bg-slate-900 rounded-2xl border-2 border-emerald-500/40 shadow-sm p-4 sm:p-5">
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div class="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -176,25 +176,25 @@
 
       <!-- TAB FILTER CEPAT 1-KLIK -->
       <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-2">
-        <button onclick="quickTab('MY_FILES')" id="tabMyFiles"
-          class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-emerald-100 transition cursor-pointer">
-          📂 Berkas Saya
-        </button>
         <button onclick="quickTab('POOL')" id="tabPool"
-          class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-amber-100 transition cursor-pointer">
-          🏊 Pool Belum Diambil
+          class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
+          🏊 Pool Belum Diambil (<span id="badgeTabPool">0</span>)
+        </button>
+        <button onclick="quickTab('MY_FILES')" id="tabMyFiles"
+          class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
+          📂 Berkas Saya (<span id="badgeTabMyFiles">0</span>)
         </button>
         <button onclick="quickTab('GAGAL_TTE')" id="tabGagalTte"
-          class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 hover:bg-rose-100 transition cursor-pointer">
-          ❌ Upload TTE Gagal
+          class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
+          ❌ Upload TTE Gagal (<span id="badgeTabGagal">0</span>)
         </button>
         <button onclick="quickTab('BERHASIL_TTE')" id="tabBerhasilTte"
-          class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition cursor-pointer">
-          ✅ TTE Berhasil
+          class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
+          ✅ TTE Berhasil (<span id="badgeTabBerhasil">0</span>)
         </button>
         <button onclick="quickTab('ALL')" id="tabAll"
-          class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-white transition cursor-pointer">
-          📋 Semua Berkas (1.323)
+          class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
+          📋 Semua Berkas (<span id="badgeTabAll">1.323</span>)
         </button>
       </div>
     </section>
@@ -233,7 +233,7 @@
       </div>
     </section>
 
-    <!-- PROGRESS 11 PETUGAS VERIFIKATOR (COLLAPSIBLE) -->
+    <!-- PROGRESS 11 PETUGAS VERIFIKATOR -->
     <section class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
       <div class="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between cursor-pointer select-none" onclick="toggleRekapSection()">
         <div>
@@ -278,8 +278,9 @@
           <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Verifikator</label>
           <select id="filterVerifikator" onchange="applyFilters()"
             class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-2 text-sm outline-none">
+            <option value="UNCLAIMED" selected>Belum Diambil (Pool)</option>
             <option value="ALL">Semua Verifikator</option>
-            <option value="UNCLAIMED">Belum Diambil (Pool)</option>
+            <option value="ORPHAN_SELESAI">⚠️ Selesai Tanpa Verifikator</option>
           </select>
         </div>
 
@@ -315,7 +316,7 @@
         </div>
       </div>
 
-      <!-- BULK SELECTION TOOLBAR (OPSIONAL UNTUK ISI BOX MASSAL) -->
+      <!-- BULK SELECTION TOOLBAR -->
       <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
           <span>Menampilkan <strong id="shownCount" class="text-slate-900 dark:text-white">0</strong> dari <strong id="totalCount">0</strong> data</span>
@@ -401,7 +402,7 @@
     </div>
   </div>
 
-  <!-- MODAL ADMIN: TRANSFER BERKAS ANTAR PETUGAS -->
+  <!-- MODAL ADMIN: TRANSFER BERKAS -->
   <div id="transferModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
     <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-800">
       <div class="px-5 py-4 bg-amber-600 text-white flex justify-between items-center">
@@ -607,26 +608,27 @@
   <div id="toast" class="fixed bottom-5 right-5 z-50 hidden max-w-sm bg-slate-900 text-white text-xs font-medium px-4 py-3 rounded-xl shadow-lg border border-slate-700"></div>
 
   <script>
-    // URL Web App Apps Script SIMON-BAPK 2025 (Sudah Tertanam)
     const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbw6U7vqmEd5n8thqt8jOmFFt1XJZ1KjdBZBRhv6H-mgGroGxM3ypKe5yaHGYasgGkIP/exec';
 
     let allRecords = [];
     let filteredRecords = [];
     let petugasList = [];
+    let lastFolderStats = {};
     let selectedNips = new Set();
     let currentPage = 1;
     let pageSize = 50;
     let chartInstance = null;
     let isAdminUnlocked = false;
     let adminPinSession = '';
+    let isInitialLoad = true;
 
     const isInsideAppsScript = typeof google !== 'undefined' && google.script && google.script.run;
 
-    function getGasUrl() {
-      return DEFAULT_GAS_URL;
+    function normStr(val) {
+      return String(val || '').trim().replace(/\s+/g, ' ').toLowerCase();
     }
 
-    function showToast(msg, duration = 4000) {
+    function showToast(msg, duration = 4500) {
       const el = document.getElementById('toast');
       el.textContent = msg;
       el.classList.remove('hidden');
@@ -646,7 +648,6 @@
       m.classList.remove('flex');
     }
 
-    // DARK MODE
     function toggleDarkMode() {
       const isDark = document.documentElement.classList.toggle('dark');
       localStorage.setItem('SIMON_BAPK_DARK', isDark ? '1' : '0');
@@ -660,11 +661,9 @@
       });
     }
 
-    // MODE ADMIN (PIN 2025)
     function handleAdminButton() {
       if (isAdminUnlocked) {
-        const panel = document.getElementById('adminControlPanel');
-        panel.classList.toggle('hidden');
+        document.getElementById('adminControlPanel').classList.toggle('hidden');
       } else {
         document.getElementById('adminPinInput').value = '';
         openModal('pinModal');
@@ -694,7 +693,6 @@
       showToast('Keluar dari Mode Admin.');
     }
 
-    // JEMBATAN KOMUNIKASI BACKEND
     async function callBackend(action, payload = {}) {
       if (isInsideAppsScript) {
         return new Promise((resolve, reject) => {
@@ -714,7 +712,7 @@
           else if (action === 'adminResetClaims') runner.adminResetClaims(payload);
         });
       } else {
-        const resp = await fetch(getGasUrl(), {
+        const resp = await fetch(DEFAULT_GAS_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action, ...payload })
@@ -763,10 +761,11 @@
     function hydrateUI(res) {
       allRecords = res.records || [];
       petugasList = res.petugasList || [];
+      lastFolderStats = res.folderStats || {};
 
       document.getElementById('lastSyncBadge').textContent = 'Update: ' + (res.timestamp || '-');
       populateDropdowns();
-      updateKpiAndRekap(res.folderStats || {});
+      updateKpiAndRekap(lastFolderStats);
       updateActiveVerifikatorCard();
       applyFilters();
     }
@@ -776,7 +775,8 @@
       const savedActive = localStorage.getItem('SIMON_BAPK_ACTIVE_VER') || activeSel.value;
 
       const filterVer = document.getElementById('filterVerifikator');
-      const currentFilter = filterVer.value;
+      const currentFilter = isInitialLoad ? 'UNCLAIMED' : filterVer.value;
+      isInitialLoad = false;
 
       const editVer = document.getElementById('editVerifikator');
       const transFrom = document.getElementById('transferFromSelect');
@@ -784,7 +784,7 @@
       const resetTarget = document.getElementById('resetTargetSelect');
 
       activeSel.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
-      filterVer.innerHTML = '<option value="ALL">Semua Verifikator</option><option value="UNCLAIMED">Belum Diambil (Pool)</option>';
+      filterVer.innerHTML = '<option value="UNCLAIMED">Belum Diambil (Pool)</option><option value="ALL">Semua Verifikator</option><option value="ORPHAN_SELESAI">⚠️ Selesai Tanpa Verifikator</option>';
       editVer.innerHTML = '<option value="">-- Belum Diambil (Pool) --</option>';
       transFrom.innerHTML = '';
       transTo.innerHTML = '';
@@ -810,10 +810,8 @@
     function setActiveVerifikator(nama) {
       localStorage.setItem('SIMON_BAPK_ACTIVE_VER', nama);
       updateActiveVerifikatorCard();
-      if (nama) {
-        document.getElementById('filterVerifikator').value = nama;
-        applyFilters();
-      }
+      updateTabCounts();
+      updateQuickTabStyles();
     }
 
     function updateActiveVerifikatorCard() {
@@ -827,8 +825,8 @@
         return;
       }
 
-      const pObj = petugasList.find(p => p.nama === nama) || { kuota: 120 };
-      const myRows = allRecords.filter(r => r.verifikator === nama);
+      const pObj = petugasList.find(p => normStr(p.nama) === normStr(nama)) || { kuota: 120 };
+      const myRows = allRecords.filter(r => normStr(r.verifikator) === normStr(nama));
       const doneRows = myRows.filter(r => r.statusBA === 'Selesai' && r.statusPK === 'Selesai');
       const remaining = Math.max(0, pObj.kuota - myRows.length);
 
@@ -843,7 +841,49 @@
       autoBox.classList.add('flex');
     }
 
-    // AMBIL OTOMATIS DARI POOL
+    function updateTabCounts() {
+      const me = document.getElementById('activeVerifikatorSelect').value;
+      const poolCount = allRecords.filter(r => !r.verifikator).length;
+      const myCount = me ? allRecords.filter(r => normStr(r.verifikator) === normStr(me)).length : 0;
+      const gagalCount = allRecords.filter(r => r.driveStatus === 'UPLOAD_TTE_GAGAL').length;
+      const berhasilCount = allRecords.filter(r => r.driveStatus === 'TTE_BERHASIL').length;
+
+      document.getElementById('badgeTabPool').textContent = poolCount.toLocaleString('id-ID');
+      document.getElementById('badgeTabMyFiles').textContent = myCount.toLocaleString('id-ID');
+      document.getElementById('badgeTabGagal').textContent = gagalCount.toLocaleString('id-ID');
+      document.getElementById('badgeTabBerhasil').textContent = berhasilCount.toLocaleString('id-ID');
+      document.getElementById('badgeTabAll').textContent = allRecords.length.toLocaleString('id-ID');
+    }
+
+    function updateQuickTabStyles() {
+      const ver = document.getElementById('filterVerifikator').value;
+      const drv = document.getElementById('filterDrive').value;
+      const me = document.getElementById('activeVerifikatorSelect').value;
+
+      const tabs = {
+        tabPool: ver === 'UNCLAIMED' && drv === 'ALL',
+        tabMyFiles: me && normStr(ver) === normStr(me) && drv === 'ALL',
+        tabGagalTte: drv === 'UPLOAD_TTE_GAGAL',
+        tabBerhasilTte: drv === 'TTE_BERHASIL',
+        tabAll: ver === 'ALL' && drv === 'ALL'
+      };
+
+      const baseInactive = 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700';
+      const activeMap = {
+        tabPool: 'bg-amber-500 text-white shadow-xs',
+        tabMyFiles: 'bg-emerald-600 text-white shadow-xs',
+        tabGagalTte: 'bg-rose-600 text-white shadow-xs',
+        tabBerhasilTte: 'bg-emerald-600 text-white shadow-xs',
+        tabAll: 'bg-slate-800 text-white shadow-xs'
+      };
+
+      Object.keys(tabs).forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.className = `px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${tabs[id] ? activeMap[id] : baseInactive}`;
+      });
+    }
+
     async function triggerAutoClaim(count) {
       const verifikator = document.getElementById('activeVerifikatorSelect').value;
       if (!verifikator) {
@@ -854,8 +894,6 @@
       const res = await callBackend('autoClaimPool', { verifikator, count });
       if (res && res.success) {
         hydrateUI(res);
-        document.getElementById('filterVerifikator').value = verifikator;
-        applyFilters();
         showToast(res.message);
       } else {
         showToast(res?.message || 'Gagal mengambil berkas.');
@@ -871,35 +909,74 @@
       await triggerAutoClaim(rem);
     }
 
-    // AMBIL 1 BERKAS LANGSUNG DARI BARIS TABEL
+    // OPTIMISTIC UI: Berkas langsung hilang dari daftar Pool seketika saat diklik + Ambil
     async function quickClaimSingle(nip) {
       const verifikator = document.getElementById('activeVerifikatorSelect').value;
       if (!verifikator) {
-        showToast('Pilih nama Anda di bagian atas ("Saya Bekerja Sebagai") sebelum mengambil berkas.');
+        showToast('Pilih nama Anda di bagian atas ("Identitas Petugas Verifikator Aktif") sebelum mengambil berkas.');
         document.getElementById('activeVerifikatorSelect').focus();
         return;
       }
-      showToast(`Mengklaim NIP ${nip} untuk ${verifikator}...`);
-      const res = await callBackend('claimBerkas', { verifikator, nips: [nip] });
-      if (res && res.success) {
-        hydrateUI(res);
-        showToast(res.message);
+
+      const targetRecord = allRecords.find(item => item.nip === nip);
+      const prevOwner = targetRecord ? targetRecord.verifikator : '';
+
+      if (targetRecord) {
+        targetRecord.verifikator = verifikator;
+        selectedNips.delete(nip);
+        updateKpiAndRekap(lastFolderStats);
+        updateActiveVerifikatorCard();
+        applyFilters();
+      }
+
+      showToast(`✓ Berkas NIP ${nip} masuk ke Berkas Saya (${verifikator})`, 2500);
+
+      try {
+        const res = await callBackend('claimBerkas', { verifikator, nips: [nip] });
+        if (res && res.success) {
+          hydrateUI(res);
+        } else {
+          if (targetRecord) targetRecord.verifikator = prevOwner;
+          hydrateUI({ records: allRecords, petugasList, folderStats: lastFolderStats });
+          showToast(res?.message || 'Gagal klaim berkas.');
+        }
+      } catch (err) {
+        if (targetRecord) targetRecord.verifikator = prevOwner;
+        applyFilters();
+        showToast('Koneksi gagal saat klaim: ' + err.message);
       }
     }
 
-    // TOGGLE CEPAT STATUS BA / PK 1-KLIK
     async function quickToggle(nip, field, currentVal) {
+      const r = allRecords.find(item => item.nip === nip);
       const activeVerifikator = document.getElementById('activeVerifikatorSelect').value;
+
+      if (r && !r.verifikator && !activeVerifikator) {
+        showToast('Pilih nama Anda dulu di kotak "Identitas Petugas Verifikator Aktif" di bagian atas!');
+        document.getElementById('activeVerifikatorSelect').focus();
+        return;
+      }
+
       const nextValue = currentVal === 'Selesai' ? 'Belum' : 'Selesai';
+      if (r) {
+        if (!r.verifikator && activeVerifikator) r.verifikator = activeVerifikator;
+        if (field === 'BA') r.statusBA = nextValue;
+        if (field === 'PK') r.statusPK = nextValue;
+        updateKpiAndRekap(lastFolderStats);
+        updateActiveVerifikatorCard();
+        applyFilters();
+      }
+
       showToast(`Mengubah ${field} NIP ${nip} -> ${nextValue}...`, 2000);
       const res = await callBackend('quickToggle', { nip, field, nextValue, activeVerifikator });
       if (res && res.success) {
         hydrateUI(res);
-        showToast(res.message, 2500);
+        showToast(res.message, 3000);
+      } else {
+        showToast(res?.message || 'Gagal memperbarui status.');
       }
     }
 
-    // TAB FILTER CEPAT
     function quickTab(mode) {
       document.getElementById('filterSearch').value = '';
       document.getElementById('filterBox').value = '';
@@ -930,7 +1007,7 @@
 
       const statsMap = {};
       petugasList.forEach(p => {
-        statsMap[p.nama] = { nama: p.nama, kuota: p.kuota, diambil: 0, ba: 0, pk: 0 };
+        statsMap[normStr(p.nama)] = { nama: p.nama, kuota: p.kuota, diambil: 0, ba: 0, pk: 0 };
       });
 
       allRecords.forEach(r => {
@@ -938,10 +1015,13 @@
         if (r.statusPK === 'Selesai') pkSelesai++;
         if (!r.verifikator) {
           unclaimed++;
-        } else if (statsMap[r.verifikator]) {
-          statsMap[r.verifikator].diambil++;
-          if (r.statusBA === 'Selesai') statsMap[r.verifikator].ba++;
-          if (r.statusPK === 'Selesai') statsMap[r.verifikator].pk++;
+        } else {
+          const key = normStr(r.verifikator);
+          if (statsMap[key]) {
+            statsMap[key].diambil++;
+            if (r.statusBA === 'Selesai') statsMap[key].ba++;
+            if (r.statusPK === 'Selesai') statsMap[key].pk++;
+          }
         }
       });
 
@@ -954,6 +1034,8 @@
       document.getElementById('kpiTteGagal').textContent = (folderStats.gagal || 0).toLocaleString('id-ID');
       document.getElementById('kpiPool').textContent = unclaimed.toLocaleString('id-ID');
       document.getElementById('kpiScanBaru').textContent = `Scan Baru: ${folderStats.scanBaru || 0} file`;
+
+      updateTabCounts();
 
       const tbody = document.getElementById('rekapTableBody');
       tbody.innerHTML = '';
@@ -1025,10 +1107,13 @@
       const st = document.getElementById('filterStatus').value;
       const box = document.getElementById('filterBox').value.toLowerCase().trim();
 
+      updateQuickTabStyles();
+
       filteredRecords = allRecords.filter(r => {
         if (q && !(r.nip.includes(q) || r.nama.toLowerCase().includes(q) || r.unitKerja.toLowerCase().includes(q))) return false;
         if (ver === 'UNCLAIMED' && r.verifikator !== '') return false;
-        if (ver !== 'ALL' && ver !== 'UNCLAIMED' && r.verifikator !== ver) return false;
+        if (ver === 'ORPHAN_SELESAI' && !(r.verifikator === '' && (r.statusBA === 'Selesai' || r.statusPK === 'Selesai'))) return false;
+        if (ver !== 'ALL' && ver !== 'UNCLAIMED' && ver !== 'ORPHAN_SELESAI' && normStr(r.verifikator) !== normStr(ver)) return false;
         if (drv !== 'ALL' && r.driveStatus !== drv) return false;
         if (box && !r.lokasiBox.toLowerCase().includes(box)) return false;
 
@@ -1084,7 +1169,7 @@
       document.getElementById('btnNext').disabled = currentPage >= totalPages;
 
       if (slice.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="py-10 text-center text-slate-400">Tidak ada data yang cocok dengan filter pencarian.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="py-10 text-center text-slate-400">Tidak ada data yang cocok dengan filter saat ini.</td></tr>';
         return;
       }
 
@@ -1179,14 +1264,14 @@
       if (currentPage < totalPages) { currentPage++; renderTable(); }
     }
 
-    // MODAL EDIT SATUAN
     function openEditModal(nip) {
       const r = allRecords.find(item => item.nip === nip);
       if (!r) return;
+      const activeVer = document.getElementById('activeVerifikatorSelect').value;
       document.getElementById('editNip').value = r.nip;
       document.getElementById('editModalTitle').textContent = r.nama;
       document.getElementById('editModalSub').textContent = `NIP: ${r.nip} • ${r.unitKerja}`;
-      document.getElementById('editVerifikator').value = r.verifikator || '';
+      document.getElementById('editVerifikator').value = r.verifikator || activeVer || '';
       document.getElementById('editLokasiBox').value = r.lokasiBox || '';
       document.getElementById('editStatusBA').value = r.statusBA || 'Belum';
       document.getElementById('editStatusPK').value = r.statusPK || 'Belum';
@@ -1196,14 +1281,39 @@
     }
 
     async function saveSingleEdit() {
+      const activeVerifikator = document.getElementById('activeVerifikatorSelect').value;
+      const chosenVerifikator = document.getElementById('editVerifikator').value || activeVerifikator;
+      const statusBA = document.getElementById('editStatusBA').value;
+      const statusPK = document.getElementById('editStatusPK').value;
+      const nip = document.getElementById('editNip').value;
+
+      if (!chosenVerifikator && (statusBA === 'Selesai' || statusPK === 'Selesai')) {
+        showToast('Pilih nama Petugas Verifikator terlebih dahulu sebelum menandai Selesai.');
+        return;
+      }
+
       const payload = {
-        nip: document.getElementById('editNip').value,
-        verifikator: document.getElementById('editVerifikator').value,
+        nip: nip,
+        verifikator: chosenVerifikator,
+        activeVerifikator: activeVerifikator,
         lokasiBox: document.getElementById('editLokasiBox').value,
-        statusBA: document.getElementById('editStatusBA').value,
-        statusPK: document.getElementById('editStatusPK').value,
+        statusBA: statusBA,
+        statusPK: statusPK,
         keterangan: document.getElementById('editKeterangan').value
       };
+
+      const targetRecord = allRecords.find(item => item.nip === nip);
+      if (targetRecord) {
+        targetRecord.verifikator = chosenVerifikator;
+        targetRecord.lokasiBox = payload.lokasiBox;
+        targetRecord.statusBA = statusBA;
+        targetRecord.statusPK = statusPK;
+        targetRecord.keterangan = payload.keterangan;
+        updateKpiAndRekap(lastFolderStats);
+        updateActiveVerifikatorCard();
+        applyFilters();
+      }
+
       closeModal('editModal');
       showToast('Menyimpan perubahan...');
       const res = await callBackend('updateSingle', payload);
@@ -1217,6 +1327,7 @@
 
     async function uploadScanForCurrentNip() {
       const nip = document.getElementById('editNip').value;
+      const activeVerifikator = document.getElementById('activeVerifikatorSelect').value;
       const file = document.getElementById('scanFileInput').files[0];
       if (!file) {
         showToast('Pilih file PDF terlebih dahulu.');
@@ -1227,7 +1338,7 @@
         const base64Data = e.target.result.split(',')[1];
         closeModal('editModal');
         showToast('Mengunggah PDF ke 03_Hasil_Scan_Baru...', 6000);
-        const res = await callBackend('uploadScanPdf', { nip, base64Data });
+        const res = await callBackend('uploadScanPdf', { nip, base64Data, activeVerifikator });
         if (res && res.success) {
           hydrateUI(res);
           showToast(res.message);
@@ -1238,7 +1349,6 @@
       reader.readAsDataURL(file);
     }
 
-    // MODAL UPDATE MASSAL
     function openBulkModal() {
       if (selectedNips.size === 0) {
         showToast('Pilih minimal 1 baris (atau klik "Pilih 25 Teratas") terlebih dahulu.');
@@ -1249,8 +1359,10 @@
     }
 
     async function submitBulkUpdate() {
+      const activeVerifikator = document.getElementById('activeVerifikatorSelect').value;
       const payload = {
         nips: Array.from(selectedNips),
+        activeVerifikator: activeVerifikator,
         lokasiBox: document.getElementById('bulkLokasiBox').value,
         statusBA: document.getElementById('bulkStatusBA').value,
         statusPK: document.getElementById('bulkStatusPK').value,
@@ -1266,7 +1378,6 @@
       }
     }
 
-    // MODAL ADMIN: TRANSFER & RESET
     function openTransferModal() { openModal('transferModal'); }
     function openResetClaimModal() { openModal('resetModal'); }
 
@@ -1309,31 +1420,39 @@
       }
     }
 
-    // MODAL ADMIN: AUDIT DATA OTOMATIS
     function openAuditModal() {
+      const orphanSelesai = allRecords.filter(r => r.verifikator === '' && (r.statusBA === 'Selesai' || r.statusPK === 'Selesai'));
       const gagalTte = allRecords.filter(r => r.driveStatus === 'UPLOAD_TTE_GAGAL');
       const selesaiNoPdf = allRecords.filter(r => r.statusPK === 'Selesai' && r.driveStatus === 'BELUM_ADA_FILE');
       const selesaiNoBox = allRecords.filter(r => r.statusBA === 'Selesai' && r.statusPK === 'Selesai' && !r.lokasiBox);
 
       document.getElementById('auditContent').innerHTML = `
-        <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 flex items-center justify-between">
+        <div class="p-3.5 rounded-xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 flex items-center justify-between gap-2">
           <div>
-            <div class="font-bold text-rose-800 dark:text-rose-200">1. Berkas Upload TTE Gagal (Perlu TTE / Scan Ulang)</div>
-            <div class="text-xs text-rose-600 dark:text-rose-300">Ditemukan <strong>${gagalTte.length}</strong> berkas di folder 02_Upload_TTE_Gagal</div>
+            <div class="font-bold text-purple-900 dark:text-purple-200">1. Status BA/PK Selesai Tapi Nama Verifikator Kosong</div>
+            <div class="text-xs text-purple-700 dark:text-purple-300">Ditemukan <strong>${orphanSelesai.length}</strong> berkas berstatus Selesai tanpa nama petugas</div>
           </div>
-          <button onclick="closeModal('auditModal'); quickTab('GAGAL_TTE');" class="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-bold cursor-pointer">Lihat Data</button>
+          <button onclick="closeModal('auditModal'); document.getElementById('filterVerifikator').value='ORPHAN_SELESAI'; applyFilters();" class="px-3 py-1.5 rounded-lg bg-purple-600 text-white text-xs font-bold shrink-0 cursor-pointer">Tampilkan</button>
         </div>
 
-        <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 flex items-center justify-between">
+        <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 flex items-center justify-between gap-2">
           <div>
-            <div class="font-bold text-amber-800 dark:text-amber-200">2. Status PK Selesai Tapi File PDF Belum Ada di Drive</div>
+            <div class="font-bold text-rose-800 dark:text-rose-200">2. Berkas Upload TTE Gagal (Perlu TTE / Scan Ulang)</div>
+            <div class="text-xs text-rose-600 dark:text-rose-300">Ditemukan <strong>${gagalTte.length}</strong> berkas di folder 02_Upload_TTE_Gagal</div>
+          </div>
+          <button onclick="closeModal('auditModal'); quickTab('GAGAL_TTE');" class="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-bold shrink-0 cursor-pointer">Lihat Data</button>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 flex items-center justify-between gap-2">
+          <div>
+            <div class="font-bold text-amber-800 dark:text-amber-200">3. Status PK Selesai Tapi File PDF Belum Ada di Drive</div>
             <div class="text-xs text-amber-700 dark:text-amber-300">Ditemukan <strong>${selesaiNoPdf.length}</strong> berkas belum terhubung ke PDF Drive</div>
           </div>
         </div>
 
-        <div class="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-between">
+        <div class="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-between gap-2">
           <div>
-            <div class="font-bold text-blue-800 dark:text-blue-200">3. BA & PK Selesai Tapi Nomor Box Fisik Masih Kosong</div>
+            <div class="font-bold text-blue-800 dark:text-blue-200">4. BA & PK Selesai Tapi Nomor Box Fisik Masih Kosong</div>
             <div class="text-xs text-blue-700 dark:text-blue-300">Ditemukan <strong>${selesaiNoBox.length}</strong> berkas belum diisi Lokasi Box</div>
           </div>
         </div>
@@ -1341,7 +1460,6 @@
       openModal('auditModal');
     }
 
-    // MODAL CETAK LABEL BOX ARSIP
     function openBoxLabelModal() {
       const boxes = [...new Set(allRecords.map(r => r.lokasiBox).filter(Boolean))].sort();
       const sel = document.getElementById('boxSelect');
@@ -1394,7 +1512,6 @@
       `;
     }
 
-    // EKSPOR CSV
     function exportFilteredCsv() {
       const headers = ['No', 'NIP', 'Nama_Guru', 'Jabatan', 'Unit_Kerja', 'Lokasi_Box', 'Petugas_Verifikator', 'Status_BA', 'Status_PK', 'Status_Drive', 'Link_Drive', 'Keterangan', 'Updated_At'];
       const rows = filteredRecords.map(r => [
