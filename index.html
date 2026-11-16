@@ -327,6 +327,10 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
+          <button onclick="submitBulkRelease()"
+            class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-sm transition cursor-pointer">
+            ↩ Buang Terpilih ke Pool
+          </button>
           <button onclick="openBulkModal()"
             class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition cursor-pointer">
             📦 Isi Box / Update Massal Terpilih
@@ -679,6 +683,7 @@
         closeModal('pinModal');
         document.getElementById('adminControlPanel').classList.remove('hidden');
         document.getElementById('adminBadge').classList.remove('hidden');
+        renderTable();
         showToast('Mode Admin aktif! Seluruh kontrol administrasi terbuka.');
       } else {
         showToast('PIN Admin salah! Coba lagi.');
@@ -690,6 +695,7 @@
       adminPinSession = '';
       document.getElementById('adminControlPanel').classList.add('hidden');
       document.getElementById('adminBadge').classList.add('hidden');
+      renderTable();
       showToast('Keluar dari Mode Admin.');
     }
 
@@ -704,6 +710,7 @@
           else if (action === 'syncDrive') runner.syncDriveFolders();
           else if (action === 'autoClaimPool') runner.autoClaimFromPool(payload);
           else if (action === 'claimBerkas') runner.claimBerkas(payload);
+          else if (action === 'releaseBerkas') runner.releaseBerkas(payload);
           else if (action === 'quickToggle') runner.quickToggleStatus(payload);
           else if (action === 'updateSingle') runner.updateSingleRecord(payload);
           else if (action === 'updateBulk') runner.updateBulkRecords(payload);
@@ -812,6 +819,7 @@
       updateActiveVerifikatorCard();
       updateTabCounts();
       updateQuickTabStyles();
+      renderTable();
     }
 
     function updateActiveVerifikatorCard() {
@@ -944,6 +952,93 @@
         if (targetRecord) targetRecord.verifikator = prevOwner;
         applyFilters();
         showToast('Koneksi gagal saat klaim: ' + err.message);
+      }
+    }
+
+    // MODE BUANG: Kembalikan berkas milik petugas aktif kembali ke Pool seketika
+    async function quickReleaseSingle(nip) {
+      const verifikator = document.getElementById('activeVerifikatorSelect').value;
+      const targetRecord = allRecords.find(item => item.nip === nip);
+      if (!targetRecord || !targetRecord.verifikator) return;
+
+      if (!isAdminUnlocked && normStr(targetRecord.verifikator) !== normStr(verifikator)) {
+        showToast(`Berkas ini milik ${targetRecord.verifikator}. Hanya pemiliknya atau Admin yang bisa membuang ke Pool.`);
+        return;
+      }
+
+      if (targetRecord.statusBA === 'Selesai' && targetRecord.statusPK === 'Selesai') {
+        const ok = confirm(`Berkas ${targetRecord.nama} (${nip}) sudah berstatus BA & PK Selesai.\nYakin ingin membuangnya kembali ke Pool?`);
+        if (!ok) return;
+      }
+
+      const prevOwner = targetRecord.verifikator;
+      targetRecord.verifikator = '';
+      selectedNips.delete(nip);
+      updateKpiAndRekap(lastFolderStats);
+      updateActiveVerifikatorCard();
+      applyFilters();
+
+      showToast(`↩ Berkas NIP ${nip} dikembalikan ke Pool`, 2500);
+
+      try {
+        const res = await callBackend('releaseBerkas', {
+          verifikator: verifikator,
+          pin: adminPinSession,
+          nips: [nip]
+        });
+        if (res && res.success) {
+          hydrateUI(res);
+        } else {
+          targetRecord.verifikator = prevOwner;
+          hydrateUI({ records: allRecords, petugasList, folderStats: lastFolderStats });
+          showToast(res?.message || 'Gagal mengembalikan berkas ke Pool.');
+        }
+      } catch (err) {
+        targetRecord.verifikator = prevOwner;
+        applyFilters();
+        showToast('Koneksi gagal saat mengembalikan berkas: ' + err.message);
+      }
+    }
+
+    // BUANG MASSAL BARIS TERPILIH KE POOL
+    async function submitBulkRelease() {
+      if (selectedNips.size === 0) {
+        showToast('Centang minimal 1 berkas milik Anda yang ingin dibuang ke Pool.');
+        return;
+      }
+      const verifikator = document.getElementById('activeVerifikatorSelect').value;
+      if (!verifikator && !isAdminUnlocked) {
+        showToast('Pilih nama Anda terlebih dahulu pada Identitas Petugas Verifikator Aktif.');
+        return;
+      }
+
+      const ok = confirm(`Kembalikan ${selectedNips.size} berkas terpilih ke Pool (Belum Diambil)?`);
+      if (!ok) return;
+
+      const nipsToRelease = Array.from(selectedNips);
+      nipsToRelease.forEach(nip => {
+        const r = allRecords.find(item => item.nip === nip);
+        if (r && (isAdminUnlocked || normStr(r.verifikator) === normStr(verifikator))) {
+          r.verifikator = '';
+        }
+      });
+
+      selectedNips.clear();
+      updateKpiAndRekap(lastFolderStats);
+      updateActiveVerifikatorCard();
+      applyFilters();
+      showToast('Mengembalikan berkas terpilih ke Pool...');
+
+      const res = await callBackend('releaseBerkas', {
+        verifikator: verifikator,
+        pin: adminPinSession,
+        nips: nipsToRelease
+      });
+      if (res && res.success) {
+        hydrateUI(res);
+        showToast(res.message);
+      } else {
+        showToast(res?.message || 'Gagal membuang berkas terpilih.');
       }
     }
 
@@ -1161,6 +1256,7 @@
 
       const start = (currentPage - 1) * pageSize;
       const slice = filteredRecords.slice(start, start + pageSize);
+      const activeVer = document.getElementById('activeVerifikatorSelect').value;
 
       document.getElementById('shownCount').textContent = slice.length;
       document.getElementById('totalCount').textContent = total.toLocaleString('id-ID');
@@ -1179,6 +1275,11 @@
           ? `<span class="font-semibold text-slate-800 dark:text-slate-200 text-xs">${r.verifikator}</span>`
           : `<button onclick="quickClaimSingle('${r.nip}')" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold shadow-xs cursor-pointer">+ Ambil</button>`;
         const boxHtml = r.lokasiBox ? `<div class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">📦 ${r.lokasiBox}</div>` : '';
+
+        const canRelease = r.verifikator && (isAdminUnlocked || (activeVer && normStr(r.verifikator) === normStr(activeVer)));
+        const releaseBtnHtml = canRelease
+          ? `<button onclick="quickReleaseSingle('${r.nip}')" title="Salah ambil? Kembalikan berkas ini ke Pool" class="px-2.5 py-1.5 rounded-lg bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-semibold cursor-pointer">↩ Buang</button>`
+          : '';
 
         return `
           <tr class="hover:bg-slate-50/90 dark:hover:bg-slate-800/60 transition ${selectedNips.has(r.nip) ? 'bg-emerald-50/40 dark:bg-emerald-950/30' : ''}">
@@ -1207,9 +1308,12 @@
               ${r.updatedAt ? `<div class="text-[10px] text-slate-400 mt-0.5">${r.updatedAt}</div>` : ''}
             </td>
             <td class="py-2.5 px-3 text-right">
-              <button onclick="openEditModal('${r.nip}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold cursor-pointer">
-                Detail / Scan
-              </button>
+              <div class="inline-flex items-center justify-end gap-1.5">
+                ${releaseBtnHtml}
+                <button onclick="openEditModal('${r.nip}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold cursor-pointer">
+                  Detail / Scan
+                </button>
+              </div>
             </td>
           </tr>
         `;
@@ -1282,7 +1386,7 @@
 
     async function saveSingleEdit() {
       const activeVerifikator = document.getElementById('activeVerifikatorSelect').value;
-      const chosenVerifikator = document.getElementById('editVerifikator').value || activeVerifikator;
+      const chosenVerifikator = document.getElementById('editVerifikator').value;
       const statusBA = document.getElementById('editStatusBA').value;
       const statusPK = document.getElementById('editStatusPK').value;
       const nip = document.getElementById('editNip').value;
