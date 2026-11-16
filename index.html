@@ -3,628 +3,280 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SIMON-BAPK 2025 | Monitoring BA &amp; PK Guru Sekolah Rakyat</title>
+  <title>SIMON-BAPK 2025 | Monitoring Verifikasi & Arsip PK</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class'
-    };
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-    .clean-card {
-      border-radius: 1.25rem;
-      box-shadow: 0 2px 14px -2px rgba(15, 23, 42, 0.04);
-    }
-    .dark .clean-card {
-      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
-    }
-    th.sortable {
-      cursor: pointer;
-      user-select: none;
-    }
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 9999px;
-    }
-    .dark ::-webkit-scrollbar-thumb {
-      background: #334155;
-    }
-    #profileDrawerBackdrop {
-      transition: opacity 0.22s ease;
-    }
-    #profileDrawerPanel {
-      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    @media print {
-      body * { visibility: hidden; }
-      #printArea, #printArea * { visibility: visible; }
-      #printArea {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        background: white !important;
-        color: black !important;
-        padding: 16px;
-      }
-      .no-print { display: none !important; }
-    }
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col bg-slate-50/70 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
+<body class="text-slate-800 antialiased">
 
-  <!-- Minimalist Sticky Top Header -->
-  <header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800 sticky top-0 z-30 no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-      <!-- Brand -->
+  <!-- TOP NAVBAR -->
+  <header class="bg-slate-900 text-white shadow-md sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-extrabold text-sm shadow-xs">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400 font-extrabold text-lg">
           SB
         </div>
         <div>
-          <div class="flex items-center gap-2">
-            <h1 class="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base tracking-tight">SIMON-BAPK 2025</h1>
-            <span id="connBadge" class="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
-              <span id="connDot" class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-              <span id="connText">Sinkron...</span>
-            </span>
-          </div>
-          <p class="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:block">Sistem Ambil Bebas &amp; Target Kuota • Guru Sekolah Rakyat</p>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight leading-tight">SIMON-BAPK 2025</h1>
+          <p class="text-xs text-slate-400">Monitoring Berita Acara & Perjanjian Kerja Guru Sekolah Rakyat</p>
         </div>
       </div>
 
-      <!-- Center Segmented Navigation -->
-      <nav class="hidden md:flex items-center bg-slate-100/90 dark:bg-slate-800/90 p-1 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
-        <button id="btnTab1" onclick="switchTab(1)" class="px-4 py-1.5 rounded-lg text-xs font-bold transition">Ringkasan</button>
-        <button id="btnTab2" onclick="switchTab(2)" class="px-4 py-1.5 rounded-lg text-xs font-bold transition">Verifikasi Berkas</button>
-        <button id="btnTab3" onclick="switchTab(3)" class="px-4 py-1.5 rounded-lg text-xs font-bold transition">Box Arsip</button>
-      </nav>
-
-      <!-- Right Controls (Clean & Compact) -->
-      <div class="flex items-center gap-2">
-        <!-- PIC Aktif -->
-        <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-50/80 dark:bg-indigo-950/70 border border-indigo-200/70 dark:border-indigo-800">
-          <span class="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 hidden sm:inline">PIC:</span>
-          <select id="activePicSelect" onchange="setActivePic()" class="text-xs font-bold text-indigo-950 dark:text-indigo-100 bg-transparent focus:outline-none cursor-pointer max-w-[130px] sm:max-w-none">
-            <option value="ALL" class="dark:bg-slate-900">Semua (Admin)</option>
-          </select>
-        </div>
-
-        <!-- Refresh Icon Button -->
-        <button onclick="fetchDataFromSheet(true)" title="Segarkan Data dari Google Sheets"
-          class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      <div class="flex flex-wrap items-center gap-2">
+        <span id="lastSyncBadge" class="hidden md:inline-flex items-center px-2.5 py-1 rounded-lg text-xs bg-slate-800 text-slate-300 border border-slate-700">
+          Memuat data...
+        </span>
+        <button onclick="triggerSyncDrive()" id="btnSyncDrive"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition cursor-pointer">
+          <svg id="syncIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
+          <span>Sinkronkan Drive</span>
         </button>
-
-        <!-- Export Icon Button -->
-        <button onclick="exportExcelReport()" title="Download Laporan Excel (.xlsx)"
-          class="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-          <span class="hidden sm:inline">Excel</span>
+        <button onclick="exportFilteredCsv()"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs sm:text-sm font-medium transition cursor-pointer">
+          <span>Ekspor CSV</span>
         </button>
-
-        <!-- Dark Mode Toggle -->
-        <button id="themeToggleBtn" onclick="toggleDarkMode()" title="Mode Gelap / Terang"
-          class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-amber-300 transition">
-          <svg id="iconSun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-          <svg id="iconMoon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-          </svg>
+        <button onclick="openApiModal()"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs sm:text-sm font-medium transition cursor-pointer" title="Pengaturan URL Web App Apps Script">
+          <span>⚙️ API</span>
         </button>
       </div>
-    </div>
-
-    <!-- Mobile Navigation Bar -->
-    <div class="md:hidden px-4 pb-2.5 flex items-center gap-1.5 overflow-x-auto">
-      <button id="mBtnTab1" onclick="switchTab(1)" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-center transition">Ringkasan</button>
-      <button id="mBtnTab2" onclick="switchTab(2)" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-center transition">Verifikasi</button>
-      <button id="mBtnTab3" onclick="switchTab(3)" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-center transition">Box Arsip</button>
     </div>
   </header>
 
-  <!-- Loading Banner -->
-  <div id="loadingBar" class="w-full bg-indigo-50 dark:bg-indigo-950/60 px-4 py-1.5 text-center text-xs font-medium text-indigo-700 dark:text-indigo-300 no-print">
-    Memuat data dari Google Spreadsheet...
-  </div>
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-  <!-- Main Container -->
-  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-7 flex-1">
-
-    <!-- ===================================================================== -->
-    <!-- TAB 1: RINGKASAN & ANALITIK VISUAL                                    -->
-    <!-- ===================================================================== -->
-    <section id="tab1" class="space-y-6">
-
-      <!-- 4 Core KPI Cards -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div onclick="jumpToUnclaimed()" class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-700 p-5 cursor-pointer transition">
-          <p class="text-xs font-semibold text-slate-400 dark:text-slate-500">Total Berkas (Pool)</p>
-          <div class="flex items-baseline justify-between mt-2 gap-1">
-            <p id="kpiTotal" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</p>
-            <span id="kpiPoolSub" class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">0 bebas &rarr;</span>
-          </div>
-        </div>
-
-        <div class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5">
-          <p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Selesai Lengkap</p>
-          <div class="flex items-baseline justify-between mt-2">
-            <p id="kpiSelesai" class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">0</p>
-            <span id="kpiSelesaiPct" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">0%</span>
-          </div>
-        </div>
-
-        <div class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5">
-          <p class="text-xs font-semibold text-amber-600 dark:text-amber-400">Proses &amp; Belum</p>
-          <div class="flex items-baseline justify-between mt-2 gap-1">
-            <p id="kpiPending" class="text-3xl font-extrabold text-slate-800 dark:text-slate-200">0</p>
-            <span id="kpiPendingDetail" class="text-[11px] text-slate-400">0 proses • 0 belum</span>
-          </div>
-        </div>
-
-        <div onclick="jumpToKendala()" class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 hover:border-rose-400 dark:hover:border-rose-700 p-5 cursor-pointer transition">
-          <p class="text-xs font-semibold text-rose-600 dark:text-rose-400">Perlu Tindak Lanjut</p>
-          <div class="flex items-baseline justify-between mt-2">
-            <p id="kpiKendala" class="text-3xl font-extrabold text-rose-600 dark:text-rose-400">0</p>
-            <span class="text-xs font-semibold text-rose-500">Lihat Kendala &rarr;</span>
-          </div>
-        </div>
+    <!-- KPI CARDS -->
+    <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+        <p class="text-xs font-medium text-slate-500">Total Berkas</p>
+        <p id="kpiTotal" class="text-2xl font-extrabold text-slate-900 mt-1">1.323</p>
+        <p class="text-[11px] text-slate-400 mt-1">Target Master Data</p>
       </div>
-
-      <!-- Visual Charts Section -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <!-- Stacked Horizontal Bar Chart: Capaian vs Target Kuota -->
-        <div class="lg:col-span-8 clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-6">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <div>
-              <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Capaian &amp; Target Kuota per Petugas (BA vs PK)</h2>
-              <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Target merata 121 berkas (3 petugas) &amp; 120 berkas (8 petugas) dari Pool Bebas</p>
-            </div>
-            <div class="flex items-center gap-3 text-xs font-bold">
-              <span class="text-indigo-600 dark:text-indigo-400">BA: <span id="baPctInline">0%</span></span>
-              <span class="text-slate-300 dark:text-slate-700">|</span>
-              <span class="text-emerald-600 dark:text-emerald-400">PK: <span id="pkPctInline">0%</span></span>
-            </div>
-          </div>
-          <div class="relative w-full h-80">
-            <canvas id="officerChartCanvas"></canvas>
-          </div>
-        </div>
-
-        <!-- Doughnut Chart: Status Composition -->
-        <div class="lg:col-span-4 clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-6 flex flex-col justify-between">
-          <div>
-            <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Komposisi Status Berkas</h2>
-            <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Proporsi keseluruhan dari total berkas</p>
-          </div>
-
-          <div class="relative w-full h-56 my-2 flex items-center justify-center">
-            <canvas id="statusDoughnutCanvas"></canvas>
-            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span id="doughnutCenterPct" class="text-2xl font-extrabold text-slate-900 dark:text-white">0%</span>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Selesai</span>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-100 dark:border-slate-800">
-            <div class="flex items-center justify-between py-1 px-2">
-              <span class="text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Selesai</span>
-              <span id="legSelesai" class="font-bold text-slate-800 dark:text-slate-200">0</span>
-            </div>
-            <div class="flex items-center justify-between py-1 px-2">
-              <span class="text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Proses</span>
-              <span id="legProses" class="font-bold text-slate-800 dark:text-slate-200">0</span>
-            </div>
-            <div class="flex items-center justify-between py-1 px-2">
-              <span class="text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-500"></span>Kendala</span>
-              <span id="legKendala" class="font-bold text-slate-800 dark:text-slate-200">0</span>
-            </div>
-            <div class="flex items-center justify-between py-1 px-2">
-              <span class="text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"></span>Belum</span>
-              <span id="legBelum" class="font-bold text-slate-800 dark:text-slate-200">0</span>
-            </div>
-          </div>
-        </div>
+      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+        <p class="text-xs font-medium text-slate-500">BA Selesai</p>
+        <p id="kpiBaSelesai" class="text-2xl font-extrabold text-blue-600 mt-1">0</p>
+        <p id="kpiBaPct" class="text-[11px] text-slate-400 mt-1">0,0% terverifikasi</p>
       </div>
-
-      <!-- 11 Petugas Verifikator (Target Kuota & Realisasi) -->
-      <div>
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">
-            Target Kuota &amp; Capaian 11 Verifikator
-            <span class="font-normal text-slate-400 text-xs ml-1">(Klik kartu untuk mulai ambil &amp; verifikasi berkas)</span>
-          </h2>
-          <button onclick="jumpToUnclaimed()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/70 dark:hover:bg-indigo-900/70 text-indigo-700 dark:text-indigo-300 transition">
-            Lihat Berkas Bebas (<span id="unclaimedQuickCount">0</span>) &rarr;
-          </button>
-        </div>
-        <div id="officersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5"></div>
+      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+        <p class="text-xs font-medium text-slate-500">PK Selesai</p>
+        <p id="kpiPkSelesai" class="text-2xl font-extrabold text-indigo-600 mt-1">0</p>
+        <p id="kpiPkPct" class="text-[11px] text-slate-400 mt-1">0,0% terverifikasi</p>
       </div>
-
-      <!-- Collapsible Audit & Kendala Footer Strip -->
-      <details class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-4 group">
-        <summary class="flex items-center justify-between cursor-pointer list-none text-xs font-bold text-slate-700 dark:text-slate-300">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-            <span>Pantauan Kendala &amp; Audit Kebersihan Data (<span id="totalAnomalyBadge">0</span> temuan)</span>
-          </div>
-          <span class="text-indigo-600 dark:text-indigo-400 group-open:rotate-180 transition-transform">&#9662;</span>
-        </summary>
-        <div class="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-          <button onclick="jumpToAnomaly('DONE_NO_BOX')" class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-left transition">
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">Selesai Tanpa Box</p>
-            <p id="anomDoneNoBox" class="text-lg font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">0</p>
-          </button>
-          <button onclick="jumpToAnomaly('BOX_NOT_DONE')" class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-left transition">
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">Ber-Box Belum Selesai</p>
-            <p id="anomBoxNotDone" class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5">0</p>
-          </button>
-          <button onclick="jumpToAnomaly('KENDALA_NO_NOTE')" class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-left transition">
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">Kendala Tanpa Catatan</p>
-            <p id="anomKendalaNoNote" class="text-lg font-extrabold text-rose-600 dark:text-rose-400 mt-0.5">0</p>
-          </button>
-          <button onclick="jumpToAnomaly('PARTIAL_STATUS')" class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition">
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">Status BA &amp; PK Timpang</p>
-            <p id="anomPartial" class="text-lg font-extrabold text-slate-700 dark:text-slate-200 mt-0.5">0</p>
-          </button>
-        </div>
-      </details>
+      <div class="bg-white rounded-xl p-4 border border-emerald-200 bg-emerald-50/40 shadow-sm">
+        <p class="text-xs font-semibold text-emerald-700">01_TTE_Berhasil</p>
+        <p id="kpiTteBerhasil" class="text-2xl font-extrabold text-emerald-600 mt-1">0</p>
+        <p class="text-[11px] text-emerald-600/80 mt-1">PDF TTE di Drive</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 border border-rose-200 bg-rose-50/40 shadow-sm">
+        <p class="text-xs font-semibold text-rose-700">02_Upload_TTE_Gagal</p>
+        <p id="kpiTteGagal" class="text-2xl font-extrabold text-rose-600 mt-1">0</p>
+        <p class="text-[11px] text-rose-600/80 mt-1">Perlu TTE / Scan Ulang</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 border border-amber-200 bg-amber-50/40 shadow-sm">
+        <p class="text-xs font-semibold text-amber-700">Sisa Pool (Belum Diambil)</p>
+        <p id="kpiPool" class="text-2xl font-extrabold text-amber-600 mt-1">1.323</p>
+        <p id="kpiScanBaru" class="text-[11px] text-slate-500 mt-1">Scan Baru: 0 file</p>
+      </div>
     </section>
 
-    <!-- ===================================================================== -->
-    <!-- TAB 2: VERIFIKASI BERKAS (SISTEM AMBIL BEBAS + KERJA CEPAT)           -->
-    <!-- ===================================================================== -->
-    <section id="tab2" class="hidden space-y-4">
-
-      <!-- Personal PIC Focus Banner -->
-      <div id="personalPicBanner" class="hidden clean-card bg-indigo-600 dark:bg-indigo-900/90 text-white p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <!-- PROGRESS 11 PETUGAS VERIFIKATOR (COLLAPSIBLE) -->
+    <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between cursor-pointer select-none" onclick="toggleRekapSection()">
         <div>
-          <h3 id="personalPicGreeting" class="text-sm sm:text-base font-extrabold">Halo Petugas, kuota terambil: 0 / 121 berkas</h3>
-          <p id="personalPicSubtext" class="text-xs text-indigo-100 mt-0.5">Sisa kuota: 121 berkas • Selesai: 0 berkas (0%)</p>
+          <h2 class="text-sm font-bold text-slate-800">Progres & Kuota 11 Petugas Verifikator (Sistem Pool)</h2>
+          <p class="text-xs text-slate-500">Klik untuk menampilkan / menyembunyikan rincian beban kerja per petugas</p>
         </div>
-        <div class="flex flex-wrap items-center gap-2 shrink-0">
-          <button onclick="showUnclaimedForPic()"
-            class="px-3.5 py-2 rounded-xl text-xs font-extrabold bg-white text-indigo-900 hover:bg-indigo-50 transition shadow-2xs">
-            + Ambil Berkas Bebas (<span id="bannerUnclaimedCount">0</span>)
-          </button>
-          <button id="btnMyRemaining" onclick="toggleMyRemainingFilter()"
-            class="px-3 py-2 rounded-xl text-xs font-bold bg-indigo-500/40 hover:bg-indigo-500/60 text-white transition">
-            <span id="btnMyRemainingText">Sisa Tugas Saya (0)</span>
-          </button>
-          <button onclick="showAllMyFiles()"
-            class="px-3 py-2 rounded-xl text-xs font-bold bg-indigo-500/40 hover:bg-indigo-500/60 text-white transition">
-            Tugas Saya (<span id="bannerMyTotalCount">0</span>)
-          </button>
-        </div>
+        <span id="rekapToggleLabel" class="text-xs font-semibold text-blue-600">Sembunyikan ▲</span>
       </div>
-
-      <!-- Compact Filter Bar -->
-      <div class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 space-y-3">
-        <div class="flex flex-wrap items-center gap-2.5">
-          <!-- Search Input -->
-          <div class="relative flex-1 min-w-[200px]">
-            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input id="searchInput" type="text" oninput="applyFilters()" placeholder="Cari nama guru dari box fisik, NIP, unit, atau catatan..."
-              class="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-indigo-500" />
-          </div>
-
-          <!-- Petugas / Pool Dropdown -->
-          <select id="filterOfficer" onchange="onFilterOfficerChange()"
-            class="px-3 py-2 text-xs font-semibold border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <option value="ALL">Semua Berkas</option>
-            <option value="UNCLAIMED">Berkas Bebas (Belum Diambil)</option>
-          </select>
-
-          <!-- Status Dropdown -->
-          <select id="filterStatus" onchange="applyFilters()"
-            class="px-3 py-2 text-xs font-semibold border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <option value="ALL">Semua Status</option>
-            <option value="NOT_SELESAI">Sisa Tugas (Belum Selesai)</option>
-            <option value="SELESAI">Selesai (BA &amp; PK)</option>
-            <option value="PROSES">Dalam Proses</option>
-            <option value="KENDALA">Ada Kendala</option>
-            <option value="BELUM">Belum Diproses</option>
-            <optgroup label="Audit Anomali">
-              <option value="DONE_NO_BOX">Selesai Tanpa Box</option>
-              <option value="BOX_NOT_DONE">Ber-Box Belum Selesai</option>
-              <option value="KENDALA_NO_NOTE">Kendala Tanpa Catatan</option>
-              <option value="PARTIAL_STATUS">BA &amp; PK Timpang</option>
-            </optgroup>
-          </select>
-
-          <!-- Box Dropdown -->
-          <select id="filterBox" onchange="applyFilters()"
-            class="px-3 py-2 text-xs font-semibold border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <option value="ALL">Semua Box</option>
-            <option value="EMPTY">Belum Ber-Box</option>
-          </select>
-
-          <!-- Unit Dropdown -->
-          <select id="filterUnit" onchange="applyFilters()"
-            class="px-3 py-2 text-xs font-semibold border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 max-w-[180px]">
-            <option value="ALL">Semua Unit</option>
-          </select>
-
-          <button onclick="resetFilters()" class="px-3 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition">
-            Reset
-          </button>
-        </div>
-
-        <!-- Bulk Action Toolbar -->
-        <div id="bulkToolbar" class="hidden pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2.5 bg-indigo-50/70 dark:bg-indigo-950/40 p-3 rounded-xl">
-          <div class="flex items-center gap-2 text-xs font-bold text-indigo-900 dark:text-indigo-200">
-            <span id="selectedCountBadge" class="px-2 py-0.5 bg-indigo-600 text-white rounded-md">0</span>
-            <span>dipilih</span>
-            <button onclick="clearSelection()" class="text-[11px] underline text-indigo-600 dark:text-indigo-400 ml-1">Batal</button>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <button id="btnBulkClaim" onclick="submitBulkClaim()" class="px-3 py-1.5 text-xs font-extrabold bg-slate-900 hover:bg-slate-800 dark:bg-indigo-500 dark:hover:bg-indigo-400 text-white rounded-lg transition">
-              + Ambil untuk PIC Aktif
-            </button>
-            <span class="text-slate-300 dark:text-slate-700 hidden sm:inline">|</span>
-            <select id="bulkStatusBA" class="px-2.5 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800">
-              <option value="">BA...</option>
-              <option value="Selesai">BA: Selesai</option>
-              <option value="Proses">BA: Proses</option>
-              <option value="Kendala">BA: Kendala</option>
-              <option value="Belum">BA: Belum</option>
-            </select>
-            <select id="bulkStatusPK" class="px-2.5 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800">
-              <option value="">PK...</option>
-              <option value="Selesai">PK: Selesai</option>
-              <option value="Proses">PK: Proses</option>
-              <option value="Kendala">PK: Kendala</option>
-              <option value="Belum">PK: Belum</option>
-            </select>
-            <input id="bulkLokasiBoxInput" type="text" placeholder="Box (mis. BOX 1)"
-              class="px-2.5 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 w-32" />
-            <input id="bulkNoteInput" type="text" placeholder="Catatan..."
-              class="px-2.5 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 w-36" />
-            <button id="btnBulkSave" onclick="submitBulkUpdate()" class="px-3.5 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition">
-              Simpan Massal
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Clean Data Table -->
-      <div class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
+      <div id="rekapBody" class="p-5 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-7 overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
             <thead>
-              <tr class="bg-slate-50/90 dark:bg-slate-800/80 border-b border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-[11px] font-bold uppercase tracking-wider">
-                <th class="p-3.5 w-10 text-center">
-                  <input id="selectAllPage" type="checkbox" onclick="toggleSelectPage(this)" class="rounded border-slate-300" />
-                </th>
-                <th onclick="sortTable('no')" class="sortable hover:text-slate-900 dark:hover:text-white p-3.5 w-14 text-center">No</th>
-                <th onclick="sortTable('nama')" class="sortable hover:text-slate-900 dark:hover:text-white p-3.5">Nama Guru &amp; NIP</th>
-                <th onclick="sortTable('lokasiBox')" class="sortable hover:text-slate-900 dark:hover:text-white p-3.5">Unit &amp; Box</th>
-                <th onclick="sortTable('petugas')" class="sortable hover:text-slate-900 dark:hover:text-white p-3.5">PIC</th>
-                <th onclick="sortTable('statusBA')" class="sortable hover:text-slate-900 dark:hover:text-white p-3.5 text-center">BA</th>
-                <th onclick="sortTable('statusPK')" class="sortable hover:text-slate-900 dark:hover:text-white p-3.5 text-center">PK</th>
-                <th class="p-3.5">Keterangan</th>
-                <th class="p-3.5 text-center w-28">Aksi</th>
+              <tr class="bg-slate-50 text-slate-600 border-b border-slate-200">
+                <th class="py-2 px-3 font-semibold">Petugas Verifikator</th>
+                <th class="py-2 px-2 text-center font-semibold">Kuota</th>
+                <th class="py-2 px-2 text-center font-semibold">Diambil</th>
+                <th class="py-2 px-2 text-center font-semibold">Sisa</th>
+                <th class="py-2 px-2 text-center font-semibold text-blue-600">BA</th>
+                <th class="py-2 px-2 text-center font-semibold text-indigo-600">PK</th>
+                <th class="py-2 px-2 text-right font-semibold">Progres</th>
               </tr>
             </thead>
-            <tbody id="tableBody" class="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs"></tbody>
+            <tbody id="rekapTableBody" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
-
-        <!-- Minimalist Pagination & Legend -->
-        <div class="px-4 py-3 bg-slate-50/60 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div class="flex items-center gap-3 text-slate-500 dark:text-slate-400">
-            <span id="paginationInfo">0 data</span>
-            <select id="pageSizeSelect" onchange="changePageSize()" class="px-2 py-1 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-xs">
-              <option value="25">25</option>
-              <option value="50" selected>50</option>
-              <option value="100">100</option>
-            </select>
-            <div class="hidden sm:flex items-center gap-2.5 text-[11px] pl-2 border-l border-slate-200 dark:border-slate-700">
-              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-200 dark:bg-emerald-800"></span>Selesai</span>
-              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-200 dark:bg-amber-800"></span>Proses</span>
-              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-200 dark:bg-rose-800"></span>Kendala</span>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-1.5">
-            <button onclick="prevPage()" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 font-semibold transition">&larr;</button>
-            <span id="pageIndicator" class="px-2.5 py-1.5 font-bold text-slate-700 dark:text-slate-300">1 / 1</span>
-            <button onclick="nextPage()" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 font-semibold transition">&rarr;</button>
-          </div>
+        <div class="lg:col-span-5 h-64">
+          <canvas id="petugasChart"></canvas>
         </div>
       </div>
     </section>
 
-    <!-- ===================================================================== -->
-    <!-- TAB 3: BOX ARSIP (BERSIH & SIAP CETAK)                                -->
-    <!-- ===================================================================== -->
-    <section id="tab3" class="hidden space-y-5">
-      <div class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5 flex flex-wrap items-center justify-between gap-4 no-print">
-        <div>
-          <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Daftar Isi Box Arsip</h2>
-          <p class="text-xs text-slate-400 mt-0.5">Pilih nomor box untuk melihat daftar guru di dalamnya atau mencetak label.</p>
+    <!-- FILTER & BULK ACTION BAR -->
+    <section class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-3.5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+        <div class="lg:col-span-2">
+          <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Cari NIP / Nama / Unit Kerja</label>
+          <input type="text" id="filterSearch" oninput="applyFilters()" placeholder="Ketik 18 digit NIP atau nama guru..."
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none" />
         </div>
-        <div class="flex items-center gap-2">
-          <select id="boxDetailSelect" onchange="renderBoxDetail()" class="px-3.5 py-2 text-xs font-bold border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800">
-            <option value="">-- Pilih Box --</option>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Verifikator</label>
+          <select id="filterVerifikator" onchange="applyFilters()"
+            class="w-full rounded-lg border border-slate-300 px-2.5 py-2 text-sm bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+            <option value="ALL">Semua Verifikator</option>
+            <option value="UNCLAIMED">Belum Diambil (Pool)</option>
           </select>
-          <button onclick="printBoxLabel()" class="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition">
-            Cetak Daftar
-          </button>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Status File Drive (TTE)</label>
+          <select id="filterDrive" onchange="applyFilters()"
+            class="w-full rounded-lg border border-slate-300 px-2.5 py-2 text-sm bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+            <option value="ALL">Semua Status Drive</option>
+            <option value="TTE_BERHASIL">✅ 01_TTE_Berhasil</option>
+            <option value="UPLOAD_TTE_GAGAL">❌ 02_Upload_TTE_Gagal</option>
+            <option value="HASIL_SCAN_BARU">📄 03_Hasil_Scan_Baru</option>
+            <option value="BELUM_ADA_FILE">⏳ Belum Ada File PDF</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Status BA / PK</label>
+          <select id="filterStatus" onchange="applyFilters()"
+            class="w-full rounded-lg border border-slate-300 px-2.5 py-2 text-sm bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+            <option value="ALL">Semua Status</option>
+            <option value="BOTH_SELESAI">BA & PK Selesai</option>
+            <option value="PK_SELESAI">PK Selesai</option>
+            <option value="BA_SELESAI">BA Selesai</option>
+            <option value="BELUM">Belum Selesai</option>
+            <option value="KENDALA">Ada Kendala</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Lokasi Box</label>
+          <input type="text" id="filterBox" oninput="applyFilters()" placeholder="Misal: BOX 1"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
         </div>
       </div>
 
-      <div id="boxSummaryGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 no-print"></div>
+      <!-- BULK SELECTION TOOLBAR -->
+      <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3 text-xs text-slate-600">
+          <span>Menampilkan <strong id="shownCount" class="text-slate-900">0</strong> dari <strong id="totalCount">0</strong> data</span>
+          <span class="text-slate-300">|</span>
+          <span>Terpilih: <strong id="selectedCount" class="text-emerald-600">0</strong> baris</span>
+          <button onclick="clearSelection()" id="btnClearSelect" class="hidden text-rose-600 hover:underline font-medium cursor-pointer">Batal Pilih</button>
+        </div>
 
-      <div id="printArea" class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-6">
-        <div id="boxDetailContent" class="text-xs text-slate-400 text-center py-8">
-          Pilih salah satu box di atas untuk menampilkan daftar berkas.
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openClaimModal()"
+            class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shadow-sm transition cursor-pointer">
+            🙋 Ambil Berkas (Pool)
+          </button>
+          <button onclick="openBulkModal()"
+            class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition cursor-pointer">
+            ✏️ Update Massal Terpilih
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- DATA TABLE -->
+    <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="overflow-x-auto custom-scrollbar">
+        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+          <thead>
+            <tr class="bg-slate-800 text-slate-100 text-xs uppercase tracking-wider">
+              <th class="py-3 px-3 w-10 text-center">
+                <input type="checkbox" id="selectAllPage" onchange="toggleSelectPage(this.checked)" class="rounded border-slate-400 cursor-pointer" />
+              </th>
+              <th class="py-3 px-3 w-12">No</th>
+              <th class="py-3 px-3">NIP & Nama Guru</th>
+              <th class="py-3 px-3 hidden md:table-cell">Unit Kerja</th>
+              <th class="py-3 px-3">Verifikator & Box</th>
+              <th class="py-3 px-3 text-center">Status BA / PK</th>
+              <th class="py-3 px-3 text-center">Arsip PDF Drive</th>
+              <th class="py-3 px-3">Keterangan</th>
+              <th class="py-3 px-3 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-slate-200">
+            <tr>
+              <td colspan="9" class="py-12 text-center text-slate-400">Sedang memuat data dari Google Spreadsheet & Drive...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2 text-slate-600">
+          <span>Baris per halaman:</span>
+          <select id="pageSizeSelect" onchange="changePageSize()" class="rounded border border-slate-300 px-2 py-1 bg-white">
+            <option value="25">25</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+            <option value="250">250</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="prevPage()" id="btnPrev" class="px-3 py-1.5 rounded border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40 cursor-pointer">← Sebelumnya</button>
+          <span id="pageInfo" class="font-semibold text-slate-700 px-2">Halaman 1 / 1</span>
+          <button onclick="nextPage()" id="btnNext" class="px-3 py-1.5 rounded border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40 cursor-pointer">Berikutnya →</button>
         </div>
       </div>
     </section>
 
   </main>
 
-  <!-- ===================================================================== -->
-  <!-- SLIDE-OVER DRAWER: KARTU PROFIL DETAIL GURU                           -->
-  <!-- ===================================================================== -->
-  <div id="profileDrawer" class="hidden fixed inset-0 z-50 overflow-hidden no-print">
-    <div id="profileDrawerBackdrop" onclick="closeProfileDrawer()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs opacity-0"></div>
-
-    <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
-      <div id="profileDrawerPanel" class="w-screen max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between translate-x-full">
+  <!-- MODAL: EDIT SATUAN & UPLOAD PDF SCAN -->
+  <div id="editModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden">
+      <div class="px-5 py-4 bg-slate-900 text-white flex justify-between items-center">
         <div>
-          <div class="p-6 border-b border-slate-100 dark:border-slate-800">
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-2">
-                <span id="drawerNoBadge" class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-bold">#0</span>
-                <span id="drawerOverallStatus" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold">Status</span>
-              </div>
-              <button onclick="closeProfileDrawer()" class="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-700 text-lg font-bold transition">
-                &times;
-              </button>
-            </div>
-
-            <h3 id="drawerNama" class="text-lg font-extrabold text-slate-900 dark:text-white leading-snug">-</h3>
-
-            <div class="mt-3 flex items-center justify-between gap-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-xl px-3.5 py-2.5">
-              <div>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">NIP PPPK</p>
-                <p id="drawerNip" class="text-sm font-mono font-bold text-slate-800 dark:text-slate-100">-</p>
-              </div>
-              <button onclick="copyDrawerNip()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition">
-                <span id="btnCopyNipText">Salin NIP</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(100vh-240px)] text-xs">
-            <div class="space-y-3">
-              <div>
-                <p class="text-[11px] text-slate-400">Jabatan</p>
-                <p id="drawerJabatan" class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">-</p>
-              </div>
-              <div>
-                <p class="text-[11px] text-slate-400">Unit Kerja Sekolah Rakyat</p>
-                <p id="drawerUnitKerja" class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">-</p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
-              <div>
-                <p class="text-[11px] text-slate-400">Petugas PIC</p>
-                <p id="drawerPetugas" class="font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">-</p>
-              </div>
-              <div>
-                <p class="text-[11px] text-slate-400">Lokasi Box Arsip</p>
-                <p id="drawerLokasiBox" class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">-</p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
-              <div>
-                <p class="text-[11px] text-slate-400 mb-1">Berita Acara (BA)</p>
-                <div id="drawerStatusBA">-</div>
-              </div>
-              <div>
-                <p class="text-[11px] text-slate-400 mb-1">Perjanjian Kerja (PK)</p>
-                <div id="drawerStatusPK">-</div>
-              </div>
-            </div>
-
-            <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
-              <p class="text-[11px] text-slate-400">Catatan Verifikasi</p>
-              <p id="drawerKeterangan" class="text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">-</p>
-            </div>
-
-            <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
-              <p class="text-[11px] text-slate-400">Terakhir Diperbarui</p>
-              <p id="drawerUpdatedAt" class="font-mono text-slate-500 dark:text-slate-400 mt-0.5">-</p>
-            </div>
-          </div>
+          <h3 class="font-bold text-sm" id="editModalTitle">Update Status Verifikasi</h3>
+          <p class="text-xs text-slate-400" id="editModalSub">NIP: -</p>
         </div>
-
-        <div class="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
-          <button onclick="closeProfileDrawer()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
-            Tutup
-          </button>
-          <button id="drawerEditBtn" class="flex-1 px-4 py-2.5 rounded-xl text-xs font-extrabold bg-indigo-600 hover:bg-indigo-700 text-white transition">
-            Ambil / Ubah Status
-          </button>
-        </div>
+        <button onclick="closeModal('editModal')" class="text-slate-400 hover:text-white text-lg font-bold cursor-pointer">✕</button>
       </div>
-    </div>
-  </div>
-
-  <!-- Edit Modal -->
-  <div id="editModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 no-print">
-    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 dark:border-slate-800 space-y-4">
-      <div class="flex justify-between items-start gap-2">
-        <div>
-          <h3 id="modalGuruName" class="text-base font-extrabold text-slate-900 dark:text-white">-</h3>
-          <p id="modalGuruMeta" class="text-xs text-slate-400 mt-0.5">-</p>
-        </div>
-        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
-      </div>
-
-      <input type="hidden" id="modalNip" />
-
-      <div class="space-y-3">
+      <div class="p-5 space-y-4 text-sm">
+        <input type="hidden" id="editNip" />
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="text-[11px] font-bold text-slate-500">Petugas PIC</label>
-              <button type="button" id="btnTogglePetugasLock" onclick="toggleAdminPetugasUnlock()" class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
-                Buka Kunci
-              </button>
-            </div>
-            <select id="modalPetugas" class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"></select>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Petugas Verifikator</label>
+            <select id="editVerifikator" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white"></select>
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-slate-500 mb-1">Lokasi Box</label>
-            <input id="modalLokasiBox" list="existingBoxesList" type="text" placeholder="Contoh: BOX 1"
-              class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-            <datalist id="existingBoxesList"></datalist>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Lokasi Box</label>
+            <input type="text" id="editLokasiBox" placeholder="Contoh: BOX 1" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-[11px] font-bold text-slate-500 mb-1">Status BA</label>
-            <select id="modalStatusBA" class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Status BA</label>
+            <select id="editStatusBA" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white">
               <option value="Belum">Belum</option>
-              <option value="Proses">Proses</option>
               <option value="Selesai">Selesai</option>
               <option value="Kendala">Kendala</option>
             </select>
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-slate-500 mb-1">Status PK</label>
-            <select id="modalStatusPK" class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Status PK</label>
+            <select id="editStatusPK" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white">
               <option value="Belum">Belum</option>
-              <option value="Proses">Proses</option>
               <option value="Selesai">Selesai</option>
               <option value="Kendala">Kendala</option>
             </select>
@@ -632,1325 +284,654 @@
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-slate-500 mb-1">Keterangan</label>
-          <textarea id="modalKeterangan" rows="2" placeholder="Catatan singkat..."
-            class="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"></textarea>
-          <div class="flex flex-wrap gap-1.5 mt-1.5">
-            <button type="button" onclick="appendModalChip('TTE Lengkap')" class="px-2 py-0.5 text-[10px] rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50">+ TTE Lengkap</button>
-            <button type="button" onclick="appendModalChip('Belum TTE')" class="px-2 py-0.5 text-[10px] rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50">+ Belum TTE</button>
-            <button type="button" onclick="appendModalChip('Scan Buram')" class="px-2 py-0.5 text-[10px] rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50">+ Scan Buram</button>
-            <button type="button" onclick="appendModalChip('Fisik Menyusul')" class="px-2 py-0.5 text-[10px] rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50">+ Fisik Menyusul</button>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Keterangan / Catatan</label>
+          <textarea id="editKeterangan" rows="2" placeholder="Catatan verifikasi atau kendala..." class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></textarea>
+        </div>
+
+        <!-- UPLOAD SCAN BARU -->
+        <div class="p-3 rounded-xl bg-slate-50 border border-dashed border-slate-300 space-y-2">
+          <p class="text-xs font-bold text-slate-700">📄 Unggah PDF Hasil Scan Baru (Ke folder 03_Hasil_Scan_Baru)</p>
+          <div class="flex items-center gap-2">
+            <input type="file" id="scanFileInput" accept="application/pdf" class="text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+            <button onclick="uploadScanForCurrentNip()" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shrink-0 cursor-pointer">
+              Unggah PDF
+            </button>
           </div>
         </div>
       </div>
-
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeEditModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Batal</button>
-        <button id="btnSaveSingle" onclick="saveSingleEdit()" class="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white">Simpan</button>
+      <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+        <button onclick="closeModal('editModal')" class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-700 cursor-pointer">Batal</button>
+        <button onclick="saveSingleEdit()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold cursor-pointer">Simpan Perubahan</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast -->
-  <div id="toast" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900 dark:bg-indigo-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg max-w-sm no-print"></div>
+  <!-- MODAL: KLAIM BERKAS (POOL) -->
+  <div id="claimModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+      <div class="px-5 py-4 bg-amber-600 text-white flex justify-between items-center">
+        <h3 class="font-bold text-sm">🙋 Klaim Berkas dari Pool (Ambil Bebas)</h3>
+        <button onclick="closeModal('claimModal')" class="text-white/80 hover:text-white font-bold cursor-pointer">✕</button>
+      </div>
+      <div class="p-5 space-y-4 text-sm">
+        <p class="text-xs text-slate-600">Anda akan mengklaim <strong id="claimCountText" class="text-slate-900">0</strong> berkas terpilih agar tercatat atas nama petugas verifikator berikut:</p>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Nama Verifikator</label>
+          <select id="claimVerifikatorSelect" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white"></select>
+        </div>
+      </div>
+      <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+        <button onclick="closeModal('claimModal')" class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-700 cursor-pointer">Batal</button>
+        <button onclick="submitClaim()" class="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold cursor-pointer">Klaim Sekarang</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: UPDATE MASSAL -->
+  <div id="bulkModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+      <div class="px-5 py-4 bg-blue-600 text-white flex justify-between items-center">
+        <h3 class="font-bold text-sm">✏️ Update Massal (<span id="bulkCountText">0</span> Berkas)</h3>
+        <button onclick="closeModal('bulkModal')" class="text-white/80 hover:text-white font-bold cursor-pointer">✕</button>
+      </div>
+      <div class="p-5 space-y-3.5 text-sm">
+        <p class="text-xs text-slate-500">Biarkan kosong kolom yang tidak ingin diubah secara massal.</p>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Set Petugas Verifikator</label>
+          <select id="bulkVerifikator" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Set Lokasi Box</label>
+          <input type="text" id="bulkLokasiBox" placeholder="Misal: BOX 2" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Set Status BA</label>
+            <select id="bulkStatusBA" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white">
+              <option value="">-- Tidak Diubah --</option>
+              <option value="Selesai">Selesai</option>
+              <option value="Belum">Belum</option>
+              <option value="Kendala">Kendala</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Set Status PK</label>
+            <select id="bulkStatusPK" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white">
+              <option value="">-- Tidak Diubah --</option>
+              <option value="Selesai">Selesai</option>
+              <option value="Belum">Belum</option>
+              <option value="Kendala">Kendala</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Set Keterangan</label>
+          <input type="text" id="bulkKeterangan" placeholder="Catatan massal..." class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+      </div>
+      <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+        <button onclick="closeModal('bulkModal')" class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-700 cursor-pointer">Batal</button>
+        <button onclick="submitBulkUpdate()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold cursor-pointer">Terapkan ke Semua Terpilih</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KONFIGURASI URL APPS SCRIPT (UNTUK GITHUB PAGES) -->
+  <div id="apiModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden">
+      <div class="px-5 py-4 bg-slate-900 text-white flex justify-between items-center">
+        <h3 class="font-bold text-sm">⚙️ Koneksi URL Web App Google Apps Script</h3>
+        <button onclick="closeModal('apiModal')" class="text-slate-400 hover:text-white font-bold cursor-pointer">✕</button>
+      </div>
+      <div class="p-5 space-y-3 text-sm">
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Jika Anda membuka halaman ini melalui <strong>GitHub Pages</strong>, tempelkan URL Deployment Web App dari Google Apps Script (<code>https://script.google.com/macros/s/.../exec</code>) di bawah ini:
+        </p>
+        <input type="url" id="gasUrlInput" placeholder="https://script.google.com/macros/s/XXXXX/exec"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-mono focus:ring-2 focus:ring-emerald-500 outline-none" />
+      </div>
+      <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+        <button onclick="closeModal('apiModal')" class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-700 cursor-pointer">Tutup</button>
+        <button onclick="saveGasUrl()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer">Simpan & Muat Ulang</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden max-w-sm bg-slate-900 text-white text-xs font-medium px-4 py-3 rounded-xl shadow-lg border border-slate-700"></div>
 
   <script>
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw6U7vqmEd5n8thqt8jOmFFt1XJZ1KjdBZBRhv6H-mgGroGxM3ypKe5yaHGYasgGkIP/exec";
+    // URL Web App Apps Script SIMON-BAPK 2025
+    const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbw6U7vqmEd5n8thqt8jOmFFt1XJZ1KjdBZBRhv6H-mgGroGxM3ypKe5yaHGYasgGkIP/exec';
 
-    let ALL_RECORDS = [];
-    let FILTERED_RECORDS = [];
-    let OFFICERS = [
-      "Anjas Marantika", "Rizky Arfiansyah", "Tony", "Gustrinelli",
-      "Taufik Hadi", "Rafi Prakas", "Bentar Purnama", "Dilla Triyana",
-      "Wira Oktoria", "Bayoe Angin", "Hikmah Mahatir"
-    ];
-    let OFFICER_QUOTAS = {};
-    let SELECTED_NIPS = {};
-    let CURRENT_PAGE = 1;
-    let PAGE_SIZE = 50;
-    let AUTO_SYNC_TIMER = null;
-    let SORT_FIELD = "no";
-    let SORT_ASC = true;
-    const ADMIN_UNLOCK_PIN = "2025";
-    let IS_ADMIN_PETUGAS_UNLOCKED = false;
+    let allRecords = [];
+    let filteredRecords = [];
+    let petugasList = [];
+    let selectedNips = new Set();
+    let currentPage = 1;
+    let pageSize = 50;
+    let chartInstance = null;
 
-    let OFFICER_CHART = null;
-    let STATUS_DOUGHNUT_CHART = null;
-    let DRAWER_CURRENT_NIP = "";
+    const isInsideAppsScript = typeof google !== 'undefined' && google.script && google.script.run;
 
-    function getOfficerQuota(name) {
-      if (OFFICER_QUOTAS && OFFICER_QUOTAS[name]) return Number(OFFICER_QUOTAS[name]);
-      const total = ALL_RECORDS.length || 1323;
-      const num = OFFICERS.length || 11;
-      const base = Math.floor(total / num);
-      const rem = total % num;
-      const idx = OFFICERS.indexOf(name);
-      return idx >= 0 ? (base + (idx < rem ? 1 : 0)) : base;
+    function getGasUrl() {
+      return localStorage.getItem('SIMON_BAPK_GAS_URL') || DEFAULT_GAS_URL;
     }
 
-    function initDarkMode() {
-      const savedTheme = localStorage.getItem("SIMON_BAPK_THEME");
-      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-      applyTheme(savedTheme ? (savedTheme === "dark") : prefersDark);
+    function showToast(msg, duration = 4000) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => el.classList.add('hidden'), duration);
     }
 
-    function applyTheme(isDark) {
-      document.documentElement.classList.toggle("dark", isDark);
-      document.getElementById("iconSun").classList.toggle("hidden", !isDark);
-      document.getElementById("iconMoon").classList.toggle("hidden", isDark);
-      if (ALL_RECORDS.length > 0) renderDashboard();
+    function openModal(id) {
+      const m = document.getElementById(id);
+      m.classList.remove('hidden');
+      m.classList.add('flex');
     }
 
-    function toggleDarkMode() {
-      const isDark = !document.documentElement.classList.contains("dark");
-      localStorage.setItem("SIMON_BAPK_THEME", isDark ? "dark" : "light");
-      applyTheme(isDark);
+    function closeModal(id) {
+      const m = document.getElementById(id);
+      m.classList.add('hidden');
+      m.classList.remove('flex');
     }
 
-    window.addEventListener("DOMContentLoaded", () => {
-      initDarkMode();
-      switchTab(1);
-      populateOfficerDropdowns();
-      const savedPic = localStorage.getItem("SIMON_BAPK_ACTIVE_PIC") || "ALL";
-      if (savedPic !== "ALL" && OFFICERS.includes(savedPic)) {
-        document.getElementById("activePicSelect").value = savedPic;
-        document.getElementById("filterOfficer").value = savedPic;
-      }
-      updatePersonalPicBanner();
-      fetchDataFromSheet(false);
-      AUTO_SYNC_TIMER = setInterval(() => {
-        if (document.getElementById("editModal").classList.contains("hidden")) {
-          fetchDataFromSheet(false, true);
+    function openApiModal() {
+      document.getElementById('gasUrlInput').value = getGasUrl();
+      openModal('apiModal');
+    }
+
+    function saveGasUrl() {
+      const val = document.getElementById('gasUrlInput').value.trim();
+      localStorage.setItem('SIMON_BAPK_GAS_URL', val);
+      closeModal('apiModal');
+      loadData();
+    }
+
+    /**
+     * Jembatan komunikasi universal (otomatis mendeteksi Apps Script vs GitHub Pages)
+     */
+    async function callBackend(action, payload = {}) {
+      if (isInsideAppsScript) {
+        return new Promise((resolve, reject) => {
+          const runner = google.script.run
+            .withSuccessHandler(res => resolve(res))
+            .withFailureHandler(err => reject(err));
+
+          if (action === 'getData') runner.getDashboardData();
+          else if (action === 'syncDrive') runner.syncDriveFolders();
+          else if (action === 'claimBerkas') runner.claimBerkas(payload);
+          else if (action === 'updateSingle') runner.updateSingleRecord(payload);
+          else if (action === 'updateBulk') runner.updateBulkRecords(payload);
+          else if (action === 'uploadScanPdf') runner.uploadScanPdf(payload);
+        });
+      } else {
+        const url = getGasUrl();
+        if (!url) {
+          openApiModal();
+          throw new Error('URL Web App Apps Script belum diatur.');
         }
-      }, 30000);
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        closeEditModal();
-        closeProfileDrawer();
-      } else if (e.key === "/" && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) {
-        e.preventDefault();
-        switchTab(2);
-        document.getElementById("searchInput").focus();
-      }
-    });
-
-    function setActivePic() {
-      const pic = document.getElementById("activePicSelect").value;
-      localStorage.setItem("SIMON_BAPK_ACTIVE_PIC", pic);
-      if (pic === "ALL") {
-        document.getElementById("filterOfficer").value = "ALL";
-      } else {
-        const myCount = ALL_RECORDS.filter(r => r.petugas === pic).length;
-        document.getElementById("filterOfficer").value = myCount > 0 ? pic : "UNCLAIMED";
-      }
-      updatePersonalPicBanner();
-      applyFilters();
-      if (pic !== "ALL") showToast(`PIC Aktif: ${pic} (Target: ${getOfficerQuota(pic)} berkas)`);
-    }
-
-    function onFilterOfficerChange() {
-      const off = document.getElementById("filterOfficer").value;
-      if (off !== "ALL" && off !== "UNCLAIMED" && OFFICERS.includes(off)) {
-        document.getElementById("activePicSelect").value = off;
-        localStorage.setItem("SIMON_BAPK_ACTIVE_PIC", off);
-      }
-      updatePersonalPicBanner();
-      applyFilters();
-    }
-
-    function updatePersonalPicBanner() {
-      const activePic = document.getElementById("activePicSelect").value;
-      const banner = document.getElementById("personalPicBanner");
-
-      if (!activePic || activePic === "ALL" || !OFFICERS.includes(activePic)) {
-        banner.classList.add("hidden");
-        return;
-      }
-
-      const quota = getOfficerQuota(activePic);
-      const myRecords = ALL_RECORDS.filter(r => r.petugas === activePic);
-      const claimedMine = myRecords.length;
-      const sisaKuota = Math.max(0, quota - claimedMine);
-      const doneMine = myRecords.filter(r => r.statusBA === "Selesai" && r.statusPK === "Selesai").length;
-      const remainingMine = claimedMine - doneMine;
-      const pctTarget = quota > 0 ? ((doneMine / quota) * 100).toFixed(1) : "0.0";
-      const unclaimedTotal = ALL_RECORDS.filter(r => !r.petugas).length;
-
-      const firstName = activePic.split(" ")[0];
-      document.getElementById("personalPicGreeting").textContent =
-        `Halo ${firstName}, kuota terambil: ${claimedMine} / ${quota} berkas` +
-        (sisaKuota > 0 ? ` (sisa kuota ${sisaKuota})` : " (target kuota tercapai!)");
-      document.getElementById("personalPicSubtext").textContent =
-        `Selesai tuntas: ${doneMine} dari ${claimedMine} berkas diambil (${pctTarget}% terhadap target kuota ${quota})`;
-
-      document.getElementById("bannerUnclaimedCount").textContent = unclaimedTotal.toLocaleString("id-ID");
-      document.getElementById("bannerMyTotalCount").textContent = claimedMine;
-
-      const curStatus = document.getElementById("filterStatus").value;
-      document.getElementById("btnMyRemainingText").textContent =
-        (curStatus === "NOT_SELESAI" && document.getElementById("filterOfficer").value === activePic)
-          ? `Menampilkan Sisa (${remainingMine})`
-          : `Sisa Tugas Saya (${remainingMine})`;
-
-      banner.classList.remove("hidden");
-    }
-
-    function showUnclaimedForPic() {
-      document.getElementById("filterOfficer").value = "UNCLAIMED";
-      document.getElementById("filterStatus").value = "ALL";
-      updatePersonalPicBanner();
-      applyFilters();
-      document.getElementById("searchInput").focus();
-    }
-
-    function toggleMyRemainingFilter() {
-      const activePic = document.getElementById("activePicSelect").value;
-      if (activePic && activePic !== "ALL") document.getElementById("filterOfficer").value = activePic;
-      const stEl = document.getElementById("filterStatus");
-      stEl.value = (stEl.value === "NOT_SELESAI") ? "ALL" : "NOT_SELESAI";
-      updatePersonalPicBanner();
-      applyFilters();
-    }
-
-    function showAllMyFiles() {
-      const activePic = document.getElementById("activePicSelect").value;
-      if (activePic && activePic !== "ALL") document.getElementById("filterOfficer").value = activePic;
-      document.getElementById("filterStatus").value = "ALL";
-      updatePersonalPicBanner();
-      applyFilters();
-    }
-
-    function setConnectionStatus(state, text) {
-      const badge = document.getElementById("connBadge");
-      const dot = document.getElementById("connDot");
-      document.getElementById("connText").textContent = text;
-
-      if (state === "connected") {
-        badge.className = "inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300";
-        dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500";
-      } else if (state === "error") {
-        badge.className = "inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300";
-        dot.className = "w-1.5 h-1.5 rounded-full bg-rose-500";
-      } else {
-        badge.className = "inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300";
-        dot.className = "w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse";
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action, ...payload })
+        });
+        return await resp.json();
       }
     }
 
-    function populateOfficerDropdowns() {
-      const filterSel = document.getElementById("filterOfficer");
-      const modalSel = document.getElementById("modalPetugas");
-      const activePicSel = document.getElementById("activePicSelect");
-      const currentFilter = filterSel.value;
-      const currentActive = activePicSel.value;
-
-      const totalCount = ALL_RECORDS.length;
-      const unclaimedCount = ALL_RECORDS.filter(r => !r.petugas).length;
-
-      filterSel.innerHTML =
-        `<option value="ALL">Semua Berkas (${totalCount.toLocaleString("id-ID")})</option>` +
-        `<option value="UNCLAIMED">Berkas Bebas / Belum Diambil (${unclaimedCount.toLocaleString("id-ID")})</option>`;
-      activePicSel.innerHTML = `<option value="ALL" class="dark:bg-slate-900">Semua (Admin)</option>`;
-      modalSel.innerHTML = `<option value="">-- Belum Diambil (Bebas) --</option>`;
-
-      OFFICERS.forEach((name) => {
-        const claimed = ALL_RECORDS.filter(r => r.petugas === name).length;
-        const quota = getOfficerQuota(name);
-
-        const o1 = document.createElement("option");
-        o1.value = name;
-        o1.textContent = `${name} (${claimed}/${quota})`;
-        filterSel.appendChild(o1);
-
-        const o2 = document.createElement("option");
-        o2.value = name;
-        o2.textContent = `${name} (${claimed}/${quota})`;
-        modalSel.appendChild(o2);
-
-        const o3 = document.createElement("option");
-        o3.value = name;
-        o3.textContent = name;
-        o3.className = "dark:bg-slate-900";
-        activePicSel.appendChild(o3);
-      });
-
-      if (currentFilter && (currentFilter === "ALL" || currentFilter === "UNCLAIMED" || OFFICERS.includes(currentFilter))) {
-        filterSel.value = currentFilter;
-      }
-      if (currentActive && (currentActive === "ALL" || OFFICERS.includes(currentActive))) {
-        activePicSel.value = currentActive;
+    async function loadData() {
+      try {
+        const res = await callBackend('getData');
+        if (!res || !res.success) {
+          showToast(res?.message || 'Gagal memuat data.');
+          return;
+        }
+        hydrateUI(res);
+      } catch (err) {
+        showToast('Koneksi gagal: ' + err.message);
       }
     }
 
-    function populateDynamicFilters() {
-      const boxSet = new Set();
-      const unitSet = new Set();
-      ALL_RECORDS.forEach(r => {
-        if (r.lokasiBox) boxSet.add(r.lokasiBox);
-        if (r.unitKerja) unitSet.add(r.unitKerja);
-      });
-
-      const sortedBoxes = Array.from(boxSet).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-      const sortedUnits = Array.from(unitSet).sort();
-
-      const filterBoxSel = document.getElementById("filterBox");
-      const boxDetailSel = document.getElementById("boxDetailSelect");
-      const datalist = document.getElementById("existingBoxesList");
-      const curBox = filterBoxSel.value;
-      const curDetailBox = boxDetailSel.value;
-
-      filterBoxSel.innerHTML = `<option value="ALL">Semua Box (${sortedBoxes.length})</option><option value="EMPTY">Belum Ber-Box</option>`;
-      boxDetailSel.innerHTML = `<option value="">-- Pilih Box (${sortedBoxes.length}) --</option>`;
-      datalist.innerHTML = "";
-
-      sortedBoxes.forEach(b => {
-        const o1 = document.createElement("option"); o1.value = b; o1.textContent = b; filterBoxSel.appendChild(o1);
-        const o2 = document.createElement("option"); o2.value = b; o2.textContent = b; boxDetailSel.appendChild(o2);
-        const o3 = document.createElement("option"); o3.value = b; datalist.appendChild(o3);
-      });
-
-      if (curBox === "ALL" || curBox === "EMPTY" || sortedBoxes.includes(curBox)) filterBoxSel.value = curBox;
-      if (sortedBoxes.includes(curDetailBox)) boxDetailSel.value = curDetailBox;
-
-      const filterUnitSel = document.getElementById("filterUnit");
-      const curUnit = filterUnitSel.value;
-      filterUnitSel.innerHTML = `<option value="ALL">Semua Unit</option>`;
-      sortedUnits.forEach(u => {
-        const o = document.createElement("option"); o.value = u; o.textContent = u; filterUnitSel.appendChild(o);
-      });
-      if (curUnit === "ALL" || sortedUnits.includes(curUnit)) filterUnitSel.value = curUnit;
-    }
-
-    function showToast(msg) {
-      const t = document.getElementById("toast");
-      t.textContent = msg;
-      t.classList.remove("hidden");
-      clearTimeout(t._timer);
-      t._timer = setTimeout(() => t.classList.add("hidden"), 3600);
-    }
-
-    function switchTab(tabNum) {
-      for (let i = 1; i <= 3; i++) {
-        document.getElementById("tab" + i).classList.toggle("hidden", i !== tabNum);
-        const btn = document.getElementById("btnTab" + i);
-        const mBtn = document.getElementById("mBtnTab" + i);
-        const activeClass = "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs";
-        const idleClass = "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200";
-        if (btn) btn.className = `px-4 py-1.5 rounded-lg text-xs font-bold transition ${i === tabNum ? activeClass : idleClass}`;
-        if (mBtn) mBtn.className = `flex-1 py-1.5 rounded-lg text-xs font-bold text-center transition ${i === tabNum ? "bg-indigo-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"}`;
-      }
-      if (tabNum === 1 && ALL_RECORDS.length > 0) renderDashboard();
-      if (tabNum === 2) updatePersonalPicBanner();
-      if (tabNum === 3) renderBoxOverview();
-    }
-
-    function jumpToUnclaimed() {
-      document.getElementById("searchInput").value = "";
-      document.getElementById("filterOfficer").value = "UNCLAIMED";
-      document.getElementById("filterStatus").value = "ALL";
-      document.getElementById("filterBox").value = "ALL";
-      document.getElementById("filterUnit").value = "ALL";
-      switchTab(2);
-      applyFilters();
-    }
-
-    function jumpToKendala() {
-      document.getElementById("filterStatus").value = "KENDALA";
-      switchTab(2);
-      applyFilters();
-    }
-
-    function jumpToAnomaly(type) {
-      document.getElementById("searchInput").value = "";
-      document.getElementById("filterBox").value = "ALL";
-      document.getElementById("filterUnit").value = "ALL";
-      document.getElementById("filterStatus").value = type;
-      switchTab(2);
-      applyFilters();
-    }
-
-    async function fetchDataFromSheet(manual = false, silent = false) {
-      const bar = document.getElementById("loadingBar");
-      if (!silent) {
-        setConnectionStatus("loading", "Sinkron...");
-        bar.classList.remove("hidden");
-      }
+    async function triggerSyncDrive() {
+      const btn = document.getElementById('btnSyncDrive');
+      const icon = document.getElementById('syncIcon');
+      btn.disabled = true;
+      icon.classList.add('animate-spin');
+      showToast('Memindai folder Drive & mencocokkan NIP...', 6000);
 
       try {
-        const sep = GAS_WEB_APP_URL.includes("?") ? "&" : "?";
-        const url = `${GAS_WEB_APP_URL}${sep}mode=json&t=${Date.now()}`;
-        const response = await fetch(url, { method: "GET", redirect: "follow" });
-        const text = await response.text();
-        const res = JSON.parse(text);
-
-        if (res && res.status === "success") {
-          ALL_RECORDS = res.data || [];
-          if (Array.isArray(res.officers) && res.officers.length > 0) {
-            OFFICERS = res.officers;
-          }
-          if (res.quotas && typeof res.quotas === "object") {
-            OFFICER_QUOTAS = res.quotas;
-          }
-          populateOfficerDropdowns();
-          populateDynamicFilters();
-          setConnectionStatus("connected", `${ALL_RECORDS.length.toLocaleString("id-ID")} Berkas`);
-          bar.classList.add("hidden");
-
-          updatePersonalPicBanner();
-          renderDashboard();
-          applyFilters(true);
-          if (!document.getElementById("tab3").classList.contains("hidden")) {
-            renderBoxOverview();
-            renderBoxDetail();
-          }
-          if (manual) showToast(`Data diperbarui (${ALL_RECORDS.length.toLocaleString("id-ID")} berkas).`);
+        const res = await callBackend('syncDrive');
+        if (res && res.success) {
+          hydrateUI(res);
+          const s = res.syncSummary || {};
+          showToast(`Sinkronisasi selesai! ${s.totalFiles || 0} file dipindai, ${s.updatedRows || 0} baris diperbarui.`);
         } else {
-          throw new Error((res && res.message) ? res.message : "Gagal memuat data.");
+          showToast(res?.message || 'Gagal melakukan sinkronisasi Drive.');
         }
       } catch (err) {
-        setConnectionStatus("error", "Offline");
-        bar.textContent = "Gagal terhubung ke Google Sheets: " + err.message;
-        bar.className = "w-full bg-rose-50 dark:bg-rose-950 px-4 py-1.5 text-center text-xs font-medium text-rose-700 dark:text-rose-300 no-print";
-        bar.classList.remove("hidden");
+        showToast('Error sinkronisasi: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        icon.classList.remove('animate-spin');
       }
     }
 
-    async function postToGas(payloadObj) {
-      const response = await fetch(GAS_WEB_APP_URL, {
-        method: "POST",
-        redirect: "follow",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payloadObj)
-      });
-      return JSON.parse(await response.text());
+    function hydrateUI(res) {
+      allRecords = res.records || [];
+      petugasList = res.petugasList || [];
+
+      document.getElementById('lastSyncBadge').textContent = 'Update: ' + (res.timestamp || '-');
+      populateDropdowns();
+      updateKpiAndRekap(res.folderStats || {});
+      applyFilters();
     }
 
-    function getCategory(rec) {
-      if (rec.statusBA === "Selesai" && rec.statusPK === "Selesai") return "SELESAI";
-      if (rec.statusBA === "Kendala" || rec.statusPK === "Kendala") return "KENDALA";
-      if (rec.statusBA === "Proses" || rec.statusPK === "Proses" || rec.statusBA === "Selesai" || rec.statusPK === "Selesai") return "PROSES";
-      return "BELUM";
-    }
+    function populateDropdowns() {
+      const filterVer = document.getElementById('filterVerifikator');
+      const currentFilter = filterVer.value;
+      filterVer.innerHTML = '<option value="ALL">Semua Verifikator</option><option value="UNCLAIMED">Belum Diambil (Pool)</option>';
 
-    function isDoneNoBox(r) { return (r.statusBA === "Selesai" && r.statusPK === "Selesai" && !r.lokasiBox); }
-    function isBoxNotDone(r) { return (Boolean(r.lokasiBox) && (r.statusBA !== "Selesai" || r.statusPK !== "Selesai")); }
-    function isKendalaNoNote(r) { return ((r.statusBA === "Kendala" || r.statusPK === "Kendala") && !r.keterangan); }
-    function isPartialStatus(r) { return ((r.statusBA === "Selesai" && r.statusPK === "Belum") || (r.statusPK === "Selesai" && r.statusBA === "Belum")); }
+      const editVer = document.getElementById('editVerifikator');
+      const claimVer = document.getElementById('claimVerifikatorSelect');
+      const bulkVer = document.getElementById('bulkVerifikator');
 
-    function renderCharts(officerStats, selesai, proses, kendala, belum, total) {
-      const isDark = document.documentElement.classList.contains("dark");
-      const textColor = isDark ? "#94a3b8" : "#64748b";
-      const gridColor = isDark ? "rgba(148, 163, 184, 0.08)" : "rgba(15, 23, 42, 0.05)";
+      editVer.innerHTML = '<option value="">-- Belum Diambil --</option>';
+      claimVer.innerHTML = '';
+      bulkVer.innerHTML = '<option value="">-- Tidak Diubah --</option>';
 
-      const barCtx = document.getElementById("officerChartCanvas");
-      if (barCtx) {
-        const labels = OFFICERS.map(n => n.split(" ")[0]);
-        const fullNames = OFFICERS;
-        const baData = OFFICERS.map(n => officerStats[n]?.baDone || 0);
-        const pkData = OFFICERS.map(n => officerStats[n]?.pkDone || 0);
-        const remQuotaData = OFFICERS.map(n => {
-          const st = officerStats[n];
-          if (!st) return 0;
-          return Math.max(0, (st.quota * 2) - (st.baDone + st.pkDone));
-        });
-
-        if (OFFICER_CHART) OFFICER_CHART.destroy();
-
-        OFFICER_CHART = new Chart(barCtx, {
-          type: "bar",
-          data: {
-            labels: labels,
-            datasets: [
-              { label: "BA Selesai", data: baData, backgroundColor: "#4f46e5", borderRadius: 4, barPercentage: 0.65 },
-              { label: "PK Selesai", data: pkData, backgroundColor: "#10b981", borderRadius: 4, barPercentage: 0.65 },
-              { label: "Sisa Target Kuota (BA+PK)", data: remQuotaData, backgroundColor: isDark ? "#1e293b" : "#f1f5f9", borderRadius: 4, barPercentage: 0.65 }
-            ]
-          },
-          options: {
-            indexAxis: "y",
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: "index", intersect: false },
-            plugins: {
-              legend: {
-                position: "bottom",
-                labels: {
-                  color: textColor,
-                  boxWidth: 10,
-                  boxHeight: 10,
-                  usePointStyle: true,
-                  pointStyle: "circle",
-                  font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: "600" }
-                }
-              },
-              tooltip: {
-                backgroundColor: "#0f172a",
-                callbacks: {
-                  title: (items) => {
-                    const idx = items[0].dataIndex;
-                    const st = officerStats[fullNames[idx]];
-                    return st
-                      ? `${fullNames[idx]} • Diambil: ${st.total}/${st.quota} berkas`
-                      : fullNames[idx];
-                  }
-                }
-              }
-            },
-            scales: {
-              x: { stacked: true, grid: { color: gridColor }, border: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
-              y: { stacked: true, grid: { display: false }, border: { display: false }, ticks: { color: isDark ? "#e2e8f0" : "#334155", font: { size: 11, weight: "700" } } }
-            }
-          }
-        });
-      }
-
-      const doughnutCtx = document.getElementById("statusDoughnutCanvas");
-      if (doughnutCtx) {
-        const selesaiPct = total > 0 ? Math.round((selesai / total) * 100) : 0;
-        document.getElementById("doughnutCenterPct").textContent = `${selesaiPct}%`;
-        document.getElementById("legSelesai").textContent = selesai.toLocaleString("id-ID");
-        document.getElementById("legProses").textContent = proses.toLocaleString("id-ID");
-        document.getElementById("legKendala").textContent = kendala.toLocaleString("id-ID");
-        document.getElementById("legBelum").textContent = belum.toLocaleString("id-ID");
-
-        if (STATUS_DOUGHNUT_CHART) STATUS_DOUGHNUT_CHART.destroy();
-
-        STATUS_DOUGHNUT_CHART = new Chart(doughnutCtx, {
-          type: "doughnut",
-          data: {
-            labels: ["Selesai", "Proses", "Kendala", "Belum"],
-            datasets: [{
-              data: [selesai, proses, kendala, belum],
-              backgroundColor: ["#10b981", "#f59e0b", "#f43f5e", isDark ? "#334155" : "#e2e8f0"],
-              borderColor: isDark ? "#0f172a" : "#ffffff",
-              borderWidth: 3
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: "74%",
-            plugins: { legend: { display: false } }
-          }
-        });
-      }
-    }
-
-    function renderDashboard() {
-      const total = ALL_RECORDS.length;
-      let selesai = 0, proses = 0, kendala = 0, belum = 0;
-      let baDone = 0, pkDone = 0, unclaimed = 0;
-      let anomDoneNoBox = 0, anomBoxNotDone = 0, anomKendalaNoNote = 0, anomPartial = 0;
-
-      const officerStats = {};
-      OFFICERS.forEach(name => {
-        officerStats[name] = {
-          name,
-          quota: getOfficerQuota(name),
-          total: 0,
-          selesai: 0,
-          baDone: 0,
-          pkDone: 0
-        };
+      petugasList.forEach(p => {
+        filterVer.add(new Option(p.nama, p.nama));
+        editVer.add(new Option(p.nama, p.nama));
+        claimVer.add(new Option(`${p.nama} (Kuota: ${p.kuota})`, p.nama));
+        bulkVer.add(new Option(p.nama, p.nama));
       });
 
-      ALL_RECORDS.forEach(r => {
-        const cat = getCategory(r);
-        if (cat === "SELESAI") selesai++;
-        else if (cat === "KENDALA") kendala++;
-        else if (cat === "PROSES") proses++;
-        else belum++;
+      if ([...filterVer.options].some(o => o.value === currentFilter)) {
+        filterVer.value = currentFilter;
+      }
+    }
 
-        if (r.statusBA === "Selesai") baDone++;
-        if (r.statusPK === "Selesai") pkDone++;
-        if (!r.petugas) unclaimed++;
+    function updateKpiAndRekap(folderStats) {
+      const total = allRecords.length;
+      let baSelesai = 0, pkSelesai = 0, unclaimed = 0;
 
-        if (isDoneNoBox(r)) anomDoneNoBox++;
-        if (isBoxNotDone(r)) anomBoxNotDone++;
-        if (isKendalaNoNote(r)) anomKendalaNoNote++;
-        if (isPartialStatus(r)) anomPartial++;
+      const statsMap = {};
+      petugasList.forEach(p => {
+        statsMap[p.nama] = { nama: p.nama, kuota: p.kuota, diambil: 0, ba: 0, pk: 0 };
+      });
 
-        const st = officerStats[r.petugas];
-        if (st) {
-          st.total++;
-          if (cat === "SELESAI") st.selesai++;
-          if (r.statusBA === "Selesai") st.baDone++;
-          if (r.statusPK === "Selesai") st.pkDone++;
+      allRecords.forEach(r => {
+        if (r.statusBA === 'Selesai') baSelesai++;
+        if (r.statusPK === 'Selesai') pkSelesai++;
+        if (!r.verifikator) {
+          unclaimed++;
+        } else if (statsMap[r.verifikator]) {
+          statsMap[r.verifikator].diambil++;
+          if (r.statusBA === 'Selesai') statsMap[r.verifikator].ba++;
+          if (r.statusPK === 'Selesai') statsMap[r.verifikator].pk++;
         }
       });
 
-      const claimedTotal = total - unclaimed;
-      document.getElementById("kpiTotal").textContent = total.toLocaleString("id-ID");
-      document.getElementById("kpiPoolSub").textContent = `${unclaimed.toLocaleString("id-ID")} bebas • ${claimedTotal.toLocaleString("id-ID")} diambil`;
-      document.getElementById("unclaimedQuickCount").textContent = unclaimed.toLocaleString("id-ID");
+      document.getElementById('kpiTotal').textContent = total.toLocaleString('id-ID');
+      document.getElementById('kpiBaSelesai').textContent = baSelesai.toLocaleString('id-ID');
+      document.getElementById('kpiBaPct').textContent = total ? ((baSelesai / total) * 100).toFixed(1).replace('.', ',') + '% terverifikasi' : '0%';
+      document.getElementById('kpiPkSelesai').textContent = pkSelesai.toLocaleString('id-ID');
+      document.getElementById('kpiPkPct').textContent = total ? ((pkSelesai / total) * 100).toFixed(1).replace('.', ',') + '% terverifikasi' : '0%';
+      document.getElementById('kpiTteBerhasil').textContent = (folderStats.berhasil || 0).toLocaleString('id-ID');
+      document.getElementById('kpiTteGagal').textContent = (folderStats.gagal || 0).toLocaleString('id-ID');
+      document.getElementById('kpiPool').textContent = unclaimed.toLocaleString('id-ID');
+      document.getElementById('kpiScanBaru').textContent = `Scan Baru: ${folderStats.scanBaru || 0} file`;
 
-      document.getElementById("kpiSelesai").textContent = selesai.toLocaleString("id-ID");
-      document.getElementById("kpiSelesaiPct").textContent = total ? `${(selesai / total * 100).toFixed(1)}%` : "0%";
-      document.getElementById("kpiPending").textContent = (proses + belum).toLocaleString("id-ID");
-      document.getElementById("kpiPendingDetail").textContent = `${proses} proses • ${belum} belum`;
-      document.getElementById("kpiKendala").textContent = kendala.toLocaleString("id-ID");
+      // Render tabel rekap 11 petugas
+      const tbody = document.getElementById('rekapTableBody');
+      tbody.innerHTML = '';
+      const labels = [], dataSelesai = [], dataSisa = [];
 
-      document.getElementById("baPctInline").textContent = total ? `${(baDone / total * 100).toFixed(1)}%` : "0%";
-      document.getElementById("pkPctInline").textContent = total ? `${(pkDone / total * 100).toFixed(1)}%` : "0%";
+      Object.values(statsMap).forEach(st => {
+        const sisa = Math.max(0, st.kuota - st.diambil);
+        const pct = st.kuota ? (((st.ba + st.pk) / (st.kuota * 2)) * 100).toFixed(1) : '0.0';
+        labels.push(st.nama.split(' ')[0]);
+        dataSelesai.push(st.pk);
+        dataSisa.push(Math.max(0, st.kuota - st.pk));
 
-      const totalAnom = anomDoneNoBox + anomBoxNotDone + anomKendalaNoNote + anomPartial;
-      document.getElementById("totalAnomalyBadge").textContent = totalAnom;
-      document.getElementById("anomDoneNoBox").textContent = anomDoneNoBox;
-      document.getElementById("anomBoxNotDone").textContent = anomBoxNotDone;
-      document.getElementById("anomKendalaNoNote").textContent = anomKendalaNoNote;
-      document.getElementById("anomPartial").textContent = anomPartial;
-
-      renderCharts(officerStats, selesai, proses, kendala, belum, total);
-
-      // Officer Quota & Progress Cards
-      const grid = document.getElementById("officersGrid");
-      grid.innerHTML = "";
-      OFFICERS.forEach((name) => {
-        const o = officerStats[name];
-        const sisaKuota = Math.max(0, o.quota - o.total);
-        const pct = o.quota ? Math.min(100, Math.round(((o.baDone + o.pkDone) / (2 * o.quota)) * 100)) : 0;
-        const quotaBadge = sisaKuota === 0
-          ? `<span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">Kuota Penuh</span>`
-          : `<span class="text-[11px] text-slate-400">Sisa kuota: ${sisaKuota}</span>`;
-
-        const card = document.createElement("div");
-        card.className = "clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-4 hover:border-indigo-500 cursor-pointer transition";
-        card.onclick = () => {
-          document.getElementById("activePicSelect").value = o.name;
-          localStorage.setItem("SIMON_BAPK_ACTIVE_PIC", o.name);
-          document.getElementById("filterOfficer").value = o.total > 0 ? o.name : "UNCLAIMED";
-          document.getElementById("filterStatus").value = "ALL";
-          updatePersonalPicBanner();
-          switchTab(2);
-          applyFilters();
-        };
-
-        card.innerHTML = `
-          <div class="flex items-center justify-between gap-2">
-            <h3 class="font-bold text-slate-900 dark:text-white text-xs truncate">${escapeHtml(o.name)}</h3>
-            <span class="text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400">${pct}%</span>
-          </div>
-          <div class="flex items-center justify-between mt-1.5">
-            <p class="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">Diambil: ${o.total} / ${o.quota}</p>
-            ${quotaBadge}
-          </div>
-          <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-2.5">
-            <div class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width:${pct}%"></div>
-          </div>
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+        tr.innerHTML = `
+          <td class="py-2 px-3 font-medium text-slate-800">${st.nama}</td>
+          <td class="py-2 px-2 text-center text-slate-500">${st.kuota}</td>
+          <td class="py-2 px-2 text-center font-semibold">${st.diambil}</td>
+          <td class="py-2 px-2 text-center text-amber-600 font-medium">${sisa}</td>
+          <td class="py-2 px-2 text-center text-blue-600 font-semibold">${st.ba}</td>
+          <td class="py-2 px-2 text-center text-indigo-600 font-semibold">${st.pk}</td>
+          <td class="py-2 px-2 text-right font-bold text-emerald-600">${pct.replace('.', ',')}%</td>
         `;
-        grid.appendChild(card);
+        tbody.appendChild(tr);
+      });
+
+      renderChart(labels, dataSelesai, dataSisa);
+    }
+
+    function renderChart(labels, dataSelesai, dataSisa) {
+      const ctx = document.getElementById('petugasChart').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'PK Selesai', data: dataSelesai, backgroundColor: '#10b981', borderRadius: 4 },
+            { label: 'Sisa Kuota', data: dataSisa, backgroundColor: '#e2e8f0', borderRadius: 4 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+          scales: {
+            x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10 } } },
+            y: { stacked: true, beginAtZero: true, max: 130, ticks: { font: { size: 10 } } }
+          }
+        }
       });
     }
 
-    function sortTable(field) {
-      if (SORT_FIELD === field) SORT_ASC = !SORT_ASC;
-      else { SORT_FIELD = field; SORT_ASC = true; }
-      applyFilters(true);
+    function toggleRekapSection() {
+      const body = document.getElementById('rekapBody');
+      const lbl = document.getElementById('rekapToggleLabel');
+      const hidden = body.classList.toggle('hidden');
+      lbl.textContent = hidden ? 'Tampilkan ▼' : 'Sembunyikan ▲';
     }
 
-    function applyFilters(keepPage = false) {
-      const q = document.getElementById("searchInput").value.toLowerCase().trim();
-      const off = document.getElementById("filterOfficer").value;
-      const st = document.getElementById("filterStatus").value;
-      const box = document.getElementById("filterBox").value;
-      const unit = document.getElementById("filterUnit").value;
+    function applyFilters() {
+      const q = document.getElementById('filterSearch').value.toLowerCase().trim();
+      const ver = document.getElementById('filterVerifikator').value;
+      const drv = document.getElementById('filterDrive').value;
+      const st = document.getElementById('filterStatus').value;
+      const box = document.getElementById('filterBox').value.toLowerCase().trim();
 
-      FILTERED_RECORDS = ALL_RECORDS.filter(r => {
-        if (off === "UNCLAIMED" && r.petugas) return false;
-        if (off !== "ALL" && off !== "UNCLAIMED" && r.petugas !== off) return false;
+      filteredRecords = allRecords.filter(r => {
+        if (q && !(r.nip.includes(q) || r.nama.toLowerCase().includes(q) || r.unitKerja.toLowerCase().includes(q))) return false;
+        if (ver === 'UNCLAIMED' && r.verifikator !== '') return false;
+        if (ver !== 'ALL' && ver !== 'UNCLAIMED' && r.verifikator !== ver) return false;
+        if (drv !== 'ALL' && r.driveStatus !== drv) return false;
+        if (box && !r.lokasiBox.toLowerCase().includes(box)) return false;
 
-        if (st !== "ALL") {
-          if (st === "NOT_SELESAI" && getCategory(r) === "SELESAI") return false;
-          else if (st === "DONE_NO_BOX" && !isDoneNoBox(r)) return false;
-          else if (st === "BOX_NOT_DONE" && !isBoxNotDone(r)) return false;
-          else if (st === "KENDALA_NO_NOTE" && !isKendalaNoNote(r)) return false;
-          else if (st === "PARTIAL_STATUS" && !isPartialStatus(r)) return false;
-          else if (["SELESAI", "PROSES", "KENDALA", "BELUM"].includes(st) && getCategory(r) !== st) return false;
-        }
-        if (box === "EMPTY" && r.lokasiBox) return false;
-        if (box !== "ALL" && box !== "EMPTY" && r.lokasiBox !== box) return false;
-        if (unit !== "ALL" && r.unitKerja !== unit) return false;
-        if (q) {
-          const hay = `${r.nama} ${r.nip} ${r.unitKerja} ${r.lokasiBox} ${r.keterangan} ${r.petugas}`.toLowerCase();
-          if (!hay.includes(q)) return false;
-        }
+        if (st === 'BOTH_SELESAI' && !(r.statusBA === 'Selesai' && r.statusPK === 'Selesai')) return false;
+        if (st === 'PK_SELESAI' && r.statusPK !== 'Selesai') return false;
+        if (st === 'BA_SELESAI' && r.statusBA !== 'Selesai') return false;
+        if (st === 'BELUM' && (r.statusBA === 'Selesai' && r.statusPK === 'Selesai')) return false;
+        if (st === 'KENDALA' && !(r.statusBA === 'Kendala' || r.statusPK === 'Kendala' || r.driveStatus === 'UPLOAD_TTE_GAGAL')) return false;
+
         return true;
       });
 
-      FILTERED_RECORDS.sort((a, b) => {
-        let valA = a[SORT_FIELD], valB = b[SORT_FIELD];
-        if (SORT_FIELD === "no") return SORT_ASC ? (Number(valA) - Number(valB)) : (Number(valB) - Number(valA));
-        const cmp = String(valA || "").toLowerCase().localeCompare(String(valB || "").toLowerCase(), undefined, { numeric: true });
-        return SORT_ASC ? cmp : -cmp;
-      });
-
-      if (!keepPage) CURRENT_PAGE = 1;
-      updatePersonalPicBanner();
+      currentPage = 1;
       renderTable();
     }
 
-    function resetFilters() {
-      document.getElementById("searchInput").value = "";
-      document.getElementById("filterOfficer").value = "ALL";
-      document.getElementById("activePicSelect").value = "ALL";
-      localStorage.setItem("SIMON_BAPK_ACTIVE_PIC", "ALL");
-      document.getElementById("filterStatus").value = "ALL";
-      document.getElementById("filterBox").value = "ALL";
-      document.getElementById("filterUnit").value = "ALL";
-      SORT_FIELD = "no"; SORT_ASC = true;
-      clearSelection();
-      updatePersonalPicBanner();
-      applyFilters();
+    function statusBadge(status) {
+      if (status === 'Selesai') return '<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700">Selesai</span>';
+      if (status === 'Kendala') return '<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-700">Kendala</span>';
+      return '<span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600">Belum</span>';
     }
 
-    function statusBadge(val) {
-      if (val === "Selesai") return '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">Selesai</span>';
-      if (val === "Proses") return '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300">Proses</span>';
-      if (val === "Kendala") return '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300">Kendala</span>';
-      return '<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">Belum</span>';
-    }
-
-    function getRowHighlightClass(cat) {
-      if (cat === "SELESAI") return "bg-emerald-50/40 hover:bg-emerald-50/80 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/35";
-      if (cat === "KENDALA") return "bg-rose-50/50 hover:bg-rose-50/90 dark:bg-rose-950/25 dark:hover:bg-rose-950/40";
-      if (cat === "PROSES") return "bg-amber-50/35 hover:bg-amber-50/75 dark:bg-amber-950/15 dark:hover:bg-amber-950/30";
-      return "hover:bg-slate-50/90 dark:hover:bg-slate-800/40";
+    function driveBadge(r) {
+      if (r.driveStatus === 'TTE_BERHASIL') {
+        return `<a href="${r.driveUrl}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700">✅ TTE Berhasil ↗</a>`;
+      }
+      if (r.driveStatus === 'UPLOAD_TTE_GAGAL') {
+        return `<a href="${r.driveUrl}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-rose-600 text-white hover:bg-rose-700">❌ Gagal TTE ↗</a>`;
+      }
+      if (r.driveStatus === 'HASIL_SCAN_BARU') {
+        return `<a href="${r.driveUrl}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700">📄 Scan Baru ↗</a>`;
+      }
+      return '<span class="text-[11px] text-slate-400 italic">Belum ada PDF</span>';
     }
 
     function renderTable() {
-      const tbody = document.getElementById("tableBody");
-      const total = FILTERED_RECORDS.length;
-      const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-      if (CURRENT_PAGE > totalPages) CURRENT_PAGE = totalPages;
+      const tbody = document.getElementById('tableBody');
+      const total = filteredRecords.length;
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+      if (currentPage > totalPages) currentPage = totalPages;
 
-      const start = (CURRENT_PAGE - 1) * PAGE_SIZE;
-      const end = Math.min(start + PAGE_SIZE, total);
+      const start = (currentPage - 1) * pageSize;
+      const slice = filteredRecords.slice(start, start + pageSize);
 
-      document.getElementById("paginationInfo").textContent = total ? `${start + 1}–${end} dari ${total.toLocaleString("id-ID")} berkas` : "0 berkas";
-      document.getElementById("pageIndicator").textContent = `${CURRENT_PAGE} / ${totalPages}`;
-      document.getElementById("selectAllPage").checked = false;
+      document.getElementById('shownCount').textContent = slice.length;
+      document.getElementById('totalCount').textContent = total.toLocaleString('id-ID');
+      document.getElementById('pageInfo').textContent = `Halaman ${currentPage} / ${totalPages}`;
+      document.getElementById('btnPrev').disabled = currentPage <= 1;
+      document.getElementById('btnNext').disabled = currentPage >= totalPages;
 
-      if (total === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="p-10 text-center text-slate-400">Tidak ada berkas yang sesuai filter.</td></tr>';
+      if (slice.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="py-10 text-center text-slate-400">Tidak ada data yang cocok dengan filter pencarian.</td></tr>';
         return;
       }
 
-      let html = "";
-      for (let i = start; i < end; i++) {
-        const r = FILTERED_RECORDS[i];
-        const checked = SELECTED_NIPS[r.nip] ? "checked" : "";
-        const cat = getCategory(r);
-        const isDone = (cat === "SELESAI");
-        const isUnclaimed = !r.petugas;
+      tbody.innerHTML = slice.map(r => {
+        const checked = selectedNips.has(r.nip) ? 'checked' : '';
+        const verHtml = r.verifikator
+          ? `<span class="font-semibold text-slate-800 text-xs">${r.verifikator}</span>`
+          : `<span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[11px] font-semibold">Pool (Kosong)</span>`;
+        const boxHtml = r.lokasiBox ? `<div class="text-[11px] text-slate-500 mt-0.5">📦 ${r.lokasiBox}</div>` : '';
 
-        const picCell = isUnclaimed
-          ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">Bebas</span>`
-          : `<span class="text-slate-700 dark:text-slate-300 font-semibold" title="${escapeAttr(r.petugas)}">${escapeHtml(r.petugas.split(" ")[0])}</span>`;
-
-        const actionCell = isUnclaimed
-          ? `<div class="inline-flex items-center gap-1">
-              <button onclick="claimSingleFile('${escapeAttr(r.nip)}')" title="Ambil Berkas Ini"
-                class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold transition">
-                + Ambil
-              </button>
-              <button onclick="openEditModal('${escapeAttr(r.nip)}')" title="Detail / Ubah"
-                class="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] font-bold transition">
-                Ubah
-              </button>
-            </div>`
-          : `<div class="inline-flex items-center gap-1">
-              ${!isDone ? `
-                <button onclick="quickComplete('${escapeAttr(r.nip)}')" title="Selesai 1-Klik"
-                  class="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                </button>
-              ` : ""}
-              <button onclick="openEditModal('${escapeAttr(r.nip)}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-bold transition">
-                Ubah
-              </button>
-            </div>`;
-
-        html += `
-          <tr class="${getRowHighlightClass(cat)} transition-colors">
-            <td class="p-3.5 text-center">
-              <input type="checkbox" ${checked} onchange="toggleSelectOne('${escapeAttr(r.nip)}', this.checked)" class="rounded border-slate-300" />
+        return `
+          <tr class="hover:bg-slate-50/90 transition ${selectedNips.has(r.nip) ? 'bg-emerald-50/40' : ''}">
+            <td class="py-2.5 px-3 text-center">
+              <input type="checkbox" ${checked} onchange="toggleSelectRow('${r.nip}', this.checked)" class="rounded border-slate-400 cursor-pointer" />
             </td>
-            <td class="p-3.5 text-center text-slate-400 font-medium">${r.no}</td>
-            <td class="p-3.5">
-              <div onclick="openProfileDrawer('${escapeAttr(r.nip)}')" class="cursor-pointer group inline-block">
-                <div class="font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">${escapeHtml(r.nama)}</div>
-                <div class="text-[11px] text-slate-400 font-mono">${escapeHtml(r.nip)}</div>
+            <td class="py-2.5 px-3 text-xs text-slate-500 font-medium">${r.no}</td>
+            <td class="py-2.5 px-3">
+              <div class="font-bold text-slate-900 text-xs sm:text-sm">${r.nama}</div>
+              <div class="font-mono text-xs text-slate-500">${r.nip}</div>
+            </td>
+            <td class="py-2.5 px-3 hidden md:table-cell text-xs text-slate-600 max-w-xs">
+              <div class="font-medium text-slate-700">${r.unitKerja}</div>
+              <div class="text-[11px] text-slate-400">${r.jabatan}</div>
+            </td>
+            <td class="py-2.5 px-3">${verHtml}${boxHtml}</td>
+            <td class="py-2.5 px-3 text-center">
+              <div class="flex flex-col items-center gap-1">
+                <div class="text-[11px]">BA: ${statusBadge(r.statusBA)}</div>
+                <div class="text-[11px]">PK: ${statusBadge(r.statusPK)}</div>
               </div>
             </td>
-            <td class="p-3.5">
-              <div class="text-slate-700 dark:text-slate-300">${escapeHtml(r.unitKerja)}</div>
-              ${r.lokasiBox ? `<span class="inline-block mt-0.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-400">${escapeHtml(r.lokasiBox)}</span>` : ""}
+            <td class="py-2.5 px-3 text-center">${driveBadge(r)}</td>
+            <td class="py-2.5 px-3 text-xs text-slate-600 max-w-[200px]">
+              <div>${r.keterangan || '-'}</div>
+              ${r.updatedAt ? `<div class="text-[10px] text-slate-400 mt-0.5">${r.updatedAt}</div>` : ''}
             </td>
-            <td class="p-3.5">${picCell}</td>
-            <td class="p-3.5 text-center">${statusBadge(r.statusBA)}</td>
-            <td class="p-3.5 text-center">${statusBadge(r.statusPK)}</td>
-            <td class="p-3.5 text-slate-500 dark:text-slate-400 max-w-[200px] truncate" title="${escapeAttr(r.keterangan || '')}">${escapeHtml(r.keterangan || "-")}</td>
-            <td class="p-3.5 text-center">${actionCell}</td>
+            <td class="py-2.5 px-3 text-right">
+              <button onclick="openEditModal('${r.nip}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer">
+                Edit
+              </button>
+            </td>
           </tr>
         `;
-      }
-      tbody.innerHTML = html;
+      }).join('');
+
+      updateSelectionUI();
     }
 
-    async function claimSingleFile(nip) {
-      const activePic = document.getElementById("activePicSelect").value;
-      const rec = ALL_RECORDS.find(r => r.nip === nip);
-      if (!rec) return;
-
-      if (!activePic || activePic === "ALL" || !OFFICERS.includes(activePic)) {
-        showToast("Pilih nama PIC Anda di pojok kanan atas, atau pilih petugas pada form ini.");
-        openEditModal(nip);
-        return;
-      }
-
-      showToast(`Mengambil berkas ${rec.nama} untuk ${activePic}...`);
-      try {
-        const res = await postToGas({
-          action: "claim",
-          nip: rec.nip,
-          petugas: activePic
-        });
-        if (res && res.status === "conflict") {
-          rec.petugas = res.currentPetugas || "";
-          populateOfficerDropdowns();
-          renderDashboard();
-          applyFilters(true);
-          showToast(`Bentrok! Berkas baru saja diambil oleh ${res.currentPetugas}.`);
-          return;
-        }
-        if (res && res.status === "success") {
-          rec.petugas = activePic;
-          rec.updatedAt = res.updatedAt || "";
-          populateOfficerDropdowns();
-          updatePersonalPicBanner();
-          renderDashboard();
-          applyFilters(true);
-          if (rec.keterangan) {
-            showToast(`Berhasil diambil! Catatan lama: "${rec.keterangan}" (silakan verifikasi ulang).`);
-          } else {
-            showToast(`Berkas ${rec.nama} berhasil diambil oleh ${activePic}!`);
-          }
-        } else {
-          showToast("Gagal mengambil berkas: " + (res ? res.message : "Error"));
-        }
-      } catch (err) {
-        showToast("Error: " + err.message);
-      }
+    function toggleSelectRow(nip, checked) {
+      if (checked) selectedNips.add(nip);
+      else selectedNips.delete(nip);
+      updateSelectionUI();
     }
 
-    async function submitBulkClaim() {
-      const nips = Object.keys(SELECTED_NIPS);
-      if (nips.length === 0) return;
-
-      const activePic = document.getElementById("activePicSelect").value;
-      if (!activePic || activePic === "ALL" || !OFFICERS.includes(activePic)) {
-        showToast("Pilih nama PIC Anda terlebih dahulu di pojok kanan atas!");
-        return;
-      }
-
-      const btn = document.getElementById("btnBulkClaim");
-      btn.disabled = true; btn.textContent = "Mengambil...";
-
-      try {
-        const res = await postToGas({
-          action: "bulk_update",
-          claimOnly: true,
-          petugas: activePic,
-          nips: nips
-        });
-        if (res && res.status === "success") {
-          const conflictSet = new Set((res.skippedConflicts || []).map(s => s.split(" (")[0]));
-          ALL_RECORDS.forEach(r => {
-            if (SELECTED_NIPS[r.nip] && !r.petugas && !conflictSet.has(r.nama)) {
-              r.petugas = activePic;
-              r.updatedAt = res.updatedAt || "";
-            }
-          });
-          SELECTED_NIPS = {};
-          populateOfficerDropdowns();
-          updateBulkBar();
-          updatePersonalPicBanner();
-          renderDashboard();
-          applyFilters(true);
-          let msg = `${res.updatedCount} berkas berhasil diambil oleh ${activePic}.`;
-          if (res.skippedConflicts && res.skippedConflicts.length > 0) {
-            msg += ` (${res.skippedConflicts.length} dilewati karena sudah diambil petugas lain)`;
-          }
-          showToast(msg);
-        }
-      } catch (err) {
-        showToast("Error: " + err.message);
-      } finally {
-        btn.disabled = false; btn.textContent = "+ Ambil untuk PIC Aktif";
-      }
-    }
-
-    // Slide-over Drawer (Kartu Profil Guru)
-    function openProfileDrawer(nip) {
-      const rec = ALL_RECORDS.find(r => r.nip === nip);
-      if (!rec) return;
-
-      DRAWER_CURRENT_NIP = rec.nip;
-      const cat = getCategory(rec);
-
-      document.getElementById("drawerNoBadge").textContent = `#${rec.no}`;
-      const overallEl = document.getElementById("drawerOverallStatus");
-      if (cat === "SELESAI") {
-        overallEl.textContent = "Selesai Lengkap";
-        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300";
-      } else if (cat === "KENDALA") {
-        overallEl.textContent = "Ada Kendala";
-        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300";
-      } else if (cat === "PROSES") {
-        overallEl.textContent = "Dalam Proses";
-        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300";
-      } else {
-        overallEl.textContent = "Belum Diproses";
-        overallEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400";
-      }
-
-      document.getElementById("drawerNama").textContent = rec.nama || "-";
-      document.getElementById("drawerNip").textContent = rec.nip || "-";
-      document.getElementById("btnCopyNipText").textContent = "Salin NIP";
-      document.getElementById("drawerJabatan").textContent = rec.jabatan || "Guru Ahli Pertama";
-      document.getElementById("drawerUnitKerja").textContent = rec.unitKerja || "-";
-      document.getElementById("drawerPetugas").textContent = rec.petugas || "Belum Diambil (Pool Bebas)";
-      document.getElementById("drawerLokasiBox").textContent = rec.lokasiBox || "Belum masuk Box";
-      document.getElementById("drawerStatusBA").innerHTML = statusBadge(rec.statusBA);
-      document.getElementById("drawerStatusPK").innerHTML = statusBadge(rec.statusPK);
-      document.getElementById("drawerKeterangan").textContent = rec.keterangan || "Tidak ada catatan.";
-      document.getElementById("drawerUpdatedAt").textContent = rec.updatedAt || "Belum ada riwayat perubahan";
-
-      document.getElementById("drawerEditBtn").onclick = () => {
-        closeProfileDrawer();
-        openEditModal(rec.nip);
-      };
-
-      const drawer = document.getElementById("profileDrawer");
-      const backdrop = document.getElementById("profileDrawerBackdrop");
-      const panel = document.getElementById("profileDrawerPanel");
-      drawer.classList.remove("hidden");
-      requestAnimationFrame(() => {
-        backdrop.classList.add("opacity-100");
-        panel.classList.remove("translate-x-full");
+    function toggleSelectPage(checked) {
+      const start = (currentPage - 1) * pageSize;
+      const slice = filteredRecords.slice(start, start + pageSize);
+      slice.forEach(r => {
+        if (checked) selectedNips.add(r.nip);
+        else selectedNips.delete(r.nip);
       });
-    }
-
-    function closeProfileDrawer() {
-      const drawer = document.getElementById("profileDrawer");
-      if (drawer.classList.contains("hidden")) return;
-      document.getElementById("profileDrawerBackdrop").classList.remove("opacity-100");
-      document.getElementById("profileDrawerPanel").classList.add("translate-x-full");
-      setTimeout(() => drawer.classList.add("hidden"), 260);
-    }
-
-    async function copyDrawerNip() {
-      if (!DRAWER_CURRENT_NIP) return;
-      try {
-        await navigator.clipboard.writeText(DRAWER_CURRENT_NIP);
-      } catch (e) {
-        const temp = document.createElement("input");
-        temp.value = DRAWER_CURRENT_NIP;
-        document.body.appendChild(temp);
-        temp.select();
-        document.execCommand("copy");
-        document.body.removeChild(temp);
-      }
-      document.getElementById("btnCopyNipText").textContent = "Tersalin!";
-      showToast(`NIP ${DRAWER_CURRENT_NIP} disalin.`);
-      setTimeout(() => { document.getElementById("btnCopyNipText").textContent = "Salin NIP"; }, 1800);
-    }
-
-    async function quickComplete(nip) {
-      const rec = ALL_RECORDS.find(r => r.nip === nip);
-      if (!rec) return;
-
-      const activePic = document.getElementById("activePicSelect").value;
-      const targetPetugas = rec.petugas || ((activePic && activePic !== "ALL") ? activePic : "");
-
-      showToast(`Menyelesaikan ${rec.nama}...`);
-      try {
-        const res = await postToGas({
-          action: "update",
-          nip: rec.nip,
-          petugas: targetPetugas,
-          lokasiBox: rec.lokasiBox,
-          statusBA: "Selesai",
-          statusPK: "Selesai",
-          keterangan: rec.keterangan
-        });
-        if (res && res.status === "conflict") {
-          rec.petugas = res.currentPetugas || "";
-          populateOfficerDropdowns();
-          renderDashboard();
-          applyFilters(true);
-          showToast(`Bentrok! Berkas ini dipegang oleh ${res.currentPetugas}.`);
-          return;
-        }
-        if (res && res.status === "success") {
-          rec.petugas = targetPetugas;
-          rec.statusBA = "Selesai";
-          rec.statusPK = "Selesai";
-          rec.updatedAt = res.updatedAt || "";
-          populateOfficerDropdowns();
-          updatePersonalPicBanner();
-          renderDashboard();
-          applyFilters(true);
-          showToast(`Selesai! ${rec.nama} tersimpan.`);
-        }
-      } catch (err) {
-        showToast("Gagal: " + err.message);
-      }
-    }
-
-    function escapeHtml(str) {
-      return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-    }
-    function escapeAttr(str) {
-      return String(str || "").replace(/'/g, "'").replace(/"/g, "&quot;");
-    }
-
-    function changePageSize() {
-      PAGE_SIZE = Number(document.getElementById("pageSizeSelect").value) || 50;
-      CURRENT_PAGE = 1;
       renderTable();
-    }
-    function prevPage() { if (CURRENT_PAGE > 1) { CURRENT_PAGE--; renderTable(); } }
-    function nextPage() {
-      const totalPages = Math.max(1, Math.ceil(FILTERED_RECORDS.length / PAGE_SIZE));
-      if (CURRENT_PAGE < totalPages) { CURRENT_PAGE++; renderTable(); }
-    }
-
-    function toggleSelectOne(nip, isChecked) {
-      if (isChecked) SELECTED_NIPS[nip] = true;
-      else delete SELECTED_NIPS[nip];
-      updateBulkBar();
-    }
-
-    function toggleSelectPage(cb) {
-      const start = (CURRENT_PAGE - 1) * PAGE_SIZE;
-      const end = Math.min(start + PAGE_SIZE, FILTERED_RECORDS.length);
-      for (let i = start; i < end; i++) {
-        const nip = FILTERED_RECORDS[i].nip;
-        if (cb.checked) SELECTED_NIPS[nip] = true;
-        else delete SELECTED_NIPS[nip];
-      }
-      renderTable();
-      updateBulkBar();
     }
 
     function clearSelection() {
-      SELECTED_NIPS = {};
-      updateBulkBar();
+      selectedNips.clear();
+      document.getElementById('selectAllPage').checked = false;
       renderTable();
     }
 
-    function updateBulkBar() {
-      const count = Object.keys(SELECTED_NIPS).length;
-      document.getElementById("selectedCountBadge").textContent = count;
-      document.getElementById("bulkToolbar").classList.toggle("hidden", count === 0);
+    function updateSelectionUI() {
+      document.getElementById('selectedCount').textContent = selectedNips.size;
+      const btnClear = document.getElementById('btnClearSelect');
+      if (selectedNips.size > 0) btnClear.classList.remove('hidden');
+      else btnClear.classList.add('hidden');
     }
 
-    function appendModalChip(text) {
-      const el = document.getElementById("modalKeterangan");
-      const cur = el.value.trim();
-      el.value = cur ? `${cur}; ${text}` : text;
+    function changePageSize() {
+      pageSize = Number(document.getElementById('pageSizeSelect').value);
+      currentPage = 1;
+      renderTable();
     }
 
-    function applyPetugasLockState(hasAssignedPetugas) {
-      const sel = document.getElementById("modalPetugas");
-      const btn = document.getElementById("btnTogglePetugasLock");
-      const shouldLock = hasAssignedPetugas && !IS_ADMIN_PETUGAS_UNLOCKED;
-      sel.disabled = shouldLock;
-      sel.className = shouldLock
-        ? "w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-100 dark:bg-slate-800/60 text-slate-500 cursor-not-allowed"
-        : "w-full px-3 py-2 text-xs border border-indigo-400 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100";
-      btn.textContent = shouldLock ? "Buka Kunci" : (hasAssignedPetugas ? "Kunci" : "Bebas Pilih");
+    function prevPage() { if (currentPage > 1) { currentPage--; renderTable(); } }
+    function nextPage() {
+      const totalPages = Math.ceil(filteredRecords.length / pageSize);
+      if (currentPage < totalPages) { currentPage++; renderTable(); }
     }
 
-    function toggleAdminPetugasUnlock() {
-      const nip = document.getElementById("modalNip").value;
-      const rec = ALL_RECORDS.find(r => r.nip === nip);
-      const hasAssigned = Boolean(rec && rec.petugas && OFFICERS.includes(rec.petugas));
-      if (!hasAssigned) return;
-
-      if (IS_ADMIN_PETUGAS_UNLOCKED) {
-        IS_ADMIN_PETUGAS_UNLOCKED = false;
-        if (rec && rec.petugas) document.getElementById("modalPetugas").value = rec.petugas;
-        applyPetugasLockState(hasAssigned);
-        return;
-      }
-      const inputPin = prompt("Masukkan PIN Admin (2025):");
-      if (inputPin && inputPin.trim() === ADMIN_UNLOCK_PIN) {
-        IS_ADMIN_PETUGAS_UNLOCKED = true;
-        applyPetugasLockState(hasAssigned);
-        showToast("Kunci PIC dibuka.");
-      } else if (inputPin !== null) {
-        showToast("PIN Admin salah.");
-      }
-    }
-
+    // MODAL EDIT SATUAN
     function openEditModal(nip) {
-      const rec = ALL_RECORDS.find(r => r.nip === nip);
-      if (!rec) return;
-
-      const activePic = document.getElementById("activePicSelect").value;
-      document.getElementById("modalNip").value = rec.nip;
-      document.getElementById("modalGuruName").textContent = rec.nama;
-      document.getElementById("modalGuruMeta").textContent = `${rec.nip} • ${rec.unitKerja}`;
-
-      if (rec.petugas) {
-        document.getElementById("modalPetugas").value = rec.petugas;
-      } else if (activePic && activePic !== "ALL" && OFFICERS.includes(activePic)) {
-        document.getElementById("modalPetugas").value = activePic;
-      } else {
-        document.getElementById("modalPetugas").value = "";
-      }
-
-      document.getElementById("modalLokasiBox").value = rec.lokasiBox || "";
-      document.getElementById("modalStatusBA").value = rec.statusBA || "Belum";
-      document.getElementById("modalStatusPK").value = rec.statusPK || "Belum";
-      document.getElementById("modalKeterangan").value = rec.keterangan || "";
-
-      applyPetugasLockState(Boolean(rec.petugas && OFFICERS.includes(rec.petugas)));
-      document.getElementById("editModal").classList.remove("hidden");
-    }
-
-    function closeEditModal() {
-      document.getElementById("editModal").classList.add("hidden");
+      const r = allRecords.find(item => item.nip === nip);
+      if (!r) return;
+      document.getElementById('editNip').value = r.nip;
+      document.getElementById('editModalTitle').textContent = r.nama;
+      document.getElementById('editModalSub').textContent = `NIP: ${r.nip} • ${r.unitKerja}`;
+      document.getElementById('editVerifikator').value = r.verifikator || '';
+      document.getElementById('editLokasiBox').value = r.lokasiBox || '';
+      document.getElementById('editStatusBA').value = r.statusBA || 'Belum';
+      document.getElementById('editStatusPK').value = r.statusPK || 'Belum';
+      document.getElementById('editKeterangan').value = r.keterangan || '';
+      document.getElementById('scanFileInput').value = '';
+      openModal('editModal');
     }
 
     async function saveSingleEdit() {
-      const btn = document.getElementById("btnSaveSingle");
-      btn.disabled = true; btn.textContent = "Menyimpan...";
-
-      const nipVal = document.getElementById("modalNip").value;
-      const existingRec = ALL_RECORDS.find(r => r.nip === nipVal);
-      const isLocked = existingRec && existingRec.petugas && OFFICERS.includes(existingRec.petugas) && !IS_ADMIN_PETUGAS_UNLOCKED;
-
       const payload = {
-        action: "update",
-        nip: nipVal,
-        petugas: isLocked ? existingRec.petugas : document.getElementById("modalPetugas").value,
-        lokasiBox: document.getElementById("modalLokasiBox").value.trim().toUpperCase(),
-        statusBA: document.getElementById("modalStatusBA").value,
-        statusPK: document.getElementById("modalStatusPK").value,
-        keterangan: document.getElementById("modalKeterangan").value,
-        forceOverride: IS_ADMIN_PETUGAS_UNLOCKED
+        nip: document.getElementById('editNip').value,
+        verifikator: document.getElementById('editVerifikator').value,
+        lokasiBox: document.getElementById('editLokasiBox').value,
+        statusBA: document.getElementById('editStatusBA').value,
+        statusPK: document.getElementById('editStatusPK').value,
+        keterangan: document.getElementById('editKeterangan').value
       };
-
-      try {
-        const res = await postToGas(payload);
-        if (res && res.status === "conflict") {
-          if (existingRec) existingRec.petugas = res.currentPetugas || "";
-          populateOfficerDropdowns();
-          closeEditModal();
-          renderDashboard();
-          applyFilters(true);
-          showToast(`Bentrok! Berkas ini baru saja diambil oleh ${res.currentPetugas}.`);
-          return;
-        }
-        if (res && res.status === "success") {
-          if (existingRec) {
-            existingRec.petugas = payload.petugas;
-            existingRec.lokasiBox = payload.lokasiBox;
-            existingRec.statusBA = payload.statusBA;
-            existingRec.statusPK = payload.statusPK;
-            existingRec.keterangan = payload.keterangan;
-            existingRec.updatedAt = res.updatedAt || "";
-          }
-          populateOfficerDropdowns();
-          populateDynamicFilters();
-          closeEditModal();
-          updatePersonalPicBanner();
-          renderDashboard();
-          applyFilters(true);
-          showToast("Tersimpan ke Google Sheets.");
-        }
-      } catch (err) {
-        showToast("Gagal: " + err.message);
-      } finally {
-        btn.disabled = false; btn.textContent = "Simpan";
+      closeModal('editModal');
+      showToast('Menyimpan perubahan...');
+      const res = await callBackend('updateSingle', payload);
+      if (res && res.success) {
+        hydrateUI(res);
+        showToast(res.message || 'Berhasil disimpan!');
+      } else {
+        showToast(res?.message || 'Gagal menyimpan.');
       }
+    }
+
+    async function uploadScanForCurrentNip() {
+      const nip = document.getElementById('editNip').value;
+      const fileInput = document.getElementById('scanFileInput');
+      const file = fileInput.files[0];
+      if (!file) {
+        showToast('Pilih file PDF terlebih dahulu.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const base64Data = e.target.result.split(',')[1];
+        closeModal('editModal');
+        showToast('Mengunggah PDF ke 03_Hasil_Scan_Baru...', 6000);
+        const res = await callBackend('uploadScanPdf', { nip, base64Data });
+        if (res && res.success) {
+          hydrateUI(res);
+          showToast(res.message);
+        } else {
+          showToast(res?.message || 'Gagal mengunggah PDF.');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // MODAL KLAIM POOL
+    function openClaimModal() {
+      if (selectedNips.size === 0) {
+        showToast('Centang minimal 1 baris berkas terlebih dahulu.');
+        return;
+      }
+      document.getElementById('claimCountText').textContent = selectedNips.size;
+      openModal('claimModal');
+    }
+
+    async function submitClaim() {
+      const verifikator = document.getElementById('claimVerifikatorSelect').value;
+      const nips = Array.from(selectedNips);
+      closeModal('claimModal');
+      showToast('Mengklaim berkas...');
+      const res = await callBackend('claimBerkas', { verifikator, nips });
+      if (res && res.success) {
+        selectedNips.clear();
+        hydrateUI(res);
+        showToast(res.message);
+      } else {
+        showToast(res?.message || 'Gagal klaim berkas.');
+      }
+    }
+
+    // MODAL BULK UPDATE
+    function openBulkModal() {
+      if (selectedNips.size === 0) {
+        showToast('Centang minimal 1 baris berkas terlebih dahulu.');
+        return;
+      }
+      document.getElementById('bulkCountText').textContent = selectedNips.size;
+      openModal('bulkModal');
     }
 
     async function submitBulkUpdate() {
-      const nips = Object.keys(SELECTED_NIPS);
-      if (nips.length === 0) return;
-
-      const statusBA = document.getElementById("bulkStatusBA").value;
-      const statusPK = document.getElementById("bulkStatusPK").value;
-      const lokasiBox = document.getElementById("bulkLokasiBoxInput").value.trim().toUpperCase();
-      const keterangan = document.getElementById("bulkNoteInput").value.trim();
-
-      if (!statusBA && !statusPK && !lokasiBox && !keterangan) {
-        showToast("Isi minimal satu perubahan.");
-        return;
-      }
-
-      const btn = document.getElementById("btnBulkSave");
-      btn.disabled = true; btn.textContent = "Menyimpan...";
-
-      try {
-        const res = await postToGas({ action: "bulk_update", nips, lokasiBox, statusBA, statusPK, keterangan });
-        if (res && res.status === "success") {
-          ALL_RECORDS.forEach(r => {
-            if (SELECTED_NIPS[r.nip]) {
-              if (lokasiBox) r.lokasiBox = lokasiBox;
-              if (statusBA) r.statusBA = statusBA;
-              if (statusPK) r.statusPK = statusPK;
-              if (keterangan) r.keterangan = keterangan;
-              r.updatedAt = res.updatedAt || "";
-            }
-          });
-          SELECTED_NIPS = {};
-          document.getElementById("bulkLokasiBoxInput").value = "";
-          document.getElementById("bulkStatusBA").value = "";
-          document.getElementById("bulkStatusPK").value = "";
-          document.getElementById("bulkNoteInput").value = "";
-          populateDynamicFilters();
-          updateBulkBar();
-          updatePersonalPicBanner();
-          renderDashboard();
-          applyFilters(true);
-          showToast(`${nips.length} berkas berhasil diperbarui.`);
-        }
-      } catch (err) {
-        showToast("Error: " + err.message);
-      } finally {
-        btn.disabled = false; btn.textContent = "Simpan Massal";
+      const payload = {
+        nips: Array.from(selectedNips),
+        verifikator: document.getElementById('bulkVerifikator').value,
+        lokasiBox: document.getElementById('bulkLokasiBox').value,
+        statusBA: document.getElementById('bulkStatusBA').value,
+        statusPK: document.getElementById('bulkStatusPK').value,
+        keterangan: document.getElementById('bulkKeterangan').value
+      };
+      closeModal('bulkModal');
+      showToast('Memperbarui berkas secara massal...');
+      const res = await callBackend('updateBulk', payload);
+      if (res && res.success) {
+        selectedNips.clear();
+        hydrateUI(res);
+        showToast(res.message);
+      } else {
+        showToast(res?.message || 'Gagal update massal.');
       }
     }
 
-    function renderBoxOverview() {
-      const boxMap = {};
-      ALL_RECORDS.forEach(r => {
-        if (!r.lokasiBox) return;
-        if (!boxMap[r.lokasiBox]) boxMap[r.lokasiBox] = [];
-        boxMap[r.lokasiBox].push(r);
-      });
+    // EKSPOR CSV DARI DATA TERFILTER
+    function exportFilteredCsv() {
+      const headers = ['No', 'NIP', 'Nama_Guru', 'Jabatan', 'Unit_Kerja', 'Lokasi_Box', 'Petugas_Verifikator', 'Status_BA', 'Status_PK', 'Status_Drive', 'Link_Drive', 'Keterangan', 'Updated_At'];
+      const rows = filteredRecords.map(r => [
+        r.no, `"${r.nip}"`, `"${r.nama}"`, `"${r.jabatan}"`, `"${r.unitKerja}"`,
+        `"${r.lokasiBox}"`, `"${r.verifikator}"`, r.statusBA, r.statusPK, r.driveStatus, r.driveUrl, `"${r.keterangan}"`, `"${r.updatedAt}"`
+      ].join(','));
 
-      const boxes = Object.keys(boxMap).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-      const grid = document.getElementById("boxSummaryGrid");
-
-      if (boxes.length === 0) {
-        grid.innerHTML = '<div class="col-span-full clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-6 text-center text-xs text-slate-400">Belum ada berkas ber-Box.</div>';
-        return;
-      }
-
-      grid.innerHTML = boxes.map(b => {
-        const list = boxMap[b];
-        const doneCount = list.filter(x => x.statusBA === "Selesai" && x.statusPK === "Selesai").length;
-        return `
-          <div onclick="selectBoxForDetail('${escapeAttr(b)}')" class="clean-card bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 hover:border-indigo-500 cursor-pointer transition">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-extrabold text-indigo-600 dark:text-indigo-400">${escapeHtml(b)}</span>
-              <span class="text-[11px] font-bold text-slate-500">${list.length}</span>
-            </div>
-            <p class="text-[11px] text-slate-400 mt-1">Tuntas: ${doneCount}/${list.length}</p>
-          </div>
-        `;
-      }).join("");
+      const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows].join('\n');
+      const link = document.createElement('a');
+      link.setAttribute('href', encodeURI(csvContent));
+      link.setAttribute('download', `Rekap_SIMON_BAPK_2025_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
-    function selectBoxForDetail(boxName) {
-      document.getElementById("boxDetailSelect").value = boxName;
-      renderBoxDetail();
-    }
-
-    function renderBoxDetail() {
-      const boxName = document.getElementById("boxDetailSelect").value;
-      const container = document.getElementById("boxDetailContent");
-      if (!boxName) {
-        container.innerHTML = '<div class="text-xs text-slate-400 text-center py-8">Pilih salah satu box di atas untuk menampilkan daftar berkas.</div>';
-        return;
-      }
-
-      const items = ALL_RECORDS.filter(r => r.lokasiBox === boxName).sort((a, b) => a.no - b.no);
-      container.innerHTML = `
-        <div class="text-left space-y-4">
-          <div class="border-b border-slate-200 dark:border-slate-800 pb-3 flex items-center justify-between">
-            <div>
-              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">DAFTAR ISI BOX ARSIP • SIMON-BAPK 2025</p>
-              <h3 class="text-lg font-extrabold text-slate-900 dark:text-white mt-0.5">${escapeHtml(boxName)}</h3>
-            </div>
-            <span class="px-3 py-1 rounded-lg bg-slate-900 dark:bg-indigo-600 text-white text-xs font-bold">${items.length} Berkas</span>
-          </div>
-
-          <table class="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr class="border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase text-slate-400">
-                <th class="p-2 w-10 text-center">No</th>
-                <th class="p-2">Nama Guru</th>
-                <th class="p-2">NIP</th>
-                <th class="p-2">Unit Kerja</th>
-                <th class="p-2 text-center">BA</th>
-                <th class="p-2 text-center">PK</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-              ${items.map((r, idx) => `
-                <tr>
-                  <td class="p-2 text-center text-slate-400">${idx + 1}</td>
-                  <td class="p-2 font-bold text-slate-800 dark:text-slate-100">${escapeHtml(r.nama)}</td>
-                  <td class="p-2 font-mono text-slate-500">${escapeHtml(r.nip)}</td>
-                  <td class="p-2 text-slate-600 dark:text-slate-300">${escapeHtml(r.unitKerja)}</td>
-                  <td class="p-2 text-center font-semibold">${escapeHtml(r.statusBA)}</td>
-                  <td class="p-2 text-center font-semibold">${escapeHtml(r.statusPK)}</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
-      `;
-    }
-
-    function printBoxLabel() {
-      if (!document.getElementById("boxDetailSelect").value) {
-        showToast("Pilih nomor Box terlebih dahulu.");
-        return;
-      }
-      window.print();
-    }
-
-    function exportExcelReport() {
-      if (!ALL_RECORDS.length) return;
-      const dataRows = ALL_RECORDS.map(r => ({
-        "No": r.no, "NIP": r.nip, "Nama_Guru": r.nama, "Jabatan": r.jabatan,
-        "Unit_Kerja": r.unitKerja, "Lokasi_Box": r.lokasiBox, "Petugas_Verifikator": r.petugas,
-        "Status_BA": r.statusBA, "Status_PK": r.statusPK, "Keterangan": r.keterangan, "Updated_At": r.updatedAt
-      }));
-      const rekapRows = OFFICERS.map((name, idx) => {
-        const quota = getOfficerQuota(name);
-        const subset = ALL_RECORDS.filter(r => r.petugas === name);
-        const baDone = subset.filter(r => r.statusBA === "Selesai").length;
-        const pkDone = subset.filter(r => r.statusPK === "Selesai").length;
-        const kendala = subset.filter(r => r.statusBA === "Kendala" || r.statusPK === "Kendala").length;
-        const pct = quota ? Number((((baDone + pkDone) / (2 * quota)) * 100).toFixed(1)) : 0;
-        return {
-          "No": idx + 1,
-          "Nama_Petugas": name,
-          "Target_Kuota": quota,
-          "Berkas_Diambil": subset.length,
-          "Sisa_Kuota": Math.max(0, quota - subset.length),
-          "BA_Selesai": baDone,
-          "PK_Selesai": pkDone,
-          "Ada_Kendala": kendala,
-          "Progres_Persen": pct
-        };
-      });
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dataRows), "Data_Berkas_Guru");
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rekapRows), "Rekap_11_Petugas");
-      XLSX.writeFile(wb, "Laporan_SIMON_BAPK_2025.xlsx");
-    }
+    window.addEventListener('DOMContentLoaded', loadData);
   </script>
 </body>
 </html>
