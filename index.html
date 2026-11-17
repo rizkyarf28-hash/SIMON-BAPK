@@ -652,7 +652,7 @@
 
   <script>
     const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbw6U7vqmEd5n8thqt8jOmFFt1XJZ1KjdBZBRhv6H-mgGroGxM3ypKe5yaHGYasgGkIP/exec';
-    const STORAGE_CACHE_KEY = 'SIMON_BAPK_SWR_CACHE_V3';
+    const STORAGE_CACHE_KEY = 'SIMON_BAPK_SWR_CACHE_V4';
 
     let allRecords = [];
     let filteredRecords = [];
@@ -666,8 +666,12 @@
     let adminPinSession = '';
     let isInitialLoad = true;
     let currentDataRev = '';
-    let pendingWritesCount = 0;
     let isSyncingInProgress = false;
+
+    // Sequential Write Queue + Coalescing (mencegah tabrakan LockService saat klik cepat)
+    const writeQueue = [];
+    let isProcessingWriteQueue = false;
+    const cancelledNips = new Set();
 
     const isInsideAppsScript = typeof google !== 'undefined' && google.script && google.script.run;
 
@@ -683,7 +687,7 @@
       return petugasList[idx].boxDefault || ('BOX ' + (idx + 1));
     }
 
-    function showToast(msg, duration = 3500) {
+    function showToast(msg, duration = 2600) {
       const el = document.getElementById('toast');
       el.textContent = msg;
       el.classList.remove('hidden');
@@ -698,10 +702,64 @@
       txt.textContent = label;
       if (state === 'syncing') {
         dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping';
+      } else if (state === 'saved') {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
       } else if (state === 'error') {
         dot.className = 'w-1.5 h-1.5 rounded-full bg-rose-400';
       } else {
         dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
+      }
+    }
+
+    function hasActiveWrites() {
+      return isProcessingWriteQueue || writeQueue.length > 0;
+    }
+
+    function enqueueWrite(task) {
+      // Gabungkan (coalesce) perubahan beruntun pada NIP yang sama yang belum terkirim
+      if (task.coalesceKey) {
+        const existingIdx = writeQueue.findIndex(q => q.coalesceKey === task.coalesceKey);
+        if (existingIdx !== -1) {
+          writeQueue[existingIdx] = task;
+          processWriteQueue();
+          return;
+        }
+      }
+      writeQueue.push(task);
+      processWriteQueue();
+    }
+
+    async function processWriteQueue() {
+      if (isProcessingWriteQueue) return;
+      if (writeQueue.length === 0) {
+        setLiveSyncStatus('saved', '✓ Tersimpan');
+        clearTimeout(window._savedResetTimer);
+        window._savedResetTimer = setTimeout(() => {
+          if (!hasActiveWrites()) setLiveSyncStatus('live', 'Delta Live (2s)');
+        }, 1600);
+        return;
+      }
+
+      isProcessingWriteQueue = true;
+      const task = writeQueue.shift();
+
+      if (task.nip && cancelledNips.has(task.nip)) {
+        cancelledNips.delete(task.nip);
+        isProcessingWriteQueue = false;
+        processWriteQueue();
+        return;
+      }
+
+      const pendingLabel = writeQueue.length > 0 ? `Menyimpan (${writeQueue.length + 1})...` : 'Menyimpan...';
+      setLiveSyncStatus('syncing', pendingLabel);
+
+      try {
+        await task.run();
+      } catch (err) {
+        if (task.onError) task.onError(err);
+      } finally {
+        isProcessingWriteQueue = false;
+        processWriteQueue();
       }
     }
 
@@ -830,7 +888,7 @@
     async function loadData(silent = false, forceRefresh = false) {
       if (isSyncingInProgress) return;
       isSyncingInProgress = true;
-      setLiveSyncStatus('syncing', 'Menarik Data...');
+      if (!hasActiveWrites()) setLiveSyncStatus('syncing', 'Menarik Data...');
 
       try {
         const res = await callBackend('getData', { forceRefresh });
@@ -842,7 +900,7 @@
         if (res.rev) currentDataRev = String(res.rev);
         hydrateUI(res, silent);
         saveLocalSnapshot();
-        setLiveSyncStatus('live', 'Delta Live (2s)');
+        if (!hasActiveWrites()) setLiveSyncStatus('live', 'Delta Live (2s)');
       } catch (err) {
         if (!silent) showToast('Koneksi gagal: ' + err.message);
         setLiveSyncStatus('error', 'Offline');
@@ -860,7 +918,7 @@
     }
 
     async function pollRealtimeChanges() {
-      if (document.hidden || pendingWritesCount > 0 || isSyncingInProgress) return;
+      if (document.hidden || hasActiveWrites() || isSyncingInProgress) return;
       if (!currentDataRev || allRecords.length === 0) {
         await loadData(true, false);
         return;
@@ -872,13 +930,13 @@
         if (!res || !res.success) return;
 
         if (res.unchanged) {
-          setLiveSyncStatus('live', 'Delta Live (2s)');
+          if (!hasActiveWrites()) setLiveSyncStatus('live', 'Delta Live (2s)');
           return;
         }
 
         if (res.delta && Array.isArray(res.updatedRecords)) {
           applyDeltaResponse(res);
-          setLiveSyncStatus('live', `Tersinkron (+${res.updatedRecords.length})`);
+          if (!hasActiveWrites()) setLiveSyncStatus('live', `Tersinkron (+${res.updatedRecords.length})`);
           return;
         }
 
@@ -1134,31 +1192,29 @@
     }
 
     // ========================================================================
-    // OPTIMISTIC ACTIONS + TARGETED FAST WRITES
+    // OPTIMISTIC ACTIONS + QUEUED TARGETED WRITES
     // ========================================================================
 
-    async function triggerAutoClaim(count) {
+    function triggerAutoClaim(count) {
       const verifikator = document.getElementById('activeVerifikatorSelect').value;
       if (!verifikator) {
         showToast('Pilih nama Anda terlebih dahulu pada menu Identitas Petugas.');
         return;
       }
       const lockedBox = getLockedBoxForVer(verifikator);
-      showToast(`Mengambil ${count} berkas ke ${lockedBox}...`, 2500);
-      pendingWritesCount++;
-      setLiveSyncStatus('syncing', 'Menyimpan...');
-      try {
-        const res = await callBackend('autoClaimPool', { verifikator, count });
-        if (res && res.success) {
-          applyDeltaResponse(res);
-          showToast(res.message);
-        } else {
-          showToast(res?.message || 'Gagal mengambil berkas.');
+      showToast(`Mengambil ${count} berkas ke ${lockedBox}...`, 2200);
+
+      enqueueWrite({
+        run: async () => {
+          const res = await callBackend('autoClaimPool', { verifikator, count });
+          if (res && res.success) {
+            applyDeltaResponse(res);
+            showToast(res.message);
+          } else {
+            showToast(res?.message || 'Gagal mengambil berkas.');
+          }
         }
-      } finally {
-        pendingWritesCount = Math.max(0, pendingWritesCount - 1);
-        setLiveSyncStatus('live', 'Delta Live (2s)');
-      }
+      });
     }
 
     async function triggerAutoClaimRemaining() {
@@ -1167,10 +1223,10 @@
         showToast('Kuota berkas Anda sudah terpenuhi.');
         return;
       }
-      await triggerAutoClaim(rem);
+      triggerAutoClaim(rem);
     }
 
-    async function quickClaimSingle(nip) {
+    function quickClaimSingle(nip) {
       const verifikator = document.getElementById('activeVerifikatorSelect').value;
       if (!verifikator) {
         showToast('Pilih nama Anda di bagian atas ("Identitas Petugas Verifikator Aktif") sebelum mengambil berkas.');
@@ -1182,6 +1238,7 @@
       const targetRecord = allRecords.find(item => item.nip === nip);
       const prevOwner = targetRecord ? targetRecord.verifikator : '';
       const prevBox = targetRecord ? targetRecord.lokasiBox : '';
+      const rowNum = targetRecord ? targetRecord.rowNum : null;
 
       if (targetRecord) {
         targetRecord.verifikator = verifikator;
@@ -1192,37 +1249,37 @@
         applyFilters(true);
       }
 
-      showToast(`✓ Fix Tersimpan (Bold): NIP ${nip} → ${verifikator} (${lockedBox})`, 2200);
-      pendingWritesCount++;
-      setLiveSyncStatus('syncing', 'Menyimpan...');
+      showToast(`✓ NIP ${nip} → ${verifikator} (${lockedBox})`, 1800);
 
-      try {
-        const res = await callBackend('claimBerkas', { verifikator, nips: [nip] });
-        if (res && res.success) {
-          applyDeltaResponse(res);
-        } else {
+      enqueueWrite({
+        nip: nip,
+        run: async () => {
+          const res = await callBackend('claimBerkas', { verifikator, nips: [nip], rowNum });
+          if (res && res.success) {
+            applyDeltaResponse(res);
+          } else {
+            cancelledNips.add(nip);
+            if (targetRecord) {
+              targetRecord.verifikator = prevOwner;
+              targetRecord.lokasiBox = prevBox;
+            }
+            applyFilters(true);
+            showToast(res?.message || 'Berkas sudah diambil petugas lain.');
+            pollRealtimeChanges();
+          }
+        },
+        onError: (err) => {
           if (targetRecord) {
             targetRecord.verifikator = prevOwner;
             targetRecord.lokasiBox = prevBox;
           }
           applyFilters(true);
-          showToast(res?.message || 'Berkas sudah diambil petugas lain.');
-          pollRealtimeChanges();
+          showToast('Koneksi gagal saat klaim: ' + err.message);
         }
-      } catch (err) {
-        if (targetRecord) {
-          targetRecord.verifikator = prevOwner;
-          targetRecord.lokasiBox = prevBox;
-        }
-        applyFilters(true);
-        showToast('Koneksi gagal saat klaim: ' + err.message);
-      } finally {
-        pendingWritesCount = Math.max(0, pendingWritesCount - 1);
-        setLiveSyncStatus('live', 'Delta Live (2s)');
-      }
+      });
     }
 
-    async function quickReleaseSingle(nip) {
+    function quickReleaseSingle(nip) {
       const verifikator = document.getElementById('activeVerifikatorSelect').value;
       const targetRecord = allRecords.find(item => item.nip === nip);
       if (!targetRecord || !targetRecord.verifikator) return;
@@ -1239,6 +1296,7 @@
 
       const prevOwner = targetRecord.verifikator;
       const prevBox = targetRecord.lokasiBox;
+      const rowNum = targetRecord.rowNum;
       targetRecord.verifikator = '';
       targetRecord.lokasiBox = '';
       selectedNips.delete(nip);
@@ -1246,36 +1304,31 @@
       updateActiveVerifikatorCard();
       applyFilters(true);
 
-      showToast(`↩ Berkas NIP ${nip} dikembalikan ke Pool`, 2000);
-      pendingWritesCount++;
-      setLiveSyncStatus('syncing', 'Menyimpan...');
+      showToast(`↩ Berkas NIP ${nip} dikembalikan ke Pool`, 1800);
 
-      try {
-        const res = await callBackend('releaseBerkas', {
-          verifikator: verifikator,
-          pin: adminPinSession,
-          nips: [nip]
-        });
-        if (res && res.success) {
-          applyDeltaResponse(res);
-        } else {
-          targetRecord.verifikator = prevOwner;
-          targetRecord.lokasiBox = prevBox;
-          applyFilters(true);
-          showToast(res?.message || 'Gagal mengembalikan berkas ke Pool.');
+      enqueueWrite({
+        nip: nip,
+        coalesceKey: 'ROW_' + nip,
+        run: async () => {
+          const res = await callBackend('releaseBerkas', {
+            verifikator: verifikator,
+            pin: adminPinSession,
+            nips: [nip],
+            rowNum: rowNum
+          });
+          if (res && res.success) {
+            applyDeltaResponse(res);
+          } else {
+            targetRecord.verifikator = prevOwner;
+            targetRecord.lokasiBox = prevBox;
+            applyFilters(true);
+            showToast(res?.message || 'Gagal mengembalikan berkas ke Pool.');
+          }
         }
-      } catch (err) {
-        targetRecord.verifikator = prevOwner;
-        targetRecord.lokasiBox = prevBox;
-        applyFilters(true);
-        showToast('Koneksi gagal: ' + err.message);
-      } finally {
-        pendingWritesCount = Math.max(0, pendingWritesCount - 1);
-        setLiveSyncStatus('live', 'Delta Live (2s)');
-      }
+      });
     }
 
-    async function submitBulkRelease() {
+    function submitBulkRelease() {
       if (selectedNips.size === 0) {
         showToast('Centang minimal 1 berkas milik Anda yang ingin dibuang ke Pool.');
         return;
@@ -1302,29 +1355,26 @@
       updateKpiAndRekap(lastFolderStats);
       updateActiveVerifikatorCard();
       applyFilters(true);
-      showToast('Mengembalikan berkas terpilih ke Pool...', 2000);
+      showToast('Mengembalikan berkas terpilih ke Pool...', 1800);
 
-      pendingWritesCount++;
-      setLiveSyncStatus('syncing', 'Menyimpan...');
-      try {
-        const res = await callBackend('releaseBerkas', {
-          verifikator: verifikator,
-          pin: adminPinSession,
-          nips: nipsToRelease
-        });
-        if (res && res.success) {
-          applyDeltaResponse(res);
-          showToast(res.message);
-        } else {
-          showToast(res?.message || 'Gagal membuang berkas terpilih.');
+      enqueueWrite({
+        run: async () => {
+          const res = await callBackend('releaseBerkas', {
+            verifikator: verifikator,
+            pin: adminPinSession,
+            nips: nipsToRelease
+          });
+          if (res && res.success) {
+            applyDeltaResponse(res);
+            showToast(res.message);
+          } else {
+            showToast(res?.message || 'Gagal membuang berkas terpilih.');
+          }
         }
-      } finally {
-        pendingWritesCount = Math.max(0, pendingWritesCount - 1);
-        setLiveSyncStatus('live', 'Delta Live (2s)');
-      }
+      });
     }
 
-    async function quickToggle(nip, field, currentVal, forcedTarget = null) {
+    function quickToggle(nip, field, currentVal, forcedTarget = null) {
       const r = allRecords.find(item => item.nip === nip);
       const activeVerifikator = document.getElementById('activeVerifikatorSelect').value;
 
@@ -1350,20 +1400,28 @@
         applyFilters(true);
       }
 
-      pendingWritesCount++;
-      setLiveSyncStatus('syncing', 'Menyimpan...');
-      try {
-        const res = await callBackend('quickToggle', { nip, field, nextValue, activeVerifikator });
-        if (res && res.success) {
-          applyDeltaResponse(res);
-          showToast(res.message, 2000);
-        } else {
-          showToast(res?.message || 'Gagal memperbarui status.');
+      // Coalesce: kirim kondisi terbaru baris ini (BA + PK sekaligus) sehingga klik cepat BA lalu PK hanya 1x simpan!
+      enqueueWrite({
+        nip: nip,
+        coalesceKey: 'ROW_' + nip,
+        run: async () => {
+          const latestRow = allRecords.find(item => item.nip === nip);
+          if (!latestRow) return;
+          const res = await callBackend('updateSingle', {
+            nip: nip,
+            rowNum: latestRow.rowNum,
+            verifikator: latestRow.verifikator,
+            activeVerifikator: activeVerifikator,
+            statusBA: latestRow.statusBA,
+            statusPK: latestRow.statusPK
+          });
+          if (res && res.success) {
+            applyDeltaResponse(res);
+          } else {
+            showToast(res?.message || 'Gagal memperbarui status.');
+          }
         }
-      } finally {
-        pendingWritesCount = Math.max(0, pendingWritesCount - 1);
-        setLiveSyncStatus('live', 'Delta Live (2s)');
-      }
+      });
     }
 
     function quickTab(mode) {
@@ -1743,7 +1801,7 @@
       openModal('editModal');
     }
 
-    async function saveSingleEdit() {
+    function saveSingleEdit() {
       const activeVerifikator = document.getElementById('activeVerifikatorSelect').value;
       const chosenVerifikator = document.getElementById('editVerifikator').value;
       const lockedBox = getLockedBoxForVer(chosenVerifikator);
@@ -1756,8 +1814,10 @@
         return;
       }
 
+      const targetRecord = allRecords.find(item => item.nip === nip);
       const payload = {
         nip: nip,
+        rowNum: targetRecord ? targetRecord.rowNum : null,
         verifikator: chosenVerifikator,
         activeVerifikator: activeVerifikator,
         lokasiBox: lockedBox,
@@ -1766,7 +1826,6 @@
         keterangan: document.getElementById('editKeterangan').value
       };
 
-      const targetRecord = allRecords.find(item => item.nip === nip);
       if (targetRecord) {
         targetRecord.verifikator = chosenVerifikator;
         targetRecord.lokasiBox = lockedBox;
@@ -1779,51 +1838,54 @@
       }
 
       closeModal('editModal');
-      pendingWritesCount++;
-      setLiveSyncStatus('syncing', 'Menyimpan...');
-      try {
-        const res = await callBackend('updateSingle', payload);
-        if (res && res.success) {
-          applyDeltaResponse(res);
-          showToast(res.message || 'Fix Tersimpan (Bold)!', 2500);
-        } else {
-          showToast(res?.message || 'Gagal menyimpan.');
+
+      enqueueWrite({
+        nip: nip,
+        coalesceKey: 'ROW_' + nip,
+        run: async () => {
+          const res = await callBackend('updateSingle', payload);
+          if (res && res.success) {
+            applyDeltaResponse(res);
+            showToast(res.message || 'Fix Tersimpan (Bold)!', 2200);
+          } else {
+            showToast(res?.message || 'Gagal menyimpan.');
+          }
         }
-      } finally {
-        pendingWritesCount = Math.max(0, pendingWritesCount - 1);
-        setLiveSyncStatus('live', 'Delta Live (2s)');
-      }
+      });
     }
 
     async function uploadScanForCurrentNip() {
       const nip = document.getElementById('editNip').value;
       const activeVerifikator = document.getElementById('activeVerifikatorSelect').value;
       const file = document.getElementById('scanFileInput').files[0];
+      const targetRecord = allRecords.find(item => item.nip === nip);
       if (!file) {
         showToast('Pilih file PDF terlebih dahulu.');
         return;
       }
       const reader = new FileReader();
-      reader.onload = async function(e) {
+      reader.onload = function(e) {
         const base64Data = e.target.result.split(',')[1];
         closeModal('editModal');
-        showToast('Mengunggah PDF ke 03_Hasil_Scan_Baru...', 5000);
-        pendingWritesCount++;
-        setLiveSyncStatus('syncing', 'Mengunggah PDF...');
-        try {
-          const res = await callBackend('uploadScanPdf', { nip, base64Data, activeVerifikator });
-          if (res && res.success) {
-            if (res.rev) currentDataRev = String(res.rev);
-            hydrateUI(res, true);
-            saveLocalSnapshot();
-            showToast(res.message);
-          } else {
-            showToast(res?.message || 'Gagal mengunggah PDF.');
+        showToast('Mengunggah PDF ke 03_Hasil_Scan_Baru...', 4000);
+        enqueueWrite({
+          run: async () => {
+            const res = await callBackend('uploadScanPdf', {
+              nip,
+              rowNum: targetRecord ? targetRecord.rowNum : null,
+              base64Data,
+              activeVerifikator
+            });
+            if (res && res.success) {
+              if (res.rev) currentDataRev = String(res.rev);
+              hydrateUI(res, true);
+              saveLocalSnapshot();
+              showToast(res.message);
+            } else {
+              showToast(res?.message || 'Gagal mengunggah PDF.');
+            }
           }
-        } finally {
-          pendingWritesCount = Math.max(0, pendingWritesCount - 1);
-          setLiveSyncStatus('live', 'Delta Live (2s)');
-        }
+        });
       };
       reader.readAsDataURL(file);
     }
@@ -1840,7 +1902,7 @@
       openModal('bulkModal');
     }
 
-    async function submitBulkUpdate() {
+    function submitBulkUpdate() {
       const activeVerifikator = document.getElementById('activeVerifikatorSelect').value;
       const payload = {
         nips: Array.from(selectedNips),
@@ -1851,19 +1913,17 @@
       };
       closeModal('bulkModal');
       showToast('Menyimpan & mem-bold berkas terpilih...', 2000);
-      pendingWritesCount++;
-      setLiveSyncStatus('syncing', 'Menyimpan...');
-      try {
-        const res = await callBackend('updateBulk', payload);
-        if (res && res.success) {
-          selectedNips.clear();
-          applyDeltaResponse(res);
-          showToast(res.message);
+
+      enqueueWrite({
+        run: async () => {
+          const res = await callBackend('updateBulk', payload);
+          if (res && res.success) {
+            selectedNips.clear();
+            applyDeltaResponse(res);
+            showToast(res.message);
+          }
         }
-      } finally {
-        pendingWritesCount = Math.max(0, pendingWritesCount - 1);
-        setLiveSyncStatus('live', 'Delta Live (2s)');
-      }
+      });
     }
 
     function openTransferModal() { openModal('transferModal'); }
