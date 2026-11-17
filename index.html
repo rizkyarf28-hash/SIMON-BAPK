@@ -36,7 +36,7 @@
             <h1 class="text-base sm:text-lg font-bold tracking-tight leading-tight">SIMON-BAPK 2025</h1>
             <span id="liveSyncBadge" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               <span id="liveSyncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span id="liveSyncText">Live Sync</span>
+              <span id="liveSyncText">Delta Live (2s)</span>
             </span>
             <span id="adminBadge" class="hidden px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white uppercase tracking-wider">Mode Admin</span>
           </div>
@@ -45,7 +45,7 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <button onclick="manualForceRefresh()" id="btnManualRefresh" title="Tarik ulang data terbaru sekarang"
+        <button onclick="manualForceRefresh()" id="btnManualRefresh" title="Tarik ulang seluruh data terbaru sekarang"
           class="inline-flex items-center gap-1 px-2.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 text-xs font-semibold transition cursor-pointer">
           <span id="refreshSpinIcon">⚡</span>
           <span class="hidden sm:inline" id="lastSyncBadge">Sync</span>
@@ -652,7 +652,7 @@
 
   <script>
     const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbw6U7vqmEd5n8thqt8jOmFFt1XJZ1KjdBZBRhv6H-mgGroGxM3ypKe5yaHGYasgGkIP/exec';
-    const STORAGE_CACHE_KEY = 'SIMON_BAPK_SWR_CACHE_V2';
+    const STORAGE_CACHE_KEY = 'SIMON_BAPK_SWR_CACHE_V3';
 
     let allRecords = [];
     let filteredRecords = [];
@@ -765,7 +765,7 @@
     }
 
     // ========================================================================
-    // BACKEND TRANSPORT & REAL-TIME SYNC ENGINE
+    // BACKEND TRANSPORT & DELTA REAL-TIME SYNC ENGINE
     // ========================================================================
 
     async function callBackend(action, payload = {}) {
@@ -775,7 +775,8 @@
             .withSuccessHandler(res => resolve(res))
             .withFailureHandler(err => reject(err));
 
-          if (action === 'checkRev') runner.checkServerRev();
+          if (action === 'syncDelta') runner.syncDelta(payload);
+          else if (action === 'checkRev') runner.checkServerRev();
           else if (action === 'getData') runner.getDashboardData(payload.forceRefresh);
           else if (action === 'syncDrive') runner.syncDriveFolders();
           else if (action === 'syncLockedBoxes') runner.syncLockedBoxes(payload);
@@ -817,8 +818,8 @@
         const raw = localStorage.getItem(STORAGE_CACHE_KEY);
         if (!raw) return false;
         const snap = JSON.parse(raw);
-        if (snap && Array.isArray(snap.records) && snap.records.length > 0) {
-          currentDataRev = snap.rev || '';
+        if (snap && Array.isArray(snap.records) && snap.records.length > 0 && snap.rev) {
+          currentDataRev = String(snap.rev);
           hydrateUI(snap, true);
           return true;
         }
@@ -829,7 +830,7 @@
     async function loadData(silent = false, forceRefresh = false) {
       if (isSyncingInProgress) return;
       isSyncingInProgress = true;
-      setLiveSyncStatus('syncing', 'Menyinkronkan...');
+      setLiveSyncStatus('syncing', 'Menarik Data...');
 
       try {
         const res = await callBackend('getData', { forceRefresh });
@@ -841,7 +842,7 @@
         if (res.rev) currentDataRev = String(res.rev);
         hydrateUI(res, silent);
         saveLocalSnapshot();
-        setLiveSyncStatus('live', 'Live Sync');
+        setLiveSyncStatus('live', 'Delta Live (2s)');
       } catch (err) {
         if (!silent) showToast('Koneksi gagal: ' + err.message);
         setLiveSyncStatus('error', 'Offline');
@@ -855,21 +856,45 @@
       icon.classList.add('animate-spin');
       await loadData(false, true);
       icon.classList.remove('animate-spin');
-      showToast('Data berhasil disinkronkan dengan Google Spreadsheet!', 2500);
+      showToast('Seluruh data berhasil disinkronkan dari Google Spreadsheet!', 2500);
     }
 
     async function pollRealtimeChanges() {
       if (document.hidden || pendingWritesCount > 0 || isSyncingInProgress) return;
+      if (!currentDataRev || allRecords.length === 0) {
+        await loadData(true, false);
+        return;
+      }
+
+      isSyncingInProgress = true;
       try {
-        const res = await callBackend('checkRev');
-        if (res && res.success && res.rev && String(res.rev) !== currentDataRev) {
-          await loadData(true, false);
-          setLiveSyncStatus('live', 'Tersinkron ✓');
+        const res = await callBackend('syncDelta', { sinceRev: currentDataRev });
+        if (!res || !res.success) return;
+
+        if (res.unchanged) {
+          setLiveSyncStatus('live', 'Delta Live (2s)');
+          return;
         }
-      } catch (e) {}
+
+        if (res.delta && Array.isArray(res.updatedRecords)) {
+          applyDeltaResponse(res);
+          setLiveSyncStatus('live', `Tersinkron (+${res.updatedRecords.length})`);
+          return;
+        }
+
+        if (res.needFullReload) {
+          isSyncingInProgress = false;
+          await loadData(true, false);
+          return;
+        }
+      } catch (e) {
+        setLiveSyncStatus('error', 'Cek Koneksi');
+      } finally {
+        isSyncingInProgress = false;
+      }
     }
 
-    setInterval(pollRealtimeChanges, 4000);
+    setInterval(pollRealtimeChanges, 2000);
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) pollRealtimeChanges();
     });
@@ -888,12 +913,18 @@
         res.updatedRecords.forEach(upd => {
           const rec = allRecords.find(r => r.nip === upd.nip);
           if (rec) {
-            if (upd.lokasiBox !== undefined) rec.lokasiBox = upd.lokasiBox;
-            if (upd.verifikator !== undefined) rec.verifikator = upd.verifikator;
+            if (upd.verifikator !== undefined) {
+              rec.verifikator = upd.verifikator;
+              rec.lokasiBox = upd.verifikator ? (getLockedBoxForVer(upd.verifikator) || upd.lokasiBox || '') : '';
+            } else if (upd.lokasiBox !== undefined) {
+              rec.lokasiBox = upd.lokasiBox;
+            }
             if (upd.statusBA !== undefined) rec.statusBA = upd.statusBA;
             if (upd.statusPK !== undefined) rec.statusPK = upd.statusPK;
             if (upd.keterangan !== undefined) rec.keterangan = upd.keterangan;
             if (upd.updatedAt !== undefined) rec.updatedAt = upd.updatedAt;
+            if (upd.driveStatus !== undefined) rec.driveStatus = upd.driveStatus;
+            if (upd.driveUrl !== undefined) rec.driveUrl = upd.driveUrl;
           }
         });
       }
@@ -904,7 +935,6 @@
       updateActiveVerifikatorCard();
       applyFilters(true);
       saveLocalSnapshot();
-      setLiveSyncStatus('live', 'Live Sync');
     }
 
     async function triggerSyncDrive() {
@@ -1127,6 +1157,7 @@
         }
       } finally {
         pendingWritesCount = Math.max(0, pendingWritesCount - 1);
+        setLiveSyncStatus('live', 'Delta Live (2s)');
       }
     }
 
@@ -1176,7 +1207,7 @@
           }
           applyFilters(true);
           showToast(res?.message || 'Berkas sudah diambil petugas lain.');
-          loadData(true, true);
+          pollRealtimeChanges();
         }
       } catch (err) {
         if (targetRecord) {
@@ -1187,7 +1218,7 @@
         showToast('Koneksi gagal saat klaim: ' + err.message);
       } finally {
         pendingWritesCount = Math.max(0, pendingWritesCount - 1);
-        setLiveSyncStatus('live', 'Live Sync');
+        setLiveSyncStatus('live', 'Delta Live (2s)');
       }
     }
 
@@ -1240,7 +1271,7 @@
         showToast('Koneksi gagal: ' + err.message);
       } finally {
         pendingWritesCount = Math.max(0, pendingWritesCount - 1);
-        setLiveSyncStatus('live', 'Live Sync');
+        setLiveSyncStatus('live', 'Delta Live (2s)');
       }
     }
 
@@ -1289,7 +1320,7 @@
         }
       } finally {
         pendingWritesCount = Math.max(0, pendingWritesCount - 1);
-        setLiveSyncStatus('live', 'Live Sync');
+        setLiveSyncStatus('live', 'Delta Live (2s)');
       }
     }
 
@@ -1331,7 +1362,7 @@
         }
       } finally {
         pendingWritesCount = Math.max(0, pendingWritesCount - 1);
-        setLiveSyncStatus('live', 'Live Sync');
+        setLiveSyncStatus('live', 'Delta Live (2s)');
       }
     }
 
@@ -1760,7 +1791,7 @@
         }
       } finally {
         pendingWritesCount = Math.max(0, pendingWritesCount - 1);
-        setLiveSyncStatus('live', 'Live Sync');
+        setLiveSyncStatus('live', 'Delta Live (2s)');
       }
     }
 
@@ -1791,7 +1822,7 @@
           }
         } finally {
           pendingWritesCount = Math.max(0, pendingWritesCount - 1);
-          setLiveSyncStatus('live', 'Live Sync');
+          setLiveSyncStatus('live', 'Delta Live (2s)');
         }
       };
       reader.readAsDataURL(file);
@@ -1831,7 +1862,7 @@
         }
       } finally {
         pendingWritesCount = Math.max(0, pendingWritesCount - 1);
-        setLiveSyncStatus('live', 'Live Sync');
+        setLiveSyncStatus('live', 'Delta Live (2s)');
       }
     }
 
@@ -1997,7 +2028,11 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       const hasSnap = bootFromLocalSnapshot();
-      loadData(hasSnap, false);
+      if (hasSnap) {
+        pollRealtimeChanges();
+      } else {
+        loadData(false, false);
+      }
     });
   </script>
 </body>
