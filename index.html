@@ -36,7 +36,7 @@
             <h1 class="text-base sm:text-lg font-bold tracking-tight leading-tight">SIMON-BAPK 2025</h1>
             <span id="liveSyncBadge" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               <span id="liveSyncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span id="liveSyncText">Delta Live (2s)</span>
+              <span id="liveSyncText">Live Sync (Anti-Bentrok)</span>
             </span>
             <span id="adminBadge" class="hidden px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white uppercase tracking-wider">Mode Admin</span>
           </div>
@@ -440,7 +440,7 @@
       </div>
       <div class="px-5 py-3 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
         <button onclick="closeModal('pinModal')" class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-semibold cursor-pointer">Batal</button>
-        <button onclick="submitAdminPin()" class="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold cursor-pointer">Buka Mode Admin</button>
+        <button onclick="submitAdminPin()" id="btnSubmitPin" class="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold cursor-pointer">Buka Mode Admin</button>
       </div>
     </div>
   </div>
@@ -652,7 +652,7 @@
 
   <script>
     const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbw6U7vqmEd5n8thqt8jOmFFt1XJZ1KjdBZBRhv6H-mgGroGxM3ypKe5yaHGYasgGkIP/exec';
-    const STORAGE_CACHE_KEY = 'SIMON_BAPK_SWR_CACHE_V4';
+    const STORAGE_CACHE_KEY = 'SIMON_BAPK_SWR_CACHE_V6';
 
     let allRecords = [];
     let filteredRecords = [];
@@ -667,8 +667,13 @@
     let isInitialLoad = true;
     let currentDataRev = '';
     let isSyncingInProgress = false;
+    let pollTimerId = null;
 
-    // Sequential Write Queue + Coalescing (mencegah tabrakan LockService saat klik cepat)
+    // Multi-User Safe Write Engine: Batching + Auto-Retry + Rollback Snapshot
+    const savingNips = new Set();
+    const rollbackSnapshots = new Map();
+    const pendingRowPatches = new Map();
+    let batchFlushTimer = null;
     const writeQueue = [];
     let isProcessingWriteQueue = false;
     const cancelledNips = new Set();
@@ -687,7 +692,7 @@
       return petugasList[idx].boxDefault || ('BOX ' + (idx + 1));
     }
 
-    function showToast(msg, duration = 2600) {
+    function showToast(msg, duration = 3000) {
       const el = document.getElementById('toast');
       el.textContent = msg;
       el.classList.remove('hidden');
@@ -705,18 +710,127 @@
       } else if (state === 'saved') {
         dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
       } else if (state === 'error') {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-rose-400';
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping';
       } else {
         dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
       }
     }
 
     function hasActiveWrites() {
-      return isProcessingWriteQueue || writeQueue.length > 0;
+      return isProcessingWriteQueue || writeQueue.length > 0 || pendingRowPatches.size > 0 || savingNips.size > 0;
+    }
+
+    function captureRollbackSnapshot(nip) {
+      if (rollbackSnapshots.has(nip)) return;
+      const r = allRecords.find(item => item.nip === nip);
+      if (!r) return;
+      rollbackSnapshots.set(nip, {
+        verifikator: r.verifikator,
+        lokasiBox: r.lokasiBox,
+        statusBA: r.statusBA,
+        statusPK: r.statusPK,
+        keterangan: r.keterangan,
+        updatedAt: r.updatedAt
+      });
+    }
+
+    function rollbackNips(nipsList) {
+      let restored = 0;
+      nipsList.forEach(nip => {
+        savingNips.delete(nip);
+        const snap = rollbackSnapshots.get(nip);
+        rollbackSnapshots.delete(nip);
+        if (!snap) return;
+        const r = allRecords.find(item => item.nip === nip);
+        if (r) {
+          r.verifikator = snap.verifikator;
+          r.lokasiBox = snap.lokasiBox;
+          r.statusBA = snap.statusBA;
+          r.statusPK = snap.statusPK;
+          r.keterangan = snap.keterangan;
+          r.updatedAt = snap.updatedAt;
+          restored++;
+        }
+      });
+      if (restored > 0) {
+        updateKpiAndRekap(lastFolderStats);
+        updateActiveVerifikatorCard();
+        applyFilters(true);
+      }
+    }
+
+    function confirmSavedNips(nipsList) {
+      nipsList.forEach(nip => {
+        savingNips.delete(nip);
+        rollbackSnapshots.delete(nip);
+      });
+    }
+
+    // Gabungkan klik status BA / PK / multi-baris selama 250ms menjadi 1 Batch Patch
+    function scheduleRowBatchSave(nip, patchObj) {
+      savingNips.add(nip);
+      const existingPatch = pendingRowPatches.get(nip) || {};
+      pendingRowPatches.set(nip, Object.assign(existingPatch, patchObj));
+      setLiveSyncStatus('syncing', `Menyimpan (${savingNips.size})...`);
+
+      clearTimeout(batchFlushTimer);
+      batchFlushTimer = setTimeout(() => {
+        if (pendingRowPatches.size === 0) return;
+
+        const batchEntries = Array.from(pendingRowPatches.entries());
+        pendingRowPatches.clear();
+        const activeVerifikator = document.getElementById('activeVerifikatorSelect').value;
+
+        enqueueWrite({
+          coalesceKey: 'BATCH_ROWS',
+          run: async () => {
+            // Serap jika ada klik tambahan saat menunggu giliran antrean
+            while (pendingRowPatches.size > 0) {
+              for (const [extraNip, extraPatch] of pendingRowPatches.entries()) {
+                const found = batchEntries.find(e => e[0] === extraNip);
+                if (found) {
+                  Object.assign(found[1], extraPatch);
+                } else {
+                  batchEntries.push([extraNip, extraPatch]);
+                }
+              }
+              pendingRowPatches.clear();
+            }
+
+            const nipsInBatch = batchEntries.map(e => e[0]);
+            const items = batchEntries.map(([n, patch]) => {
+              const row = allRecords.find(r => r.nip === n);
+              return Object.assign({ nip: n, rowNum: row ? row.rowNum : null }, patch);
+            });
+
+            if (items.length === 0) return true;
+
+            try {
+              const res = await callBackend('batchUpdateRows', {
+                activeVerifikator: activeVerifikator,
+                items: items
+              }, 18000, 2);
+
+              if (res && res.success) {
+                confirmSavedNips(nipsInBatch);
+                applyDeltaResponse(res);
+                return true;
+              } else {
+                rollbackNips(nipsInBatch);
+                showToast('❌ Gagal menyimpan ke Spreadsheet: ' + (res?.message || 'Respons tidak valid'), 4500);
+                return false;
+              }
+            } catch (err) {
+              rollbackNips(nipsInBatch);
+              showToast('❌ Gagal menyimpan (koneksi/server sibuk): ' + err.message, 4500);
+              return false;
+            }
+          }
+        });
+      }, 250);
     }
 
     function enqueueWrite(task) {
-      // Gabungkan (coalesce) perubahan beruntun pada NIP yang sama yang belum terkirim
       if (task.coalesceKey) {
         const existingIdx = writeQueue.findIndex(q => q.coalesceKey === task.coalesceKey);
         if (existingIdx !== -1) {
@@ -731,32 +845,51 @@
 
     async function processWriteQueue() {
       if (isProcessingWriteQueue) return;
-      if (writeQueue.length === 0) {
-        setLiveSyncStatus('saved', '✓ Tersimpan');
-        clearTimeout(window._savedResetTimer);
-        window._savedResetTimer = setTimeout(() => {
-          if (!hasActiveWrites()) setLiveSyncStatus('live', 'Delta Live (2s)');
-        }, 1600);
+
+      if (writeQueue.length === 0 && pendingRowPatches.size === 0) {
+        if (!window._lastWriteFailed) {
+          setLiveSyncStatus('saved', '✓ Tersimpan di Sheet');
+          clearTimeout(window._savedResetTimer);
+          window._savedResetTimer = setTimeout(() => {
+            if (!hasActiveWrites()) setLiveSyncStatus('live', 'Live Sync (Anti-Bentrok)');
+          }, 2000);
+        }
+        // Tarik perubahan petugas lain segera setelah simpanan selesai
+        setTimeout(() => pollRealtimeChanges(), 350);
         return;
       }
 
+      if (writeQueue.length === 0) return;
+
       isProcessingWriteQueue = true;
+      window._lastWriteFailed = false;
       const task = writeQueue.shift();
 
       if (task.nip && cancelledNips.has(task.nip)) {
         cancelledNips.delete(task.nip);
+        savingNips.delete(task.nip);
+        rollbackSnapshots.delete(task.nip);
         isProcessingWriteQueue = false;
         processWriteQueue();
         return;
       }
 
-      const pendingLabel = writeQueue.length > 0 ? `Menyimpan (${writeQueue.length + 1})...` : 'Menyimpan...';
-      setLiveSyncStatus('syncing', pendingLabel);
+      setLiveSyncStatus('syncing', 'Menyimpan ke Sheet...');
 
       try {
-        await task.run();
+        const ok = await task.run();
+        if (ok === false) {
+          window._lastWriteFailed = true;
+          setLiveSyncStatus('error', '❌ Gagal Simpan');
+        }
       } catch (err) {
-        if (task.onError) task.onError(err);
+        window._lastWriteFailed = true;
+        setLiveSyncStatus('error', '❌ Gagal Simpan');
+        if (task.onError) {
+          task.onError(err);
+        } else {
+          showToast('❌ Gagal menyimpan: ' + err.message, 4500);
+        }
       } finally {
         isProcessingWriteQueue = false;
         processWriteQueue();
@@ -798,18 +931,31 @@
       }
     }
 
-    function submitAdminPin() {
+    async function submitAdminPin() {
       const pin = document.getElementById('adminPinInput').value.trim();
-      if (pin === '2025') {
-        isAdminUnlocked = true;
-        adminPinSession = pin;
-        closeModal('pinModal');
-        document.getElementById('adminControlPanel').classList.remove('hidden');
-        document.getElementById('adminBadge').classList.remove('hidden');
-        renderTable();
-        showToast('Mode Admin aktif! Seluruh kontrol administrasi terbuka.');
-      } else {
-        showToast('PIN Admin salah! Coba lagi.');
+      if (!pin) return;
+      const btn = document.getElementById('btnSubmitPin');
+      btn.disabled = true;
+      btn.textContent = 'Memeriksa...';
+
+      try {
+        const res = await callBackend('verifyPin', { pin }, 10000, 1);
+        if (res && res.success) {
+          isAdminUnlocked = true;
+          adminPinSession = pin;
+          closeModal('pinModal');
+          document.getElementById('adminControlPanel').classList.remove('hidden');
+          document.getElementById('adminBadge').classList.remove('hidden');
+          renderTable();
+          showToast('Mode Admin aktif! Seluruh kontrol administrasi terbuka.');
+        } else {
+          showToast('PIN Admin salah! Coba lagi.');
+        }
+      } catch (err) {
+        showToast('Gagal memverifikasi PIN: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Buka Mode Admin';
       }
     }
 
@@ -823,17 +969,19 @@
     }
 
     // ========================================================================
-    // BACKEND TRANSPORT & DELTA REAL-TIME SYNC ENGINE
+    // BACKEND TRANSPORT DENGAN TIMEOUT + AUTO-RETRY EXPONENTIAL BACKOFF
     // ========================================================================
 
-    async function callBackend(action, payload = {}) {
+    async function singleBackendAttempt(action, payload, timeoutMs) {
       if (isInsideAppsScript) {
         return new Promise((resolve, reject) => {
+          const timer = setTimeout(() => reject(new Error('Waktu tunggu server habis (timeout).')), timeoutMs);
           const runner = google.script.run
-            .withSuccessHandler(res => resolve(res))
-            .withFailureHandler(err => reject(err));
+            .withSuccessHandler(res => { clearTimeout(timer); resolve(res); })
+            .withFailureHandler(err => { clearTimeout(timer); reject(err); });
 
-          if (action === 'syncDelta') runner.syncDelta(payload);
+          if (action === 'verifyPin') runner.doPost({ postData: { contents: JSON.stringify({ action: 'verifyPin', ...payload }) } });
+          else if (action === 'syncDelta') runner.syncDelta(payload);
           else if (action === 'checkRev') runner.checkServerRev();
           else if (action === 'getData') runner.getDashboardData(payload.forceRefresh);
           else if (action === 'syncDrive') runner.syncDriveFolders();
@@ -843,22 +991,61 @@
           else if (action === 'releaseBerkas') runner.releaseBerkas(payload);
           else if (action === 'quickToggle') runner.quickToggleStatus(payload);
           else if (action === 'updateSingle') runner.updateSingleRecord(payload);
+          else if (action === 'batchUpdateRows') runner.batchUpdateRows(payload);
           else if (action === 'updateBulk') runner.updateBulkRecords(payload);
           else if (action === 'uploadScanPdf') runner.uploadScanPdf(payload);
           else if (action === 'adminTransfer') runner.adminTransferBerkas(payload);
           else if (action === 'adminResetClaims') runner.adminResetClaims(payload);
         });
       } else {
-        const resp = await fetch(DEFAULT_GAS_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action, ...payload })
-        });
-        return await resp.json();
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          const resp = await fetch(DEFAULT_GAS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action, ...payload }),
+            signal: controller.signal
+          });
+          if (!resp.ok) {
+            throw new Error(`HTTP ${resp.status} dari server Google.`);
+          }
+          const rawText = await resp.text();
+          try {
+            return JSON.parse(rawText);
+          } catch (parseErr) {
+            throw new Error('Server Google sedang sibuk/antre.');
+          }
+        } catch (err) {
+          if (err.name === 'AbortError') {
+            throw new Error('Koneksi timeout.');
+          }
+          throw err;
+        } finally {
+          clearTimeout(timer);
+        }
       }
     }
 
+    async function callBackend(action, payload = {}, timeoutMs = 18000, maxRetries = 2) {
+      let lastError = null;
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          return await singleBackendAttempt(action, payload, timeoutMs);
+        } catch (err) {
+          lastError = err;
+          if (attempt < maxRetries) {
+            const backoffMs = 600 * (attempt + 1) + Math.floor(Math.random() * 350);
+            await new Promise(r => setTimeout(r, backoffMs));
+          }
+        }
+      }
+      throw lastError;
+    }
+
     function saveLocalSnapshot() {
+      // Hanya simpan snapshot ke localStorage jika tidak ada data yang sedang/gagal tersimpan
+      if (hasActiveWrites() || window._lastWriteFailed) return;
       try {
         const snapshot = {
           rev: currentDataRev,
@@ -891,7 +1078,7 @@
       if (!hasActiveWrites()) setLiveSyncStatus('syncing', 'Menarik Data...');
 
       try {
-        const res = await callBackend('getData', { forceRefresh });
+        const res = await callBackend('getData', { forceRefresh }, 25000, 2);
         if (!res || !res.success) {
           if (!silent) showToast(res?.message || 'Gagal memuat data.');
           setLiveSyncStatus('error', 'Gangguan Koneksi');
@@ -900,7 +1087,7 @@
         if (res.rev) currentDataRev = String(res.rev);
         hydrateUI(res, silent);
         saveLocalSnapshot();
-        if (!hasActiveWrites()) setLiveSyncStatus('live', 'Delta Live (2s)');
+        if (!hasActiveWrites()) setLiveSyncStatus('live', 'Live Sync (Anti-Bentrok)');
       } catch (err) {
         if (!silent) showToast('Koneksi gagal: ' + err.message);
         setLiveSyncStatus('error', 'Offline');
@@ -910,6 +1097,10 @@
     }
 
     async function manualForceRefresh() {
+      if (hasActiveWrites()) {
+        showToast('Tunggu sebentar, sedang menyelesaikan penyimpanan ke Spreadsheet...');
+        return;
+      }
       const icon = document.getElementById('refreshSpinIcon');
       icon.classList.add('animate-spin');
       await loadData(false, true);
@@ -917,26 +1108,42 @@
       showToast('Seluruh data berhasil disinkronkan dari Google Spreadsheet!', 2500);
     }
 
+    function scheduleNextPoll() {
+      clearTimeout(pollTimerId);
+      // Interval 6 - 8.5 detik dengan random jitter agar 11+ user tidak menembak GAS bersamaan
+      const nextDelay = 6000 + Math.floor(Math.random() * 2500);
+      pollTimerId = setTimeout(pollRealtimeChanges, nextDelay);
+    }
+
     async function pollRealtimeChanges() {
-      if (document.hidden || hasActiveWrites() || isSyncingInProgress) return;
+      if (document.hidden || hasActiveWrites() || isSyncingInProgress) {
+        scheduleNextPoll();
+        return;
+      }
+
       if (!currentDataRev || allRecords.length === 0) {
         await loadData(true, false);
+        scheduleNextPoll();
         return;
       }
 
       isSyncingInProgress = true;
       try {
-        const res = await callBackend('syncDelta', { sinceRev: currentDataRev });
+        const res = await callBackend('syncDelta', { sinceRev: currentDataRev }, 10000, 0);
         if (!res || !res.success) return;
 
         if (res.unchanged) {
-          if (!hasActiveWrites()) setLiveSyncStatus('live', 'Delta Live (2s)');
+          if (!hasActiveWrites() && !window._lastWriteFailed) {
+            setLiveSyncStatus('live', 'Live Sync (Anti-Bentrok)');
+          }
           return;
         }
 
         if (res.delta && Array.isArray(res.updatedRecords)) {
           applyDeltaResponse(res);
-          if (!hasActiveWrites()) setLiveSyncStatus('live', `Tersinkron (+${res.updatedRecords.length})`);
+          if (!hasActiveWrites()) {
+            setLiveSyncStatus('live', `Tersinkron (+${res.updatedRecords.length})`);
+          }
           return;
         }
 
@@ -946,13 +1153,13 @@
           return;
         }
       } catch (e) {
-        setLiveSyncStatus('error', 'Cek Koneksi');
+        if (!hasActiveWrites()) setLiveSyncStatus('error', 'Cek Koneksi');
       } finally {
         isSyncingInProgress = false;
+        scheduleNextPoll();
       }
     }
 
-    setInterval(pollRealtimeChanges, 2000);
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) pollRealtimeChanges();
     });
@@ -969,8 +1176,12 @@
       if (res.rev) currentDataRev = String(res.rev);
       if (Array.isArray(res.updatedRecords)) {
         res.updatedRecords.forEach(upd => {
+          // Jangan timpa baris yang sedang dalam proses penyimpanan aktif di browser ini
+          if (savingNips.has(upd.nip)) return;
+
           const rec = allRecords.find(r => r.nip === upd.nip);
           if (rec) {
+            if (upd.rowNum !== undefined) rec.rowNum = upd.rowNum;
             if (upd.verifikator !== undefined) {
               rec.verifikator = upd.verifikator;
               rec.lokasiBox = upd.verifikator ? (getLockedBoxForVer(upd.verifikator) || upd.lokasiBox || '') : '';
@@ -1003,7 +1214,7 @@
       showToast('Memindai folder Drive, mencocokkan NIP & mem-bold baris tersimpan...', 6000);
 
       try {
-        const res = await callBackend('syncDrive');
+        const res = await callBackend('syncDrive', {}, 35000, 1);
         if (res && res.success) {
           if (res.rev) currentDataRev = String(res.rev);
           hydrateUI(res, false);
@@ -1023,14 +1234,18 @@
 
     async function triggerSyncLockedBoxes() {
       showToast('Menyelaraskan BOX 1 – BOX 11 & mem-bold seluruh baris terverifikasi...');
-      const res = await callBackend('syncLockedBoxes', { pin: adminPinSession });
-      if (res && res.success) {
-        if (res.rev) currentDataRev = String(res.rev);
-        hydrateUI(res, false);
-        saveLocalSnapshot();
-        showToast(res.message);
-      } else {
-        showToast(res?.message || 'Gagal menyelaraskan Box.');
+      try {
+        const res = await callBackend('syncLockedBoxes', { pin: adminPinSession }, 30000, 1);
+        if (res && res.success) {
+          if (res.rev) currentDataRev = String(res.rev);
+          hydrateUI(res, false);
+          saveLocalSnapshot();
+          showToast(res.message);
+        } else {
+          showToast(res?.message || 'Gagal menyelaraskan Box.');
+        }
+      } catch (err) {
+        showToast('Gagal menyelaraskan Box: ' + err.message);
       }
     }
 
@@ -1192,7 +1407,7 @@
     }
 
     // ========================================================================
-    // OPTIMISTIC ACTIONS + QUEUED TARGETED WRITES
+    // OPTIMISTIC ACTIONS + AUTO-RETRY + ROLLBACK ON FAILURE
     // ========================================================================
 
     function triggerAutoClaim(count) {
@@ -1206,12 +1421,14 @@
 
       enqueueWrite({
         run: async () => {
-          const res = await callBackend('autoClaimPool', { verifikator, count });
+          const res = await callBackend('autoClaimPool', { verifikator, count }, 25000, 2);
           if (res && res.success) {
             applyDeltaResponse(res);
             showToast(res.message);
+            return true;
           } else {
-            showToast(res?.message || 'Gagal mengambil berkas.');
+            showToast('❌ ' + (res?.message || 'Gagal mengambil berkas.'), 4000);
+            return false;
           }
         }
       });
@@ -1236,11 +1453,11 @@
 
       const lockedBox = getLockedBoxForVer(verifikator);
       const targetRecord = allRecords.find(item => item.nip === nip);
-      const prevOwner = targetRecord ? targetRecord.verifikator : '';
-      const prevBox = targetRecord ? targetRecord.lokasiBox : '';
       const rowNum = targetRecord ? targetRecord.rowNum : null;
 
       if (targetRecord) {
+        captureRollbackSnapshot(nip);
+        savingNips.add(nip);
         targetRecord.verifikator = verifikator;
         targetRecord.lokasiBox = lockedBox;
         selectedNips.delete(nip);
@@ -1249,32 +1466,27 @@
         applyFilters(true);
       }
 
-      showToast(`✓ NIP ${nip} → ${verifikator} (${lockedBox})`, 1800);
-
       enqueueWrite({
         nip: nip,
         run: async () => {
-          const res = await callBackend('claimBerkas', { verifikator, nips: [nip], rowNum });
-          if (res && res.success) {
-            applyDeltaResponse(res);
-          } else {
-            cancelledNips.add(nip);
-            if (targetRecord) {
-              targetRecord.verifikator = prevOwner;
-              targetRecord.lokasiBox = prevBox;
+          try {
+            const res = await callBackend('claimBerkas', { verifikator, nips: [nip], rowNum }, 18000, 2);
+            if (res && res.success) {
+              confirmSavedNips([nip]);
+              applyDeltaResponse(res);
+              return true;
+            } else {
+              cancelledNips.add(nip);
+              rollbackNips([nip]);
+              showToast('❌ ' + (res?.message || 'Berkas sudah diambil petugas lain.'), 4000);
+              pollRealtimeChanges();
+              return false;
             }
-            applyFilters(true);
-            showToast(res?.message || 'Berkas sudah diambil petugas lain.');
-            pollRealtimeChanges();
+          } catch (err) {
+            rollbackNips([nip]);
+            showToast('❌ Gagal mengklaim berkas: ' + err.message, 4000);
+            return false;
           }
-        },
-        onError: (err) => {
-          if (targetRecord) {
-            targetRecord.verifikator = prevOwner;
-            targetRecord.lokasiBox = prevBox;
-          }
-          applyFilters(true);
-          showToast('Koneksi gagal saat klaim: ' + err.message);
         }
       });
     }
@@ -1294,9 +1506,9 @@
         if (!ok) return;
       }
 
-      const prevOwner = targetRecord.verifikator;
-      const prevBox = targetRecord.lokasiBox;
       const rowNum = targetRecord.rowNum;
+      captureRollbackSnapshot(nip);
+      savingNips.add(nip);
       targetRecord.verifikator = '';
       targetRecord.lokasiBox = '';
       selectedNips.delete(nip);
@@ -1304,25 +1516,29 @@
       updateActiveVerifikatorCard();
       applyFilters(true);
 
-      showToast(`↩ Berkas NIP ${nip} dikembalikan ke Pool`, 1800);
-
       enqueueWrite({
         nip: nip,
-        coalesceKey: 'ROW_' + nip,
         run: async () => {
-          const res = await callBackend('releaseBerkas', {
-            verifikator: verifikator,
-            pin: adminPinSession,
-            nips: [nip],
-            rowNum: rowNum
-          });
-          if (res && res.success) {
-            applyDeltaResponse(res);
-          } else {
-            targetRecord.verifikator = prevOwner;
-            targetRecord.lokasiBox = prevBox;
-            applyFilters(true);
-            showToast(res?.message || 'Gagal mengembalikan berkas ke Pool.');
+          try {
+            const res = await callBackend('releaseBerkas', {
+              verifikator: verifikator,
+              pin: adminPinSession,
+              nips: [nip],
+              rowNum: rowNum
+            }, 18000, 2);
+            if (res && res.success) {
+              confirmSavedNips([nip]);
+              applyDeltaResponse(res);
+              return true;
+            } else {
+              rollbackNips([nip]);
+              showToast('❌ ' + (res?.message || 'Gagal mengembalikan berkas ke Pool.'), 4000);
+              return false;
+            }
+          } catch (err) {
+            rollbackNips([nip]);
+            showToast('❌ Gagal membuang berkas: ' + err.message, 4000);
+            return false;
           }
         }
       });
@@ -1339,13 +1555,24 @@
         return;
       }
 
-      const ok = confirm(`Kembalikan ${selectedNips.size} berkas terpilih ke Pool (Belum Diambil)?`);
+      const nipsToRelease = Array.from(selectedNips);
+      const finishedSelected = nipsToRelease.filter(nip => {
+        const r = allRecords.find(item => item.nip === nip);
+        return r && (r.statusBA === 'Selesai' || r.statusPK === 'Selesai');
+      });
+
+      const warningExtra = finishedSelected.length > 0
+        ? `\n\n⚠️ PERHATIAN: ${finishedSelected.length} dari berkas tersebut sudah berstatus Selesai!`
+        : '';
+
+      const ok = confirm(`Kembalikan ${nipsToRelease.length} berkas terpilih ke Pool (Belum Diambil)?${warningExtra}`);
       if (!ok) return;
 
-      const nipsToRelease = Array.from(selectedNips);
       nipsToRelease.forEach(nip => {
         const r = allRecords.find(item => item.nip === nip);
         if (r && (isAdminUnlocked || normStr(r.verifikator) === normStr(verifikator))) {
+          captureRollbackSnapshot(nip);
+          savingNips.add(nip);
           r.verifikator = '';
           r.lokasiBox = '';
         }
@@ -1359,16 +1586,26 @@
 
       enqueueWrite({
         run: async () => {
-          const res = await callBackend('releaseBerkas', {
-            verifikator: verifikator,
-            pin: adminPinSession,
-            nips: nipsToRelease
-          });
-          if (res && res.success) {
-            applyDeltaResponse(res);
-            showToast(res.message);
-          } else {
-            showToast(res?.message || 'Gagal membuang berkas terpilih.');
+          try {
+            const res = await callBackend('releaseBerkas', {
+              verifikator: verifikator,
+              pin: adminPinSession,
+              nips: nipsToRelease
+            }, 25000, 2);
+            if (res && res.success) {
+              confirmSavedNips(nipsToRelease);
+              applyDeltaResponse(res);
+              showToast(res.message);
+              return true;
+            } else {
+              rollbackNips(nipsToRelease);
+              showToast('❌ ' + (res?.message || 'Gagal membuang berkas terpilih.'), 4000);
+              return false;
+            }
+          } catch (err) {
+            rollbackNips(nipsToRelease);
+            showToast('❌ Gagal membuang berkas: ' + err.message, 4000);
+            return false;
           }
         }
       });
@@ -1384,9 +1621,15 @@
         return;
       }
 
+      if (r && r.verifikator && activeVerifikator && normStr(r.verifikator) !== normStr(activeVerifikator) && !isAdminUnlocked) {
+        showToast(`⚠️ Berkas ini dikelola oleh ${r.verifikator}. Anda sedang login sebagai ${activeVerifikator}.`, 3500);
+      }
+
       const nextValue = forcedTarget
         ? forcedTarget
         : (currentVal === 'Selesai' ? 'Belum' : 'Selesai');
+
+      captureRollbackSnapshot(nip);
 
       if (r) {
         if (!r.verifikator && activeVerifikator) {
@@ -1395,33 +1638,14 @@
         }
         if (field === 'BA') r.statusBA = nextValue;
         if (field === 'PK') r.statusPK = nextValue;
+        savingNips.add(nip);
         updateKpiAndRekap(lastFolderStats);
         updateActiveVerifikatorCard();
         applyFilters(true);
       }
 
-      // Coalesce: kirim kondisi terbaru baris ini (BA + PK sekaligus) sehingga klik cepat BA lalu PK hanya 1x simpan!
-      enqueueWrite({
-        nip: nip,
-        coalesceKey: 'ROW_' + nip,
-        run: async () => {
-          const latestRow = allRecords.find(item => item.nip === nip);
-          if (!latestRow) return;
-          const res = await callBackend('updateSingle', {
-            nip: nip,
-            rowNum: latestRow.rowNum,
-            verifikator: latestRow.verifikator,
-            activeVerifikator: activeVerifikator,
-            statusBA: latestRow.statusBA,
-            statusPK: latestRow.statusPK
-          });
-          if (res && res.success) {
-            applyDeltaResponse(res);
-          } else {
-            showToast(res?.message || 'Gagal memperbarui status.');
-          }
-        }
-      });
+      const patch = field === 'BA' ? { statusBA: nextValue } : { statusPK: nextValue };
+      scheduleRowBatchSave(nip, patch);
     }
 
     function quickTab(mode) {
@@ -1674,18 +1898,26 @@
 
       tbody.innerHTML = slice.map(r => {
         const checked = selectedNips.has(r.nip) ? 'checked' : '';
-        const isSavedBold = Boolean(r.verifikator);
-        const rowWeightClass = isSavedBold ? 'font-bold border-l-4 border-l-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20' : '';
+        const isSavingRow = savingNips.has(r.nip);
+        const isSavedBold = Boolean(r.verifikator) && !isSavingRow;
+        const rowWeightClass = isSavingRow
+          ? 'border-l-4 border-l-amber-400 bg-amber-50/30 dark:bg-amber-950/20'
+          : (isSavedBold ? 'font-bold border-l-4 border-l-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20' : '');
 
         const verHtml = r.verifikator
           ? `<div class="font-extrabold text-slate-900 dark:text-white text-xs">${r.verifikator}</div>`
           : `<button onclick="quickClaimSingle('${r.nip}')" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold shadow-xs cursor-pointer">+ Ambil</button>`;
+
+        const statusChipHtml = isSavingRow
+          ? `<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/80 text-[10px] font-extrabold text-amber-800 dark:text-amber-300 animate-pulse">⏳ Menyimpan...</span>`
+          : `<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/80 text-[10px] font-extrabold text-emerald-800 dark:text-emerald-300">✓ Fix Tersimpan</span>`;
+
         const boxHtml = r.lokasiBox
           ? `<div class="mt-1 flex flex-wrap items-center gap-1">
               <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-[11px] font-bold text-indigo-700 dark:text-indigo-300">🔒 ${r.lokasiBox}</span>
-              <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/80 text-[10px] font-extrabold text-emerald-800 dark:text-emerald-300">✓ Fix Tersimpan</span>
+              ${statusChipHtml}
             </div>`
-          : '';
+          : (isSavingRow ? `<div class="mt-1">${statusChipHtml}</div>` : '');
 
         const canRelease = r.verifikator && (isAdminUnlocked || (activeVer && normStr(r.verifikator) === normStr(activeVer)));
         const releaseBtnHtml = canRelease
@@ -1802,11 +2034,11 @@
     }
 
     function saveSingleEdit() {
-      const activeVerifikator = document.getElementById('activeVerifikatorSelect').value;
       const chosenVerifikator = document.getElementById('editVerifikator').value;
       const lockedBox = getLockedBoxForVer(chosenVerifikator);
       const statusBA = document.getElementById('editStatusBA').value;
       const statusPK = document.getElementById('editStatusPK').value;
+      const keterangan = document.getElementById('editKeterangan').value;
       const nip = document.getElementById('editNip').value;
 
       if (!chosenVerifikator && (statusBA === 'Selesai' || statusPK === 'Selesai' || statusBA === 'Kendala' || statusPK === 'Kendala')) {
@@ -1814,43 +2046,26 @@
         return;
       }
 
+      captureRollbackSnapshot(nip);
       const targetRecord = allRecords.find(item => item.nip === nip);
-      const payload = {
-        nip: nip,
-        rowNum: targetRecord ? targetRecord.rowNum : null,
-        verifikator: chosenVerifikator,
-        activeVerifikator: activeVerifikator,
-        lokasiBox: lockedBox,
-        statusBA: statusBA,
-        statusPK: statusPK,
-        keterangan: document.getElementById('editKeterangan').value
-      };
-
       if (targetRecord) {
+        savingNips.add(nip);
         targetRecord.verifikator = chosenVerifikator;
         targetRecord.lokasiBox = lockedBox;
         targetRecord.statusBA = statusBA;
         targetRecord.statusPK = statusPK;
-        targetRecord.keterangan = payload.keterangan;
+        targetRecord.keterangan = keterangan;
         updateKpiAndRekap(lastFolderStats);
         updateActiveVerifikatorCard();
         applyFilters(true);
       }
 
       closeModal('editModal');
-
-      enqueueWrite({
-        nip: nip,
-        coalesceKey: 'ROW_' + nip,
-        run: async () => {
-          const res = await callBackend('updateSingle', payload);
-          if (res && res.success) {
-            applyDeltaResponse(res);
-            showToast(res.message || 'Fix Tersimpan (Bold)!', 2200);
-          } else {
-            showToast(res?.message || 'Gagal menyimpan.');
-          }
-        }
+      scheduleRowBatchSave(nip, {
+        explicitVerifikator: chosenVerifikator,
+        statusBA: statusBA,
+        statusPK: statusPK,
+        keterangan: keterangan
       });
     }
 
@@ -1863,26 +2078,43 @@
         showToast('Pilih file PDF terlebih dahulu.');
         return;
       }
+      if (file.size > 15 * 1024 * 1024) {
+        showToast('⚠️ Ukuran file PDF melebihi 15 MB. Kompres PDF terlebih dahulu agar unggahan tidak timeout.', 4500);
+        return;
+      }
       const reader = new FileReader();
       reader.onload = function(e) {
         const base64Data = e.target.result.split(',')[1];
         closeModal('editModal');
+        savingNips.add(nip);
+        renderTable();
         showToast('Mengunggah PDF ke 03_Hasil_Scan_Baru...', 4000);
         enqueueWrite({
           run: async () => {
-            const res = await callBackend('uploadScanPdf', {
-              nip,
-              rowNum: targetRecord ? targetRecord.rowNum : null,
-              base64Data,
-              activeVerifikator
-            });
-            if (res && res.success) {
-              if (res.rev) currentDataRev = String(res.rev);
-              hydrateUI(res, true);
-              saveLocalSnapshot();
-              showToast(res.message);
-            } else {
-              showToast(res?.message || 'Gagal mengunggah PDF.');
+            try {
+              const res = await callBackend('uploadScanPdf', {
+                nip,
+                rowNum: targetRecord ? targetRecord.rowNum : null,
+                base64Data,
+                activeVerifikator
+              }, 35000, 1);
+              savingNips.delete(nip);
+              if (res && res.success) {
+                if (res.rev) currentDataRev = String(res.rev);
+                hydrateUI(res, true);
+                saveLocalSnapshot();
+                showToast(res.message);
+                return true;
+              } else {
+                renderTable();
+                showToast('❌ ' + (res?.message || 'Gagal mengunggah PDF.'), 4500);
+                return false;
+              }
+            } catch (err) {
+              savingNips.delete(nip);
+              renderTable();
+              showToast('❌ Gagal unggah PDF: ' + err.message, 4500);
+              return false;
             }
           }
         });
@@ -1904,23 +2136,63 @@
 
     function submitBulkUpdate() {
       const activeVerifikator = document.getElementById('activeVerifikatorSelect').value;
-      const payload = {
-        nips: Array.from(selectedNips),
-        activeVerifikator: activeVerifikator,
-        statusBA: document.getElementById('bulkStatusBA').value,
-        statusPK: document.getElementById('bulkStatusPK').value,
-        keterangan: document.getElementById('bulkKeterangan').value
-      };
+      const nipsList = Array.from(selectedNips);
+      const statusBA = document.getElementById('bulkStatusBA').value;
+      const statusPK = document.getElementById('bulkStatusPK').value;
+      const keterangan = document.getElementById('bulkKeterangan').value;
+
+      if (!statusBA && !statusPK && !keterangan) {
+        showToast('Pilih minimal 1 perubahan (Status BA, Status PK, atau Keterangan).');
+        return;
+      }
+
+      nipsList.forEach(nip => {
+        const r = allRecords.find(item => item.nip === nip);
+        if (r) {
+          captureRollbackSnapshot(nip);
+          savingNips.add(nip);
+          if (!r.verifikator && activeVerifikator) {
+            r.verifikator = activeVerifikator;
+            r.lokasiBox = getLockedBoxForVer(activeVerifikator);
+          }
+          if (statusBA) r.statusBA = statusBA;
+          if (statusPK) r.statusPK = statusPK;
+          if (keterangan) r.keterangan = keterangan;
+        }
+      });
+
+      selectedNips.clear();
+      updateKpiAndRekap(lastFolderStats);
+      updateActiveVerifikatorCard();
+      applyFilters(true);
       closeModal('bulkModal');
-      showToast('Menyimpan & mem-bold berkas terpilih...', 2000);
+
+      const payload = {
+        nips: nipsList,
+        activeVerifikator: activeVerifikator,
+        statusBA: statusBA,
+        statusPK: statusPK,
+        keterangan: keterangan
+      };
 
       enqueueWrite({
         run: async () => {
-          const res = await callBackend('updateBulk', payload);
-          if (res && res.success) {
-            selectedNips.clear();
-            applyDeltaResponse(res);
-            showToast(res.message);
+          try {
+            const res = await callBackend('updateBulk', payload, 25000, 2);
+            if (res && res.success) {
+              confirmSavedNips(nipsList);
+              applyDeltaResponse(res);
+              showToast(res.message);
+              return true;
+            } else {
+              rollbackNips(nipsList);
+              showToast('❌ ' + (res?.message || 'Gagal menyimpan update massal.'), 4500);
+              return false;
+            }
+          } catch (err) {
+            rollbackNips(nipsList);
+            showToast('❌ Gagal update massal: ' + err.message, 4500);
+            return false;
           }
         }
       });
@@ -1940,15 +2212,19 @@
       };
       closeModal('transferModal');
       showToast('Memproses & menyimpan transfer berkas...');
-      const res = await callBackend('adminTransfer', payload);
-      if (res && res.success) {
-        selectedNips.clear();
-        if (res.rev) currentDataRev = String(res.rev);
-        hydrateUI(res, true);
-        saveLocalSnapshot();
-        showToast(res.message);
-      } else {
-        showToast(res?.message || 'Transfer gagal.');
+      try {
+        const res = await callBackend('adminTransfer', payload, 30000, 1);
+        if (res && res.success) {
+          selectedNips.clear();
+          if (res.rev) currentDataRev = String(res.rev);
+          hydrateUI(res, true);
+          saveLocalSnapshot();
+          showToast(res.message);
+        } else {
+          showToast(res?.message || 'Transfer gagal.');
+        }
+      } catch (err) {
+        showToast('Transfer gagal: ' + err.message);
       }
     }
 
@@ -1960,15 +2236,19 @@
       };
       closeModal('resetModal');
       showToast('Mereset klaim kembali ke Pool...');
-      const res = await callBackend('adminResetClaims', payload);
-      if (res && res.success) {
-        selectedNips.clear();
-        if (res.rev) currentDataRev = String(res.rev);
-        hydrateUI(res, true);
-        saveLocalSnapshot();
-        showToast(res.message);
-      } else {
-        showToast(res?.message || 'Reset gagal.');
+      try {
+        const res = await callBackend('adminResetClaims', payload, 30000, 1);
+        if (res && res.success) {
+          selectedNips.clear();
+          if (res.rev) currentDataRev = String(res.rev);
+          hydrateUI(res, true);
+          saveLocalSnapshot();
+          showToast(res.message);
+        } else {
+          showToast(res?.message || 'Reset gagal.');
+        }
+      } catch (err) {
+        showToast('Reset gagal: ' + err.message);
       }
     }
 
@@ -2092,6 +2372,7 @@
         pollRealtimeChanges();
       } else {
         loadData(false, false);
+        scheduleNextPoll();
       }
     });
   </script>
