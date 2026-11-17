@@ -34,16 +34,22 @@
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-base sm:text-lg font-bold tracking-tight leading-tight">SIMON-BAPK 2025</h1>
-            <span id="adminBadge" class="hidden px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white uppercase tracking-wider">Mode Admin Aktif</span>
+            <span id="liveSyncBadge" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              <span id="liveSyncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="liveSyncText">Live Sync</span>
+            </span>
+            <span id="adminBadge" class="hidden px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white uppercase tracking-wider">Mode Admin</span>
           </div>
           <p class="text-xs text-slate-400">Monitoring Berita Acara & Perjanjian Kerja Guru Sekolah Rakyat</p>
         </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <span id="lastSyncBadge" class="hidden xl:inline-flex items-center px-2.5 py-1 rounded-lg text-xs bg-slate-800 text-slate-300 border border-slate-700">
-          Memuat data...
-        </span>
+        <button onclick="manualForceRefresh()" id="btnManualRefresh" title="Tarik ulang data terbaru sekarang"
+          class="inline-flex items-center gap-1 px-2.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 text-xs font-semibold transition cursor-pointer">
+          <span id="refreshSpinIcon">⚡</span>
+          <span class="hidden sm:inline" id="lastSyncBadge">Sync</span>
+        </button>
 
         <button onclick="openBoxLabelModal()"
           class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition cursor-pointer">
@@ -86,7 +92,7 @@
           class="flex items-center justify-between p-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-left shadow transition cursor-pointer">
           <div>
             <div class="text-xs font-bold">🔄 Sinkron Drive</div>
-            <div class="text-[11px] text-emerald-100">Scan 01, 02, 03 & Buka Link</div>
+            <div class="text-[11px] text-emerald-100">Scan 01, 02, 03 & Bold</div>
           </div>
           <svg id="syncIcon" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -96,8 +102,8 @@
         <button onclick="triggerSyncLockedBoxes()"
           class="flex items-center justify-between p-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-left shadow transition cursor-pointer">
           <div>
-            <div class="text-xs font-bold">🔒 Kunci Box 1–11</div>
-            <div class="text-[11px] text-teal-100">Urutkan Box per Verifikator</div>
+            <div class="text-xs font-bold">🔒 Kunci Box & Bold</div>
+            <div class="text-[11px] text-teal-100">Box 1–11 & Bold Tersimpan</div>
           </div>
           <span class="text-lg">📦</span>
         </button>
@@ -216,7 +222,7 @@
       </div>
     </section>
 
-    <!-- KPI CARDS (7 KARTU TERMASUK KENDALA BA) -->
+    <!-- KPI CARDS -->
     <section class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
       <div onclick="quickTab('ALL')" class="bg-white dark:bg-slate-900 rounded-xl p-3.5 border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer hover:border-slate-400 transition">
         <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Berkas</p>
@@ -365,8 +371,8 @@
             ↩ Buang Terpilih ke Pool
           </button>
           <button onclick="openBulkModal()"
-            class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition cursor-pointer">
-            ✏️ Update Massal Terpilih
+            class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition cursor-pointer">
+            ✏️ Update & Simpan Massal
           </button>
         </div>
       </div>
@@ -393,7 +399,7 @@
           </thead>
           <tbody id="tableBody" class="divide-y divide-slate-200 dark:divide-slate-800">
             <tr>
-              <td colspan="9" class="py-12 text-center text-slate-400">Sedang memuat data dari Google Spreadsheet & Drive...</td>
+              <td colspan="9" class="py-12 text-center text-slate-400">Sedang menyinkronkan data dari Google Spreadsheet...</td>
             </tr>
           </tbody>
         </table>
@@ -472,7 +478,7 @@
       </div>
       <div class="px-5 py-3 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
         <button onclick="closeModal('transferModal')" class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-semibold cursor-pointer">Batal</button>
-        <button onclick="submitAdminTransfer()" class="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer">Proses Transfer</button>
+        <button onclick="submitAdminTransfer()" class="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-extrabold cursor-pointer">Proses & Simpan Transfer</button>
       </div>
     </div>
   </div>
@@ -493,7 +499,7 @@
       </div>
       <div class="px-5 py-3 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
         <button onclick="closeModal('resetModal')" class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-semibold cursor-pointer">Batal</button>
-        <button onclick="submitAdminReset()" class="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold cursor-pointer">Reset ke Pool</button>
+        <button onclick="submitAdminReset()" class="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold cursor-pointer">Reset ke Pool</button>
       </div>
     </div>
   </div>
@@ -527,7 +533,7 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Petugas Verifikator</label>
-            <select id="editVerifikator" onchange="syncEditModalLockedBox()" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"></select>
+            <select id="editVerifikator" onchange="syncEditModalLockedBox()" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm font-bold"></select>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">🔒 Lokasi Box (Terkunci Otomatis)</label>
@@ -538,7 +544,7 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Status BA</label>
-            <select id="editStatusBA" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm">
+            <select id="editStatusBA" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm font-semibold">
               <option value="Belum">Belum</option>
               <option value="Selesai">Selesai</option>
               <option value="Kendala">Kendala</option>
@@ -546,7 +552,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Status PK</label>
-            <select id="editStatusPK" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm">
+            <select id="editStatusPK" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm font-semibold">
               <option value="Belum">Belum</option>
               <option value="Selesai">Selesai</option>
               <option value="Kendala">Kendala</option>
@@ -564,7 +570,7 @@
           <p class="text-xs font-bold text-slate-700 dark:text-slate-200">📄 Unggah PDF Hasil Scan Baru (Ke folder 03_Hasil_Scan_Baru)</p>
           <div class="flex items-center gap-2">
             <input type="file" id="scanFileInput" accept="application/pdf" class="text-xs text-slate-600 dark:text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
-            <button onclick="uploadScanForCurrentNip()" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shrink-0 cursor-pointer">
+            <button onclick="uploadScanForCurrentNip()" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shrink-0 cursor-pointer">
               Unggah PDF
             </button>
           </div>
@@ -572,7 +578,9 @@
       </div>
       <div class="px-5 py-3 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
         <button onclick="closeModal('editModal')" class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-semibold cursor-pointer">Batal</button>
-        <button onclick="saveSingleEdit()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold cursor-pointer">Simpan Perubahan</button>
+        <button onclick="saveSingleEdit()" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold tracking-wide shadow-sm cursor-pointer">
+          💾 Simpan Perubahan (Bold)
+        </button>
       </div>
     </div>
   </div>
@@ -585,7 +593,7 @@
         <button onclick="closeModal('bulkModal')" class="text-white/80 hover:text-white font-bold cursor-pointer">✕</button>
       </div>
       <div class="p-5 space-y-3.5 text-sm">
-        <p class="text-xs text-slate-500 dark:text-slate-400">Lokasi Box otomatis terkunci sesuai petugas masing-masing (<strong id="bulkLockedBoxInfo">-</strong>).</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Lokasi Box otomatis terkunci sesuai petugas masing-masing (<strong id="bulkLockedBoxInfo">-</strong>) dan baris akan di-bold otomatis.</p>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Set Status BA</label>
@@ -613,7 +621,9 @@
       </div>
       <div class="px-5 py-3 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
         <button onclick="closeModal('bulkModal')" class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-semibold cursor-pointer">Batal</button>
-        <button onclick="submitBulkUpdate()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold cursor-pointer">Terapkan ke Semua Terpilih</button>
+        <button onclick="submitBulkUpdate()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold cursor-pointer">
+          💾 Simpan ke Semua Terpilih (Bold)
+        </button>
       </div>
     </div>
   </div>
@@ -638,10 +648,11 @@
   </div>
 
   <!-- TOAST NOTIFICATION -->
-  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden max-w-sm bg-slate-900 text-white text-xs font-medium px-4 py-3 rounded-xl shadow-lg border border-slate-700"></div>
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden max-w-sm bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg border border-emerald-500/40"></div>
 
   <script>
     const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbw6U7vqmEd5n8thqt8jOmFFt1XJZ1KjdBZBRhv6H-mgGroGxM3ypKe5yaHGYasgGkIP/exec';
+    const STORAGE_CACHE_KEY = 'SIMON_BAPK_SWR_CACHE_V2';
 
     let allRecords = [];
     let filteredRecords = [];
@@ -654,6 +665,9 @@
     let isAdminUnlocked = false;
     let adminPinSession = '';
     let isInitialLoad = true;
+    let currentDataRev = '';
+    let pendingWritesCount = 0;
+    let isSyncingInProgress = false;
 
     const isInsideAppsScript = typeof google !== 'undefined' && google.script && google.script.run;
 
@@ -669,12 +683,26 @@
       return petugasList[idx].boxDefault || ('BOX ' + (idx + 1));
     }
 
-    function showToast(msg, duration = 4500) {
+    function showToast(msg, duration = 3500) {
       const el = document.getElementById('toast');
       el.textContent = msg;
       el.classList.remove('hidden');
       clearTimeout(window._toastTimer);
       window._toastTimer = setTimeout(() => el.classList.add('hidden'), duration);
+    }
+
+    function setLiveSyncStatus(state, label) {
+      const dot = document.getElementById('liveSyncDot');
+      const txt = document.getElementById('liveSyncText');
+      if (!dot || !txt) return;
+      txt.textContent = label;
+      if (state === 'syncing') {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping';
+      } else if (state === 'error') {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-rose-400';
+      } else {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
+      }
     }
 
     function openModal(id) {
@@ -736,6 +764,10 @@
       showToast('Keluar dari Mode Admin.');
     }
 
+    // ========================================================================
+    // BACKEND TRANSPORT & REAL-TIME SYNC ENGINE
+    // ========================================================================
+
     async function callBackend(action, payload = {}) {
       if (isInsideAppsScript) {
         return new Promise((resolve, reject) => {
@@ -743,7 +775,8 @@
             .withSuccessHandler(res => resolve(res))
             .withFailureHandler(err => reject(err));
 
-          if (action === 'getData') runner.getDashboardData();
+          if (action === 'checkRev') runner.checkServerRev();
+          else if (action === 'getData') runner.getDashboardData(payload.forceRefresh);
           else if (action === 'syncDrive') runner.syncDriveFolders();
           else if (action === 'syncLockedBoxes') runner.syncLockedBoxes(payload);
           else if (action === 'autoClaimPool') runner.autoClaimFromPool(payload);
@@ -766,17 +799,112 @@
       }
     }
 
-    async function loadData() {
+    function saveLocalSnapshot() {
       try {
-        const res = await callBackend('getData');
+        const snapshot = {
+          rev: currentDataRev,
+          timestamp: document.getElementById('lastSyncBadge').textContent.replace('Sync ', ''),
+          folderStats: lastFolderStats,
+          petugasList: petugasList,
+          records: allRecords
+        };
+        localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(snapshot));
+      } catch (e) {}
+    }
+
+    function bootFromLocalSnapshot() {
+      try {
+        const raw = localStorage.getItem(STORAGE_CACHE_KEY);
+        if (!raw) return false;
+        const snap = JSON.parse(raw);
+        if (snap && Array.isArray(snap.records) && snap.records.length > 0) {
+          currentDataRev = snap.rev || '';
+          hydrateUI(snap, true);
+          return true;
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    async function loadData(silent = false, forceRefresh = false) {
+      if (isSyncingInProgress) return;
+      isSyncingInProgress = true;
+      setLiveSyncStatus('syncing', 'Menyinkronkan...');
+
+      try {
+        const res = await callBackend('getData', { forceRefresh });
         if (!res || !res.success) {
-          showToast(res?.message || 'Gagal memuat data.');
+          if (!silent) showToast(res?.message || 'Gagal memuat data.');
+          setLiveSyncStatus('error', 'Gangguan Koneksi');
           return;
         }
-        hydrateUI(res);
+        if (res.rev) currentDataRev = String(res.rev);
+        hydrateUI(res, silent);
+        saveLocalSnapshot();
+        setLiveSyncStatus('live', 'Live Sync');
       } catch (err) {
-        showToast('Koneksi gagal: ' + err.message);
+        if (!silent) showToast('Koneksi gagal: ' + err.message);
+        setLiveSyncStatus('error', 'Offline');
+      } finally {
+        isSyncingInProgress = false;
       }
+    }
+
+    async function manualForceRefresh() {
+      const icon = document.getElementById('refreshSpinIcon');
+      icon.classList.add('animate-spin');
+      await loadData(false, true);
+      icon.classList.remove('animate-spin');
+      showToast('Data berhasil disinkronkan dengan Google Spreadsheet!', 2500);
+    }
+
+    async function pollRealtimeChanges() {
+      if (document.hidden || pendingWritesCount > 0 || isSyncingInProgress) return;
+      try {
+        const res = await callBackend('checkRev');
+        if (res && res.success && res.rev && String(res.rev) !== currentDataRev) {
+          await loadData(true, false);
+          setLiveSyncStatus('live', 'Tersinkron ✓');
+        }
+      } catch (e) {}
+    }
+
+    setInterval(pollRealtimeChanges, 4000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) pollRealtimeChanges();
+    });
+
+    function applyDeltaResponse(res) {
+      if (!res) return;
+      if (res.records) {
+        if (res.rev) currentDataRev = String(res.rev);
+        hydrateUI(res, true);
+        saveLocalSnapshot();
+        return;
+      }
+
+      if (res.rev) currentDataRev = String(res.rev);
+      if (Array.isArray(res.updatedRecords)) {
+        res.updatedRecords.forEach(upd => {
+          const rec = allRecords.find(r => r.nip === upd.nip);
+          if (rec) {
+            if (upd.lokasiBox !== undefined) rec.lokasiBox = upd.lokasiBox;
+            if (upd.verifikator !== undefined) rec.verifikator = upd.verifikator;
+            if (upd.statusBA !== undefined) rec.statusBA = upd.statusBA;
+            if (upd.statusPK !== undefined) rec.statusPK = upd.statusPK;
+            if (upd.keterangan !== undefined) rec.keterangan = upd.keterangan;
+            if (upd.updatedAt !== undefined) rec.updatedAt = upd.updatedAt;
+          }
+        });
+      }
+
+      const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      document.getElementById('lastSyncBadge').textContent = 'Sync ' + nowTime;
+      updateKpiAndRekap(lastFolderStats);
+      updateActiveVerifikatorCard();
+      applyFilters(true);
+      saveLocalSnapshot();
+      setLiveSyncStatus('live', 'Live Sync');
     }
 
     async function triggerSyncDrive() {
@@ -784,14 +912,16 @@
       const icon = document.getElementById('syncIcon');
       btn.disabled = true;
       icon.classList.add('animate-spin');
-      showToast('Memindai folder Drive & mencocokkan NIP...', 6000);
+      showToast('Memindai folder Drive, mencocokkan NIP & mem-bold baris tersimpan...', 6000);
 
       try {
         const res = await callBackend('syncDrive');
         if (res && res.success) {
-          hydrateUI(res);
+          if (res.rev) currentDataRev = String(res.rev);
+          hydrateUI(res, false);
+          saveLocalSnapshot();
           const s = res.syncSummary || {};
-          showToast(`Sinkronisasi selesai! ${s.totalFiles || 0} file dipindai, ${s.updatedRows || 0} baris diperbarui.`);
+          showToast(`Sinkronisasi selesai! ${s.totalFiles || 0} file dipindai, ${s.updatedRows || 0} baris diperbarui & di-bold.`);
         } else {
           showToast(res?.message || 'Gagal melakukan sinkronisasi Drive.');
         }
@@ -804,17 +934,21 @@
     }
 
     async function triggerSyncLockedBoxes() {
-      showToast('Menyelaraskan & mengunci BOX 1 – BOX 11 sesuai urutan verifikator...');
+      showToast('Menyelaraskan BOX 1 – BOX 11 & mem-bold seluruh baris terverifikasi...');
       const res = await callBackend('syncLockedBoxes', { pin: adminPinSession });
       if (res && res.success) {
-        hydrateUI(res);
+        if (res.rev) currentDataRev = String(res.rev);
+        hydrateUI(res, false);
+        saveLocalSnapshot();
         showToast(res.message);
       } else {
         showToast(res?.message || 'Gagal menyelaraskan Box.');
       }
     }
 
-    function hydrateUI(res) {
+    function hydrateUI(res, preservePage = false) {
+      const savedPage = currentPage;
+
       petugasList = (res.petugasList || []).map((p, idx) => ({
         urutan: p.urutan || (idx + 1),
         nama: p.nama,
@@ -829,11 +963,12 @@
 
       lastFolderStats = res.folderStats || {};
 
-      document.getElementById('lastSyncBadge').textContent = 'Update: ' + (res.timestamp || '-');
+      const timeOnly = res.timestamp ? String(res.timestamp).split(' ').pop() : '-';
+      document.getElementById('lastSyncBadge').textContent = 'Sync ' + timeOnly;
       populateDropdowns();
       updateKpiAndRekap(lastFolderStats);
       updateActiveVerifikatorCard();
-      applyFilters();
+      applyFilters(preservePage, savedPage);
     }
 
     function populateDropdowns() {
@@ -968,6 +1103,10 @@
       });
     }
 
+    // ========================================================================
+    // OPTIMISTIC ACTIONS + TARGETED FAST WRITES
+    // ========================================================================
+
     async function triggerAutoClaim(count) {
       const verifikator = document.getElementById('activeVerifikatorSelect').value;
       if (!verifikator) {
@@ -975,13 +1114,19 @@
         return;
       }
       const lockedBox = getLockedBoxForVer(verifikator);
-      showToast(`Mengambil ${count} berkas otomatis ke ${lockedBox}...`);
-      const res = await callBackend('autoClaimPool', { verifikator, count });
-      if (res && res.success) {
-        hydrateUI(res);
-        showToast(res.message);
-      } else {
-        showToast(res?.message || 'Gagal mengambil berkas.');
+      showToast(`Mengambil ${count} berkas ke ${lockedBox}...`, 2500);
+      pendingWritesCount++;
+      setLiveSyncStatus('syncing', 'Menyimpan...');
+      try {
+        const res = await callBackend('autoClaimPool', { verifikator, count });
+        if (res && res.success) {
+          applyDeltaResponse(res);
+          showToast(res.message);
+        } else {
+          showToast(res?.message || 'Gagal mengambil berkas.');
+        }
+      } finally {
+        pendingWritesCount = Math.max(0, pendingWritesCount - 1);
       }
     }
 
@@ -1013,30 +1158,36 @@
         selectedNips.delete(nip);
         updateKpiAndRekap(lastFolderStats);
         updateActiveVerifikatorCard();
-        applyFilters();
+        applyFilters(true);
       }
 
-      showToast(`✓ NIP ${nip} masuk ke ${verifikator} (${lockedBox})`, 2500);
+      showToast(`✓ Fix Tersimpan (Bold): NIP ${nip} → ${verifikator} (${lockedBox})`, 2200);
+      pendingWritesCount++;
+      setLiveSyncStatus('syncing', 'Menyimpan...');
 
       try {
         const res = await callBackend('claimBerkas', { verifikator, nips: [nip] });
         if (res && res.success) {
-          hydrateUI(res);
+          applyDeltaResponse(res);
         } else {
           if (targetRecord) {
             targetRecord.verifikator = prevOwner;
             targetRecord.lokasiBox = prevBox;
           }
-          hydrateUI({ records: allRecords, petugasList, folderStats: lastFolderStats });
-          showToast(res?.message || 'Gagal klaim berkas.');
+          applyFilters(true);
+          showToast(res?.message || 'Berkas sudah diambil petugas lain.');
+          loadData(true, true);
         }
       } catch (err) {
         if (targetRecord) {
           targetRecord.verifikator = prevOwner;
           targetRecord.lokasiBox = prevBox;
         }
-        applyFilters();
+        applyFilters(true);
         showToast('Koneksi gagal saat klaim: ' + err.message);
+      } finally {
+        pendingWritesCount = Math.max(0, pendingWritesCount - 1);
+        setLiveSyncStatus('live', 'Live Sync');
       }
     }
 
@@ -1062,9 +1213,11 @@
       selectedNips.delete(nip);
       updateKpiAndRekap(lastFolderStats);
       updateActiveVerifikatorCard();
-      applyFilters();
+      applyFilters(true);
 
-      showToast(`↩ Berkas NIP ${nip} dikembalikan ke Pool`, 2500);
+      showToast(`↩ Berkas NIP ${nip} dikembalikan ke Pool`, 2000);
+      pendingWritesCount++;
+      setLiveSyncStatus('syncing', 'Menyimpan...');
 
       try {
         const res = await callBackend('releaseBerkas', {
@@ -1073,18 +1226,21 @@
           nips: [nip]
         });
         if (res && res.success) {
-          hydrateUI(res);
+          applyDeltaResponse(res);
         } else {
           targetRecord.verifikator = prevOwner;
           targetRecord.lokasiBox = prevBox;
-          hydrateUI({ records: allRecords, petugasList, folderStats: lastFolderStats });
+          applyFilters(true);
           showToast(res?.message || 'Gagal mengembalikan berkas ke Pool.');
         }
       } catch (err) {
         targetRecord.verifikator = prevOwner;
         targetRecord.lokasiBox = prevBox;
-        applyFilters();
-        showToast('Koneksi gagal saat mengembalikan berkas: ' + err.message);
+        applyFilters(true);
+        showToast('Koneksi gagal: ' + err.message);
+      } finally {
+        pendingWritesCount = Math.max(0, pendingWritesCount - 1);
+        setLiveSyncStatus('live', 'Live Sync');
       }
     }
 
@@ -1114,19 +1270,26 @@
       selectedNips.clear();
       updateKpiAndRekap(lastFolderStats);
       updateActiveVerifikatorCard();
-      applyFilters();
-      showToast('Mengembalikan berkas terpilih ke Pool...');
+      applyFilters(true);
+      showToast('Mengembalikan berkas terpilih ke Pool...', 2000);
 
-      const res = await callBackend('releaseBerkas', {
-        verifikator: verifikator,
-        pin: adminPinSession,
-        nips: nipsToRelease
-      });
-      if (res && res.success) {
-        hydrateUI(res);
-        showToast(res.message);
-      } else {
-        showToast(res?.message || 'Gagal membuang berkas terpilih.');
+      pendingWritesCount++;
+      setLiveSyncStatus('syncing', 'Menyimpan...');
+      try {
+        const res = await callBackend('releaseBerkas', {
+          verifikator: verifikator,
+          pin: adminPinSession,
+          nips: nipsToRelease
+        });
+        if (res && res.success) {
+          applyDeltaResponse(res);
+          showToast(res.message);
+        } else {
+          showToast(res?.message || 'Gagal membuang berkas terpilih.');
+        }
+      } finally {
+        pendingWritesCount = Math.max(0, pendingWritesCount - 1);
+        setLiveSyncStatus('live', 'Live Sync');
       }
     }
 
@@ -1153,16 +1316,22 @@
         if (field === 'PK') r.statusPK = nextValue;
         updateKpiAndRekap(lastFolderStats);
         updateActiveVerifikatorCard();
-        applyFilters();
+        applyFilters(true);
       }
 
-      showToast(`Mengubah ${field} NIP ${nip} -> ${nextValue}...`, 2000);
-      const res = await callBackend('quickToggle', { nip, field, nextValue, activeVerifikator });
-      if (res && res.success) {
-        hydrateUI(res);
-        showToast(res.message, 3000);
-      } else {
-        showToast(res?.message || 'Gagal memperbarui status.');
+      pendingWritesCount++;
+      setLiveSyncStatus('syncing', 'Menyimpan...');
+      try {
+        const res = await callBackend('quickToggle', { nip, field, nextValue, activeVerifikator });
+        if (res && res.success) {
+          applyDeltaResponse(res);
+          showToast(res.message, 2000);
+        } else {
+          showToast(res?.message || 'Gagal memperbarui status.');
+        }
+      } finally {
+        pendingWritesCount = Math.max(0, pendingWritesCount - 1);
+        setLiveSyncStatus('live', 'Live Sync');
       }
     }
 
@@ -1193,7 +1362,7 @@
       } else if (mode === 'BERHASIL_TTE') {
         document.getElementById('filterDrive').value = 'TTE_BERHASIL';
       }
-      applyFilters();
+      applyFilters(false);
     }
 
     function updateKpiAndRekap(folderStats) {
@@ -1262,7 +1431,7 @@
         tr.onclick = () => {
           document.getElementById('filterVerifikator').value = st.nama;
           document.getElementById('filterStatus').value = 'ALL';
-          applyFilters();
+          applyFilters(false);
         };
         tr.innerHTML = `
           <td class="py-2 px-2 text-center">
@@ -1284,7 +1453,13 @@
 
     function renderChart(labels, dataSelesai, dataSisa) {
       const ctx = document.getElementById('petugasChart').getContext('2d');
-      if (chartInstance) chartInstance.destroy();
+      if (chartInstance) {
+        chartInstance.data.labels = labels;
+        chartInstance.data.datasets[0].data = dataSelesai;
+        chartInstance.data.datasets[1].data = dataSisa;
+        chartInstance.update('none');
+        return;
+      }
       chartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -1297,6 +1472,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: false,
           plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
           scales: {
             x: { stacked: true, grid: { display: false }, ticks: { font: { size: 9 } } },
@@ -1313,7 +1489,7 @@
       lbl.textContent = hidden ? 'Tampilkan ▼' : 'Sembunyikan ▲';
     }
 
-    function applyFilters() {
+    function applyFilters(preservePage = false, targetPage = null) {
       const q = document.getElementById('filterSearch').value.toLowerCase().trim();
       const ver = document.getElementById('filterVerifikator').value;
       const drv = document.getElementById('filterDrive').value;
@@ -1343,7 +1519,8 @@
         return true;
       });
 
-      currentPage = 1;
+      if (!preservePage) currentPage = 1;
+      else if (targetPage) currentPage = targetPage;
       renderTable();
     }
 
@@ -1408,11 +1585,17 @@
 
       tbody.innerHTML = slice.map(r => {
         const checked = selectedNips.has(r.nip) ? 'checked' : '';
+        const isSavedBold = Boolean(r.verifikator);
+        const rowWeightClass = isSavedBold ? 'font-bold border-l-4 border-l-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20' : '';
+
         const verHtml = r.verifikator
-          ? `<span class="font-semibold text-slate-800 dark:text-slate-200 text-xs">${r.verifikator}</span>`
+          ? `<div class="font-extrabold text-slate-900 dark:text-white text-xs">${r.verifikator}</div>`
           : `<button onclick="quickClaimSingle('${r.nip}')" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold shadow-xs cursor-pointer">+ Ambil</button>`;
         const boxHtml = r.lokasiBox
-          ? `<div class="mt-1"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-[11px] font-bold text-indigo-700 dark:text-indigo-300">🔒 ${r.lokasiBox}</span></div>`
+          ? `<div class="mt-1 flex flex-wrap items-center gap-1">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-[11px] font-bold text-indigo-700 dark:text-indigo-300">🔒 ${r.lokasiBox}</span>
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/80 text-[10px] font-extrabold text-emerald-800 dark:text-emerald-300">✓ Fix Tersimpan</span>
+            </div>`
           : '';
 
         const canRelease = r.verifikator && (isAdminUnlocked || (activeVer && normStr(r.verifikator) === normStr(activeVer)));
@@ -1421,17 +1604,17 @@
           : '';
 
         return `
-          <tr class="hover:bg-slate-50/90 dark:hover:bg-slate-800/60 transition ${selectedNips.has(r.nip) ? 'bg-emerald-50/40 dark:bg-emerald-950/30' : ''}">
+          <tr class="hover:bg-slate-50/90 dark:hover:bg-slate-800/60 transition ${rowWeightClass} ${selectedNips.has(r.nip) ? 'bg-emerald-50/40 dark:bg-emerald-950/30' : ''}">
             <td class="py-2.5 px-3 text-center">
               <input type="checkbox" ${checked} onchange="toggleSelectRow('${r.nip}', this.checked)" class="rounded border-slate-400 cursor-pointer" />
             </td>
-            <td class="py-2.5 px-3 text-xs text-slate-500 font-medium">${r.no}</td>
+            <td class="py-2.5 px-3 text-xs text-slate-600 dark:text-slate-300 ${isSavedBold ? 'font-bold' : 'font-medium'}">${r.no}</td>
             <td class="py-2.5 px-3">
-              <div class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">${r.nama}</div>
-              <div class="font-mono text-xs text-slate-500 dark:text-slate-400">${r.nip}</div>
+              <div class="${isSavedBold ? 'font-extrabold' : 'font-bold'} text-slate-900 dark:text-white text-xs sm:text-sm">${r.nama}</div>
+              <div class="font-mono text-xs ${isSavedBold ? 'font-bold text-slate-700 dark:text-slate-300' : 'text-slate-500 dark:text-slate-400'}">${r.nip}</div>
             </td>
-            <td class="py-2.5 px-3 hidden md:table-cell text-xs text-slate-600 dark:text-slate-300 max-w-xs">
-              <div class="font-medium">${r.unitKerja}</div>
+            <td class="py-2.5 px-3 hidden md:table-cell text-xs text-slate-700 dark:text-slate-300 max-w-xs">
+              <div class="${isSavedBold ? 'font-bold' : 'font-medium'}">${r.unitKerja}</div>
               <div class="text-[11px] text-slate-400">${r.jabatan}</div>
             </td>
             <td class="py-2.5 px-3">${verHtml}${boxHtml}</td>
@@ -1442,14 +1625,14 @@
               </div>
             </td>
             <td class="py-2.5 px-3 text-center">${driveBadge(r)}</td>
-            <td class="py-2.5 px-3 text-xs text-slate-600 dark:text-slate-300 max-w-[200px]">
-              <div>${r.keterangan || '-'}</div>
+            <td class="py-2.5 px-3 text-xs text-slate-700 dark:text-slate-300 max-w-[200px]">
+              <div class="${isSavedBold ? 'font-bold' : ''}">${r.keterangan || '-'}</div>
               ${r.updatedAt ? `<div class="text-[10px] text-slate-400 mt-0.5">${r.updatedAt}</div>` : ''}
             </td>
             <td class="py-2.5 px-3 text-right">
               <div class="inline-flex items-center justify-end gap-1.5">
                 ${releaseBtnHtml}
-                <button onclick="openEditModal('${r.nip}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold cursor-pointer">
+                <button onclick="openEditModal('${r.nip}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold cursor-pointer">
                   Detail / Scan
                 </button>
               </div>
@@ -1561,17 +1744,23 @@
         targetRecord.keterangan = payload.keterangan;
         updateKpiAndRekap(lastFolderStats);
         updateActiveVerifikatorCard();
-        applyFilters();
+        applyFilters(true);
       }
 
       closeModal('editModal');
-      showToast('Menyimpan perubahan...');
-      const res = await callBackend('updateSingle', payload);
-      if (res && res.success) {
-        hydrateUI(res);
-        showToast(res.message || 'Berhasil disimpan!');
-      } else {
-        showToast(res?.message || 'Gagal menyimpan.');
+      pendingWritesCount++;
+      setLiveSyncStatus('syncing', 'Menyimpan...');
+      try {
+        const res = await callBackend('updateSingle', payload);
+        if (res && res.success) {
+          applyDeltaResponse(res);
+          showToast(res.message || 'Fix Tersimpan (Bold)!', 2500);
+        } else {
+          showToast(res?.message || 'Gagal menyimpan.');
+        }
+      } finally {
+        pendingWritesCount = Math.max(0, pendingWritesCount - 1);
+        setLiveSyncStatus('live', 'Live Sync');
       }
     }
 
@@ -1587,13 +1776,22 @@
       reader.onload = async function(e) {
         const base64Data = e.target.result.split(',')[1];
         closeModal('editModal');
-        showToast('Mengunggah PDF ke 03_Hasil_Scan_Baru...', 6000);
-        const res = await callBackend('uploadScanPdf', { nip, base64Data, activeVerifikator });
-        if (res && res.success) {
-          hydrateUI(res);
-          showToast(res.message);
-        } else {
-          showToast(res?.message || 'Gagal mengunggah PDF.');
+        showToast('Mengunggah PDF ke 03_Hasil_Scan_Baru...', 5000);
+        pendingWritesCount++;
+        setLiveSyncStatus('syncing', 'Mengunggah PDF...');
+        try {
+          const res = await callBackend('uploadScanPdf', { nip, base64Data, activeVerifikator });
+          if (res && res.success) {
+            if (res.rev) currentDataRev = String(res.rev);
+            hydrateUI(res, true);
+            saveLocalSnapshot();
+            showToast(res.message);
+          } else {
+            showToast(res?.message || 'Gagal mengunggah PDF.');
+          }
+        } finally {
+          pendingWritesCount = Math.max(0, pendingWritesCount - 1);
+          setLiveSyncStatus('live', 'Live Sync');
         }
       };
       reader.readAsDataURL(file);
@@ -1621,12 +1819,19 @@
         keterangan: document.getElementById('bulkKeterangan').value
       };
       closeModal('bulkModal');
-      showToast('Memperbarui berkas secara massal...');
-      const res = await callBackend('updateBulk', payload);
-      if (res && res.success) {
-        selectedNips.clear();
-        hydrateUI(res);
-        showToast(res.message);
+      showToast('Menyimpan & mem-bold berkas terpilih...', 2000);
+      pendingWritesCount++;
+      setLiveSyncStatus('syncing', 'Menyimpan...');
+      try {
+        const res = await callBackend('updateBulk', payload);
+        if (res && res.success) {
+          selectedNips.clear();
+          applyDeltaResponse(res);
+          showToast(res.message);
+        }
+      } finally {
+        pendingWritesCount = Math.max(0, pendingWritesCount - 1);
+        setLiveSyncStatus('live', 'Live Sync');
       }
     }
 
@@ -1643,11 +1848,13 @@
         nips: Array.from(selectedNips)
       };
       closeModal('transferModal');
-      showToast('Memproses transfer berkas...');
+      showToast('Memproses & menyimpan transfer berkas...');
       const res = await callBackend('adminTransfer', payload);
       if (res && res.success) {
         selectedNips.clear();
-        hydrateUI(res);
+        if (res.rev) currentDataRev = String(res.rev);
+        hydrateUI(res, true);
+        saveLocalSnapshot();
         showToast(res.message);
       } else {
         showToast(res?.message || 'Transfer gagal.');
@@ -1665,7 +1872,9 @@
       const res = await callBackend('adminResetClaims', payload);
       if (res && res.success) {
         selectedNips.clear();
-        hydrateUI(res);
+        if (res.rev) currentDataRev = String(res.rev);
+        hydrateUI(res, true);
+        saveLocalSnapshot();
         showToast(res.message);
       } else {
         showToast(res?.message || 'Reset gagal.');
@@ -1786,7 +1995,10 @@
       document.body.removeChild(link);
     }
 
-    window.addEventListener('DOMContentLoaded', loadData);
+    window.addEventListener('DOMContentLoaded', () => {
+      const hasSnap = bootFromLocalSnapshot();
+      loadData(hasSnap, false);
+    });
   </script>
 </body>
 </html>
