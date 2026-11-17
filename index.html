@@ -47,7 +47,7 @@
 
         <button onclick="openBoxLabelModal()"
           class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition cursor-pointer">
-          <span>🖨️ Label Box</span>
+          <span>🖨️ Label Box 1–11</span>
         </button>
 
         <button onclick="exportFilteredCsv()"
@@ -74,30 +74,39 @@
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-2">
           <span class="text-sm font-extrabold uppercase tracking-wide text-rose-300">🛡️ Panel Kendali Admin (Terotentikasi PIN)</span>
-          <span class="text-xs text-rose-200/80 hidden sm:inline">• Kelola sinkronisasi Drive, transfer beban berkas, reset klaim, & audit anomali</span>
+          <span class="text-xs text-rose-200/80 hidden sm:inline">• Kelola sinkronisasi Drive, kunci Box 1–11, transfer berkas, reset klaim, & audit</span>
         </div>
         <button onclick="exitAdminMode()" class="px-3 py-1 rounded-lg bg-rose-900 hover:bg-rose-800 text-xs font-semibold text-rose-200 border border-rose-700 cursor-pointer">
           Keluar Mode Admin ✕
         </button>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         <button onclick="triggerSyncDrive()" id="btnSyncDrive"
           class="flex items-center justify-between p-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-left shadow transition cursor-pointer">
           <div>
-            <div class="text-xs font-bold">🔄 Sinkronkan Folder Drive</div>
-            <div class="text-[11px] text-emerald-100">Scan 01_Berhasil, 02_Gagal, 03_Scan</div>
+            <div class="text-xs font-bold">🔄 Sinkron Drive</div>
+            <div class="text-[11px] text-emerald-100">Scan 01, 02, 03 & Buka Link</div>
           </div>
           <svg id="syncIcon" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
         </button>
 
+        <button onclick="triggerSyncLockedBoxes()"
+          class="flex items-center justify-between p-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-left shadow transition cursor-pointer">
+          <div>
+            <div class="text-xs font-bold">🔒 Kunci Box 1–11</div>
+            <div class="text-[11px] text-teal-100">Urutkan Box per Verifikator</div>
+          </div>
+          <span class="text-lg">📦</span>
+        </button>
+
         <button onclick="openTransferModal()"
           class="flex items-center justify-between p-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-left shadow transition cursor-pointer">
           <div>
-            <div class="text-xs font-bold">🔀 Transfer Berkas Petugas</div>
-            <div class="text-[11px] text-amber-100">Pindahkan kuota/berkas antar verifikator</div>
+            <div class="text-xs font-bold">🔀 Transfer Berkas</div>
+            <div class="text-[11px] text-amber-100">Pindah kuota antar petugas</div>
           </div>
           <span class="text-lg">➔</span>
         </button>
@@ -105,8 +114,8 @@
         <button onclick="openResetClaimModal()"
           class="flex items-center justify-between p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-left shadow transition cursor-pointer">
           <div>
-            <div class="text-xs font-bold">♻️ Reset Klaim ke Pool</div>
-            <div class="text-[11px] text-slate-300">Lepas berkas belum selesai ke Pool</div>
+            <div class="text-xs font-bold">♻️ Reset ke Pool</div>
+            <div class="text-[11px] text-slate-300">Lepas berkas ke Pool</div>
           </div>
           <span class="text-lg">↺</span>
         </button>
@@ -114,8 +123,8 @@
         <button onclick="openAuditModal()"
           class="flex items-center justify-between p-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-left shadow transition cursor-pointer">
           <div>
-            <div class="text-xs font-bold">🔍 Audit Data Otomatis</div>
-            <div class="text-[11px] text-indigo-100">Cek Gagal TTE, Selesai tanpa verifikator</div>
+            <div class="text-xs font-bold">🔍 Audit Data</div>
+            <div class="text-[11px] text-indigo-100">Cek Kendala BA & Gagal TTE</div>
           </div>
           <span class="text-lg">📋</span>
         </button>
@@ -135,12 +144,16 @@
               👤 Identitas Petugas Verifikator Aktif
             </label>
             <select id="activeVerifikatorSelect" onchange="setActiveVerifikator(this.value)"
-              class="w-full sm:w-64 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none">
+              class="w-full sm:w-72 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none">
               <option value="">-- Pilih Nama Anda --</option>
             </select>
           </div>
 
-          <div id="personalQuotaStats" class="hidden flex-wrap items-center gap-2 sm:gap-3 pt-1 sm:pt-4">
+          <div id="personalQuotaStats" class="hidden flex-wrap items-center gap-2 sm:gap-2.5 pt-1 sm:pt-4">
+            <div class="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-xs">
+              <span class="text-indigo-700 dark:text-indigo-300">Box Terkunci:</span>
+              <strong id="myLockedBoxBadge" class="text-indigo-900 dark:text-indigo-100 ml-1">BOX -</strong>
+            </div>
             <div class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs">
               <span class="text-slate-500 dark:text-slate-400">Diambil:</span>
               <strong id="myClaimedCount" class="text-slate-900 dark:text-white ml-1">0</strong> / <span id="myQuotaTarget">120</span>
@@ -150,7 +163,7 @@
               <strong id="myRemainingQuota" class="text-amber-800 dark:text-amber-200 ml-1">120</strong>
             </div>
             <div class="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-xs">
-              <span class="text-emerald-700 dark:text-emerald-300">Selesai (BA & PK):</span>
+              <span class="text-emerald-700 dark:text-emerald-300">Selesai:</span>
               <strong id="myDoneCount" class="text-emerald-800 dark:text-emerald-200 ml-1">0</strong>
             </div>
           </div>
@@ -158,7 +171,7 @@
 
         <!-- TOMBOL AMBIL OTOMATIS DARI POOL -->
         <div id="autoClaimControls" class="hidden flex-wrap items-center gap-2">
-          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1">Ambil Otomatis Pool:</span>
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1">Ambil Pool:</span>
           <button onclick="triggerAutoClaim(10)"
             class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition cursor-pointer">
             ⚡ +10 Berkas
@@ -184,6 +197,10 @@
           class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
           📂 Berkas Saya (<span id="badgeTabMyFiles">0</span>)
         </button>
+        <button onclick="quickTab('KENDALA_BA')" id="tabKendalaBa"
+          class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
+          ⚠️ Kendala BA (<span id="badgeTabKendalaBa">0</span>)
+        </button>
         <button onclick="quickTab('GAGAL_TTE')" id="tabGagalTte"
           class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
           ❌ Upload TTE Gagal (<span id="badgeTabGagal">0</span>)
@@ -199,46 +216,57 @@
       </div>
     </section>
 
-    <!-- KPI CARDS -->
-    <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-      <div class="bg-white dark:bg-slate-900 rounded-xl p-3.5 border border-slate-200 dark:border-slate-800 shadow-sm">
+    <!-- KPI CARDS (7 KARTU TERMASUK KENDALA BA) -->
+    <section class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+      <div onclick="quickTab('ALL')" class="bg-white dark:bg-slate-900 rounded-xl p-3.5 border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer hover:border-slate-400 transition">
         <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Berkas</p>
         <p id="kpiTotal" class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">1.323</p>
         <p class="text-[11px] text-slate-400 mt-0.5">Target Master Data</p>
       </div>
-      <div class="bg-white dark:bg-slate-900 rounded-xl p-3.5 border border-slate-200 dark:border-slate-800 shadow-sm">
+
+      <div onclick="quickTab('BA_SELESAI')" class="bg-white dark:bg-slate-900 rounded-xl p-3.5 border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer hover:border-blue-400 transition">
         <p class="text-xs font-medium text-slate-500 dark:text-slate-400">BA Selesai</p>
         <p id="kpiBaSelesai" class="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">0</p>
         <p id="kpiBaPct" class="text-[11px] text-slate-400 mt-0.5">0,0% terverifikasi</p>
       </div>
-      <div class="bg-white dark:bg-slate-900 rounded-xl p-3.5 border border-slate-200 dark:border-slate-800 shadow-sm">
+
+      <div onclick="quickTab('KENDALA_BA')" class="bg-white dark:bg-slate-900 rounded-xl p-3.5 border-2 border-orange-300 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-950/30 shadow-sm cursor-pointer hover:border-orange-500 transition">
+        <p class="text-xs font-bold text-orange-700 dark:text-orange-400">⚠️ Kendala BA</p>
+        <p id="kpiBaKendala" class="text-2xl font-extrabold text-orange-600 dark:text-orange-400 mt-1">0</p>
+        <p id="kpiPkKendalaSub" class="text-[11px] text-orange-700/80 dark:text-orange-300/80 mt-0.5">PK Kendala: 0</p>
+      </div>
+
+      <div onclick="quickTab('PK_SELESAI')" class="bg-white dark:bg-slate-900 rounded-xl p-3.5 border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer hover:border-indigo-400 transition">
         <p class="text-xs font-medium text-slate-500 dark:text-slate-400">PK Selesai</p>
         <p id="kpiPkSelesai" class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-1">0</p>
         <p id="kpiPkPct" class="text-[11px] text-slate-400 mt-0.5">0,0% terverifikasi</p>
       </div>
-      <div class="bg-white dark:bg-slate-900 rounded-xl p-3.5 border border-emerald-200 dark:border-emerald-900 bg-emerald-50/40 shadow-sm">
+
+      <div onclick="quickTab('BERHASIL_TTE')" class="bg-white dark:bg-slate-900 rounded-xl p-3.5 border border-emerald-200 dark:border-emerald-900 bg-emerald-50/40 shadow-sm cursor-pointer hover:border-emerald-400 transition">
         <p class="text-xs font-semibold text-emerald-700 dark:text-emerald-400">01_TTE_Berhasil</p>
         <p id="kpiTteBerhasil" class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">0</p>
         <p class="text-[11px] text-emerald-600/80 mt-0.5">PDF TTE di Drive</p>
       </div>
-      <div class="bg-white dark:bg-slate-900 rounded-xl p-3.5 border border-rose-200 dark:border-rose-900 bg-rose-50/40 shadow-sm">
+
+      <div onclick="quickTab('GAGAL_TTE')" class="bg-white dark:bg-slate-900 rounded-xl p-3.5 border border-rose-200 dark:border-rose-900 bg-rose-50/40 shadow-sm cursor-pointer hover:border-rose-400 transition">
         <p class="text-xs font-semibold text-rose-700 dark:text-rose-400">02_Upload_TTE_Gagal</p>
         <p id="kpiTteGagal" class="text-2xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">0</p>
         <p class="text-[11px] text-rose-600/80 mt-0.5">Perlu TTE / Scan Ulang</p>
       </div>
-      <div class="bg-white dark:bg-slate-900 rounded-xl p-3.5 border border-amber-200 dark:border-amber-900 bg-amber-50/40 shadow-sm">
+
+      <div onclick="quickTab('POOL')" class="bg-white dark:bg-slate-900 rounded-xl p-3.5 border border-amber-200 dark:border-amber-900 bg-amber-50/40 shadow-sm cursor-pointer hover:border-amber-400 transition">
         <p class="text-xs font-semibold text-amber-700 dark:text-amber-400">Sisa Pool Bebas</p>
         <p id="kpiPool" class="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">1.323</p>
         <p id="kpiScanBaru" class="text-[11px] text-slate-500 mt-0.5">Scan Baru: 0 file</p>
       </div>
     </section>
 
-    <!-- PROGRESS 11 PETUGAS VERIFIKATOR -->
+    <!-- PROGRESS & KUNCI BOX 11 PETUGAS VERIFIKATOR -->
     <section class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
       <div class="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between cursor-pointer select-none" onclick="toggleRekapSection()">
         <div>
-          <h2 class="text-sm font-bold text-slate-800 dark:text-slate-100">Progres & Kuota 11 Petugas Verifikator (Sistem Pool)</h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Klik baris nama petugas untuk memfilter berkas milik petugas tersebut</p>
+          <h2 class="text-sm font-bold text-slate-800 dark:text-slate-100">Progres & Kunci Box (BOX 1 – BOX 11) 11 Petugas Verifikator</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Nomor Box terkunci otomatis sesuai urutan nama petugas • Klik baris untuk memfilter berkas petugas</p>
         </div>
         <span id="rekapToggleLabel" class="text-xs font-semibold text-blue-600 dark:text-blue-400">Sembunyikan ▲</span>
       </div>
@@ -247,12 +275,13 @@
           <table class="w-full text-left border-collapse text-xs">
             <thead>
               <tr class="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-2 px-2 text-center font-semibold">Box</th>
                 <th class="py-2 px-3 font-semibold">Petugas Verifikator</th>
                 <th class="py-2 px-2 text-center font-semibold">Kuota</th>
                 <th class="py-2 px-2 text-center font-semibold">Diambil</th>
-                <th class="py-2 px-2 text-center font-semibold">Sisa</th>
-                <th class="py-2 px-2 text-center font-semibold text-blue-600 dark:text-blue-400">BA</th>
-                <th class="py-2 px-2 text-center font-semibold text-indigo-600 dark:text-indigo-400">PK</th>
+                <th class="py-2 px-2 text-center font-semibold text-blue-600 dark:text-blue-400">BA OK</th>
+                <th class="py-2 px-2 text-center font-semibold text-orange-600 dark:text-orange-400">Kendala BA</th>
+                <th class="py-2 px-2 text-center font-semibold text-indigo-600 dark:text-indigo-400">PK OK</th>
                 <th class="py-2 px-2 text-right font-semibold">Progres</th>
               </tr>
             </thead>
@@ -301,18 +330,22 @@
           <select id="filterStatus" onchange="applyFilters()"
             class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-2 text-sm outline-none">
             <option value="ALL">Semua Status</option>
-            <option value="BOTH_SELESAI">BA & PK Selesai</option>
+            <option value="BA_KENDALA">⚠️ BA Kendala</option>
+            <option value="PK_KENDALA">⚠️ PK Kendala</option>
+            <option value="KENDALA">⚠️ Semua Kendala (BA/PK/TTE)</option>
+            <option value="BOTH_SELESAI">✅ BA & PK Selesai</option>
             <option value="PK_SELESAI">PK Selesai</option>
             <option value="BA_SELESAI">BA Selesai</option>
             <option value="BELUM">Belum Selesai</option>
-            <option value="KENDALA">Ada Kendala</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Lokasi Box</label>
-          <input type="text" id="filterBox" oninput="applyFilters()" placeholder="Misal: BOX 1"
-            class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm outline-none" />
+          <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Lokasi Box (1–11)</label>
+          <select id="filterBox" onchange="applyFilters()"
+            class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-2 text-sm outline-none">
+            <option value="ALL">Semua Box</option>
+          </select>
         </div>
       </div>
 
@@ -333,7 +366,7 @@
           </button>
           <button onclick="openBulkModal()"
             class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition cursor-pointer">
-            📦 Isi Box / Update Massal Terpilih
+            ✏️ Update Massal Terpilih
           </button>
         </div>
       </div>
@@ -395,7 +428,7 @@
         <button onclick="closeModal('pinModal')" class="text-white/80 hover:text-white font-bold cursor-pointer">✕</button>
       </div>
       <div class="p-5 space-y-3 text-sm">
-        <p class="text-xs text-slate-600 dark:text-slate-400">Masukkan PIN Admin untuk mengakses Transfer Berkas, Reset Klaim, Sinkronisasi Drive, dan Audit Data:</p>
+        <p class="text-xs text-slate-600 dark:text-slate-400">Masukkan PIN Admin untuk mengakses Kunci Box 1–11, Transfer Berkas, Reset Klaim, Sinkronisasi Drive, dan Audit Data:</p>
         <input type="password" id="adminPinInput" onkeydown="if(event.key==='Enter') submitAdminPin()" placeholder="Masukkan PIN Admin..."
           class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-center text-lg font-mono tracking-widest focus:ring-2 focus:ring-rose-500 outline-none" />
       </div>
@@ -419,7 +452,7 @@
           <select id="transferFromSelect" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"></select>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Ke Petugas Tujuan</label>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Ke Petugas Tujuan (Box Otomatis Menyesuaikan)</label>
           <select id="transferToSelect" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"></select>
         </div>
         <div class="grid grid-cols-2 gap-3">
@@ -494,11 +527,11 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Petugas Verifikator</label>
-            <select id="editVerifikator" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"></select>
+            <select id="editVerifikator" onchange="syncEditModalLockedBox()" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"></select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Lokasi Box</label>
-            <input type="text" id="editLokasiBox" placeholder="Contoh: BOX 1" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm" />
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">🔒 Lokasi Box (Terkunci Otomatis)</label>
+            <input type="text" id="editLokasiBox" readonly placeholder="Otomatis sesuai petugas" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 font-bold px-3 py-2 text-sm cursor-not-allowed" />
           </div>
         </div>
 
@@ -522,8 +555,8 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Keterangan / Catatan</label>
-          <textarea id="editKeterangan" rows="2" placeholder="Catatan verifikasi atau kendala..." class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"></textarea>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Keterangan / Catatan Kendala</label>
+          <textarea id="editKeterangan" rows="2" placeholder="Catatan verifikasi atau rincian kendala BA/PK..." class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"></textarea>
         </div>
 
         <!-- UPLOAD SCAN BARU -->
@@ -548,15 +581,11 @@
   <div id="bulkModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
     <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-800">
       <div class="px-5 py-4 bg-blue-600 text-white flex justify-between items-center">
-        <h3 class="font-bold text-sm">📦 Update Massal (<span id="bulkCountText">0</span> Berkas)</h3>
+        <h3 class="font-bold text-sm">✏️ Update Massal (<span id="bulkCountText">0</span> Berkas)</h3>
         <button onclick="closeModal('bulkModal')" class="text-white/80 hover:text-white font-bold cursor-pointer">✕</button>
       </div>
       <div class="p-5 space-y-3.5 text-sm">
-        <p class="text-xs text-slate-500 dark:text-slate-400">Biarkan kosong kolom yang tidak ingin diubah secara massal.</p>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Set Lokasi Box</label>
-          <input type="text" id="bulkLokasiBox" placeholder="Misal: BOX 2" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm" />
-        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Lokasi Box otomatis terkunci sesuai petugas masing-masing (<strong id="bulkLockedBoxInfo">-</strong>).</p>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Set Status BA</label>
@@ -589,11 +618,11 @@
     </div>
   </div>
 
-  <!-- MODAL: CETAK LABEL BOX ARSIP -->
+  <!-- MODAL: CETAK LABEL BOX ARSIP (BOX 1 - BOX 11) -->
   <div id="boxLabelModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
     <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-2xl w-full overflow-hidden border border-slate-200 dark:border-slate-800">
       <div class="px-5 py-4 bg-slate-900 text-white flex justify-between items-center">
-        <h3 class="font-bold text-sm">🖨️ Cetak Label & Daftar Isi Box Arsip</h3>
+        <h3 class="font-bold text-sm">🖨️ Cetak Label & Daftar Isi Box Arsip (BOX 1 – BOX 11)</h3>
         <button onclick="closeModal('boxLabelModal')" class="text-slate-400 hover:text-white font-bold cursor-pointer">✕</button>
       </div>
       <div class="p-5 space-y-4">
@@ -630,6 +659,14 @@
 
     function normStr(val) {
       return String(val || '').trim().replace(/\s+/g, ' ').toLowerCase();
+    }
+
+    function getLockedBoxForVer(verName) {
+      const n = normStr(verName);
+      if (!n) return '';
+      const idx = petugasList.findIndex(p => normStr(p.nama) === n);
+      if (idx === -1) return '';
+      return petugasList[idx].boxDefault || ('BOX ' + (idx + 1));
     }
 
     function showToast(msg, duration = 4500) {
@@ -708,6 +745,7 @@
 
           if (action === 'getData') runner.getDashboardData();
           else if (action === 'syncDrive') runner.syncDriveFolders();
+          else if (action === 'syncLockedBoxes') runner.syncLockedBoxes(payload);
           else if (action === 'autoClaimPool') runner.autoClaimFromPool(payload);
           else if (action === 'claimBerkas') runner.claimBerkas(payload);
           else if (action === 'releaseBerkas') runner.releaseBerkas(payload);
@@ -765,9 +803,30 @@
       }
     }
 
+    async function triggerSyncLockedBoxes() {
+      showToast('Menyelaraskan & mengunci BOX 1 – BOX 11 sesuai urutan verifikator...');
+      const res = await callBackend('syncLockedBoxes', { pin: adminPinSession });
+      if (res && res.success) {
+        hydrateUI(res);
+        showToast(res.message);
+      } else {
+        showToast(res?.message || 'Gagal menyelaraskan Box.');
+      }
+    }
+
     function hydrateUI(res) {
-      allRecords = res.records || [];
-      petugasList = res.petugasList || [];
+      petugasList = (res.petugasList || []).map((p, idx) => ({
+        urutan: p.urutan || (idx + 1),
+        nama: p.nama,
+        kuota: p.kuota || 120,
+        boxDefault: p.boxDefault || ('BOX ' + (idx + 1))
+      }));
+
+      allRecords = (res.records || []).map(r => ({
+        ...r,
+        lokasiBox: r.verifikator ? (getLockedBoxForVer(r.verifikator) || r.lokasiBox) : ''
+      }));
+
       lastFolderStats = res.folderStats || {};
 
       document.getElementById('lastSyncBadge').textContent = 'Update: ' + (res.timestamp || '-');
@@ -785,6 +844,9 @@
       const currentFilter = isInitialLoad ? 'UNCLAIMED' : filterVer.value;
       isInitialLoad = false;
 
+      const filterBox = document.getElementById('filterBox');
+      const currentBoxFilter = filterBox.value || 'ALL';
+
       const editVer = document.getElementById('editVerifikator');
       const transFrom = document.getElementById('transferFromSelect');
       const transTo = document.getElementById('transferToSelect');
@@ -792,18 +854,23 @@
 
       activeSel.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
       filterVer.innerHTML = '<option value="UNCLAIMED">Belum Diambil (Pool)</option><option value="ALL">Semua Verifikator</option><option value="ORPHAN_SELESAI">⚠️ Selesai Tanpa Verifikator</option>';
+      filterBox.innerHTML = '<option value="ALL">Semua Box (1–11)</option><option value="UNBOXED">Belum Terisi Box</option>';
       editVer.innerHTML = '<option value="">-- Belum Diambil (Pool) --</option>';
       transFrom.innerHTML = '';
       transTo.innerHTML = '';
       resetTarget.innerHTML = '<option value="ALL_UNFINISHED">Semua Petugas (Hanya Berkas Belum Selesai)</option><option value="SELECTED">Hanya Baris Yang Dicentang di Tabel</option>';
 
-      petugasList.forEach(p => {
-        activeSel.add(new Option(p.nama, p.nama));
-        filterVer.add(new Option(p.nama, p.nama));
-        editVer.add(new Option(p.nama, p.nama));
-        transFrom.add(new Option(p.nama, p.nama));
-        transTo.add(new Option(p.nama, p.nama));
-        resetTarget.add(new Option(`Petugas: ${p.nama} (Belum Selesai)`, p.nama));
+      petugasList.forEach((p, idx) => {
+        const boxCode = p.boxDefault || ('BOX ' + (idx + 1));
+        const labelWithBox = `${idx + 1}. ${p.nama} (${boxCode})`;
+
+        activeSel.add(new Option(labelWithBox, p.nama));
+        filterVer.add(new Option(labelWithBox, p.nama));
+        filterBox.add(new Option(`${boxCode} — ${p.nama}`, boxCode));
+        editVer.add(new Option(labelWithBox, p.nama));
+        transFrom.add(new Option(labelWithBox, p.nama));
+        transTo.add(new Option(labelWithBox, p.nama));
+        resetTarget.add(new Option(`${labelWithBox} (Belum Selesai)`, p.nama));
       });
 
       if (savedActive && [...activeSel.options].some(o => o.value === savedActive)) {
@@ -811,6 +878,9 @@
       }
       if ([...filterVer.options].some(o => o.value === currentFilter)) {
         filterVer.value = currentFilter;
+      }
+      if ([...filterBox.options].some(o => o.value === currentBoxFilter)) {
+        filterBox.value = currentBoxFilter;
       }
     }
 
@@ -833,11 +903,12 @@
         return;
       }
 
-      const pObj = petugasList.find(p => normStr(p.nama) === normStr(nama)) || { kuota: 120 };
+      const pObj = petugasList.find(p => normStr(p.nama) === normStr(nama)) || { kuota: 120, boxDefault: 'BOX -' };
       const myRows = allRecords.filter(r => normStr(r.verifikator) === normStr(nama));
       const doneRows = myRows.filter(r => r.statusBA === 'Selesai' && r.statusPK === 'Selesai');
       const remaining = Math.max(0, pObj.kuota - myRows.length);
 
+      document.getElementById('myLockedBoxBadge').textContent = pObj.boxDefault;
       document.getElementById('myClaimedCount').textContent = myRows.length;
       document.getElementById('myQuotaTarget').textContent = pObj.kuota;
       document.getElementById('myRemainingQuota').textContent = remaining;
@@ -853,11 +924,13 @@
       const me = document.getElementById('activeVerifikatorSelect').value;
       const poolCount = allRecords.filter(r => !r.verifikator).length;
       const myCount = me ? allRecords.filter(r => normStr(r.verifikator) === normStr(me)).length : 0;
+      const kendalaBaCount = allRecords.filter(r => r.statusBA === 'Kendala').length;
       const gagalCount = allRecords.filter(r => r.driveStatus === 'UPLOAD_TTE_GAGAL').length;
       const berhasilCount = allRecords.filter(r => r.driveStatus === 'TTE_BERHASIL').length;
 
       document.getElementById('badgeTabPool').textContent = poolCount.toLocaleString('id-ID');
       document.getElementById('badgeTabMyFiles').textContent = myCount.toLocaleString('id-ID');
+      document.getElementById('badgeTabKendalaBa').textContent = kendalaBaCount.toLocaleString('id-ID');
       document.getElementById('badgeTabGagal').textContent = gagalCount.toLocaleString('id-ID');
       document.getElementById('badgeTabBerhasil').textContent = berhasilCount.toLocaleString('id-ID');
       document.getElementById('badgeTabAll').textContent = allRecords.length.toLocaleString('id-ID');
@@ -866,20 +939,23 @@
     function updateQuickTabStyles() {
       const ver = document.getElementById('filterVerifikator').value;
       const drv = document.getElementById('filterDrive').value;
+      const st = document.getElementById('filterStatus').value;
       const me = document.getElementById('activeVerifikatorSelect').value;
 
       const tabs = {
-        tabPool: ver === 'UNCLAIMED' && drv === 'ALL',
-        tabMyFiles: me && normStr(ver) === normStr(me) && drv === 'ALL',
+        tabPool: ver === 'UNCLAIMED' && drv === 'ALL' && st === 'ALL',
+        tabMyFiles: me && normStr(ver) === normStr(me) && drv === 'ALL' && st === 'ALL',
+        tabKendalaBa: st === 'BA_KENDALA',
         tabGagalTte: drv === 'UPLOAD_TTE_GAGAL',
         tabBerhasilTte: drv === 'TTE_BERHASIL',
-        tabAll: ver === 'ALL' && drv === 'ALL'
+        tabAll: ver === 'ALL' && drv === 'ALL' && st === 'ALL'
       };
 
       const baseInactive = 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700';
       const activeMap = {
         tabPool: 'bg-amber-500 text-white shadow-xs',
         tabMyFiles: 'bg-emerald-600 text-white shadow-xs',
+        tabKendalaBa: 'bg-orange-600 text-white shadow-xs',
         tabGagalTte: 'bg-rose-600 text-white shadow-xs',
         tabBerhasilTte: 'bg-emerald-600 text-white shadow-xs',
         tabAll: 'bg-slate-800 text-white shadow-xs'
@@ -898,7 +974,8 @@
         showToast('Pilih nama Anda terlebih dahulu pada menu Identitas Petugas.');
         return;
       }
-      showToast(`Mengambil ${count} berkas otomatis dari Pool...`);
+      const lockedBox = getLockedBoxForVer(verifikator);
+      showToast(`Mengambil ${count} berkas otomatis ke ${lockedBox}...`);
       const res = await callBackend('autoClaimPool', { verifikator, count });
       if (res && res.success) {
         hydrateUI(res);
@@ -917,7 +994,6 @@
       await triggerAutoClaim(rem);
     }
 
-    // OPTIMISTIC UI: Berkas langsung hilang dari daftar Pool seketika saat diklik + Ambil
     async function quickClaimSingle(nip) {
       const verifikator = document.getElementById('activeVerifikatorSelect').value;
       if (!verifikator) {
@@ -926,36 +1002,44 @@
         return;
       }
 
+      const lockedBox = getLockedBoxForVer(verifikator);
       const targetRecord = allRecords.find(item => item.nip === nip);
       const prevOwner = targetRecord ? targetRecord.verifikator : '';
+      const prevBox = targetRecord ? targetRecord.lokasiBox : '';
 
       if (targetRecord) {
         targetRecord.verifikator = verifikator;
+        targetRecord.lokasiBox = lockedBox;
         selectedNips.delete(nip);
         updateKpiAndRekap(lastFolderStats);
         updateActiveVerifikatorCard();
         applyFilters();
       }
 
-      showToast(`✓ Berkas NIP ${nip} masuk ke Berkas Saya (${verifikator})`, 2500);
+      showToast(`✓ NIP ${nip} masuk ke ${verifikator} (${lockedBox})`, 2500);
 
       try {
         const res = await callBackend('claimBerkas', { verifikator, nips: [nip] });
         if (res && res.success) {
           hydrateUI(res);
         } else {
-          if (targetRecord) targetRecord.verifikator = prevOwner;
+          if (targetRecord) {
+            targetRecord.verifikator = prevOwner;
+            targetRecord.lokasiBox = prevBox;
+          }
           hydrateUI({ records: allRecords, petugasList, folderStats: lastFolderStats });
           showToast(res?.message || 'Gagal klaim berkas.');
         }
       } catch (err) {
-        if (targetRecord) targetRecord.verifikator = prevOwner;
+        if (targetRecord) {
+          targetRecord.verifikator = prevOwner;
+          targetRecord.lokasiBox = prevBox;
+        }
         applyFilters();
         showToast('Koneksi gagal saat klaim: ' + err.message);
       }
     }
 
-    // MODE BUANG: Kembalikan berkas milik petugas aktif kembali ke Pool seketika
     async function quickReleaseSingle(nip) {
       const verifikator = document.getElementById('activeVerifikatorSelect').value;
       const targetRecord = allRecords.find(item => item.nip === nip);
@@ -972,7 +1056,9 @@
       }
 
       const prevOwner = targetRecord.verifikator;
+      const prevBox = targetRecord.lokasiBox;
       targetRecord.verifikator = '';
+      targetRecord.lokasiBox = '';
       selectedNips.delete(nip);
       updateKpiAndRekap(lastFolderStats);
       updateActiveVerifikatorCard();
@@ -990,17 +1076,18 @@
           hydrateUI(res);
         } else {
           targetRecord.verifikator = prevOwner;
+          targetRecord.lokasiBox = prevBox;
           hydrateUI({ records: allRecords, petugasList, folderStats: lastFolderStats });
           showToast(res?.message || 'Gagal mengembalikan berkas ke Pool.');
         }
       } catch (err) {
         targetRecord.verifikator = prevOwner;
+        targetRecord.lokasiBox = prevBox;
         applyFilters();
         showToast('Koneksi gagal saat mengembalikan berkas: ' + err.message);
       }
     }
 
-    // BUANG MASSAL BARIS TERPILIH KE POOL
     async function submitBulkRelease() {
       if (selectedNips.size === 0) {
         showToast('Centang minimal 1 berkas milik Anda yang ingin dibuang ke Pool.');
@@ -1020,6 +1107,7 @@
         const r = allRecords.find(item => item.nip === nip);
         if (r && (isAdminUnlocked || normStr(r.verifikator) === normStr(verifikator))) {
           r.verifikator = '';
+          r.lokasiBox = '';
         }
       });
 
@@ -1042,7 +1130,7 @@
       }
     }
 
-    async function quickToggle(nip, field, currentVal) {
+    async function quickToggle(nip, field, currentVal, forcedTarget = null) {
       const r = allRecords.find(item => item.nip === nip);
       const activeVerifikator = document.getElementById('activeVerifikatorSelect').value;
 
@@ -1052,9 +1140,15 @@
         return;
       }
 
-      const nextValue = currentVal === 'Selesai' ? 'Belum' : 'Selesai';
+      const nextValue = forcedTarget
+        ? forcedTarget
+        : (currentVal === 'Selesai' ? 'Belum' : 'Selesai');
+
       if (r) {
-        if (!r.verifikator && activeVerifikator) r.verifikator = activeVerifikator;
+        if (!r.verifikator && activeVerifikator) {
+          r.verifikator = activeVerifikator;
+          r.lokasiBox = getLockedBoxForVer(activeVerifikator);
+        }
         if (field === 'BA') r.statusBA = nextValue;
         if (field === 'PK') r.statusPK = nextValue;
         updateKpiAndRekap(lastFolderStats);
@@ -1074,7 +1168,7 @@
 
     function quickTab(mode) {
       document.getElementById('filterSearch').value = '';
-      document.getElementById('filterBox').value = '';
+      document.getElementById('filterBox').value = 'ALL';
       document.getElementById('filterStatus').value = 'ALL';
       document.getElementById('filterDrive').value = 'ALL';
       document.getElementById('filterVerifikator').value = 'ALL';
@@ -1088,6 +1182,12 @@
         document.getElementById('filterVerifikator').value = me;
       } else if (mode === 'POOL') {
         document.getElementById('filterVerifikator').value = 'UNCLAIMED';
+      } else if (mode === 'KENDALA_BA') {
+        document.getElementById('filterStatus').value = 'BA_KENDALA';
+      } else if (mode === 'BA_SELESAI') {
+        document.getElementById('filterStatus').value = 'BA_SELESAI';
+      } else if (mode === 'PK_SELESAI') {
+        document.getElementById('filterStatus').value = 'PK_SELESAI';
       } else if (mode === 'GAGAL_TTE') {
         document.getElementById('filterDrive').value = 'UPLOAD_TTE_GAGAL';
       } else if (mode === 'BERHASIL_TTE') {
@@ -1098,16 +1198,28 @@
 
     function updateKpiAndRekap(folderStats) {
       const total = allRecords.length;
-      let baSelesai = 0, pkSelesai = 0, unclaimed = 0;
+      let baSelesai = 0, baKendala = 0, pkSelesai = 0, pkKendala = 0, unclaimed = 0;
 
       const statsMap = {};
-      petugasList.forEach(p => {
-        statsMap[normStr(p.nama)] = { nama: p.nama, kuota: p.kuota, diambil: 0, ba: 0, pk: 0 };
+      petugasList.forEach((p, idx) => {
+        statsMap[normStr(p.nama)] = {
+          urutan: idx + 1,
+          boxDefault: p.boxDefault || ('BOX ' + (idx + 1)),
+          nama: p.nama,
+          kuota: p.kuota,
+          diambil: 0,
+          ba: 0,
+          baKendala: 0,
+          pk: 0
+        };
       });
 
       allRecords.forEach(r => {
         if (r.statusBA === 'Selesai') baSelesai++;
+        if (r.statusBA === 'Kendala') baKendala++;
         if (r.statusPK === 'Selesai') pkSelesai++;
+        if (r.statusPK === 'Kendala') pkKendala++;
+
         if (!r.verifikator) {
           unclaimed++;
         } else {
@@ -1115,6 +1227,7 @@
           if (statsMap[key]) {
             statsMap[key].diambil++;
             if (r.statusBA === 'Selesai') statsMap[key].ba++;
+            if (r.statusBA === 'Kendala') statsMap[key].baKendala++;
             if (r.statusPK === 'Selesai') statsMap[key].pk++;
           }
         }
@@ -1123,6 +1236,8 @@
       document.getElementById('kpiTotal').textContent = total.toLocaleString('id-ID');
       document.getElementById('kpiBaSelesai').textContent = baSelesai.toLocaleString('id-ID');
       document.getElementById('kpiBaPct').textContent = total ? ((baSelesai / total) * 100).toFixed(1).replace('.', ',') + '% terverifikasi' : '0%';
+      document.getElementById('kpiBaKendala').textContent = baKendala.toLocaleString('id-ID');
+      document.getElementById('kpiPkKendalaSub').textContent = `PK Kendala: ${pkKendala.toLocaleString('id-ID')}`;
       document.getElementById('kpiPkSelesai').textContent = pkSelesai.toLocaleString('id-ID');
       document.getElementById('kpiPkPct').textContent = total ? ((pkSelesai / total) * 100).toFixed(1).replace('.', ',') + '% terverifikasi' : '0%';
       document.getElementById('kpiTteBerhasil').textContent = (folderStats.berhasil || 0).toLocaleString('id-ID');
@@ -1137,9 +1252,8 @@
       const labels = [], dataSelesai = [], dataSisa = [];
 
       Object.values(statsMap).forEach(st => {
-        const sisa = Math.max(0, st.kuota - st.diambil);
         const pct = st.kuota ? (((st.ba + st.pk) / (st.kuota * 2)) * 100).toFixed(1) : '0.0';
-        labels.push(st.nama.split(' ')[0]);
+        labels.push(`${st.boxDefault} (${st.nama.split(' ')[0]})`);
         dataSelesai.push(st.pk);
         dataSisa.push(Math.max(0, st.kuota - st.pk));
 
@@ -1147,14 +1261,18 @@
         tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer';
         tr.onclick = () => {
           document.getElementById('filterVerifikator').value = st.nama;
+          document.getElementById('filterStatus').value = 'ALL';
           applyFilters();
         };
         tr.innerHTML = `
-          <td class="py-2 px-3 font-medium text-slate-800 dark:text-slate-200">${st.nama}</td>
+          <td class="py-2 px-2 text-center">
+            <span class="px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-200 font-bold text-[11px]">${st.boxDefault}</span>
+          </td>
+          <td class="py-2 px-3 font-medium text-slate-800 dark:text-slate-200">${st.urutan}. ${st.nama}</td>
           <td class="py-2 px-2 text-center text-slate-500">${st.kuota}</td>
           <td class="py-2 px-2 text-center font-semibold">${st.diambil}</td>
-          <td class="py-2 px-2 text-center text-amber-600 font-medium">${sisa}</td>
           <td class="py-2 px-2 text-center text-blue-600 font-semibold">${st.ba}</td>
+          <td class="py-2 px-2 text-center font-bold ${st.baKendala > 0 ? 'text-orange-600 bg-orange-50 dark:bg-orange-950/40' : 'text-slate-400'}">${st.baKendala}</td>
           <td class="py-2 px-2 text-center text-indigo-600 font-semibold">${st.pk}</td>
           <td class="py-2 px-2 text-right font-bold text-emerald-600">${pct.replace('.', ',')}%</td>
         `;
@@ -1181,7 +1299,7 @@
           maintainAspectRatio: false,
           plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
           scales: {
-            x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10 } } },
+            x: { stacked: true, grid: { display: false }, ticks: { font: { size: 9 } } },
             y: { stacked: true, beginAtZero: true, max: 130, ticks: { font: { size: 10 } } }
           }
         }
@@ -1200,7 +1318,7 @@
       const ver = document.getElementById('filterVerifikator').value;
       const drv = document.getElementById('filterDrive').value;
       const st = document.getElementById('filterStatus').value;
-      const box = document.getElementById('filterBox').value.toLowerCase().trim();
+      const box = document.getElementById('filterBox').value;
 
       updateQuickTabStyles();
 
@@ -1210,8 +1328,12 @@
         if (ver === 'ORPHAN_SELESAI' && !(r.verifikator === '' && (r.statusBA === 'Selesai' || r.statusPK === 'Selesai'))) return false;
         if (ver !== 'ALL' && ver !== 'UNCLAIMED' && ver !== 'ORPHAN_SELESAI' && normStr(r.verifikator) !== normStr(ver)) return false;
         if (drv !== 'ALL' && r.driveStatus !== drv) return false;
-        if (box && !r.lokasiBox.toLowerCase().includes(box)) return false;
 
+        if (box === 'UNBOXED' && r.lokasiBox !== '') return false;
+        if (box !== 'ALL' && box !== 'UNBOXED' && r.lokasiBox !== box) return false;
+
+        if (st === 'BA_KENDALA' && r.statusBA !== 'Kendala') return false;
+        if (st === 'PK_KENDALA' && r.statusPK !== 'Kendala') return false;
         if (st === 'BOTH_SELESAI' && !(r.statusBA === 'Selesai' && r.statusPK === 'Selesai')) return false;
         if (st === 'PK_SELESAI' && r.statusPK !== 'Selesai') return false;
         if (st === 'BA_SELESAI' && r.statusBA !== 'Selesai') return false;
@@ -1226,13 +1348,28 @@
     }
 
     function quickToggleBtn(nip, field, status) {
+      let mainBtn = '';
       if (status === 'Selesai') {
-        return `<button onclick="quickToggle('${nip}', '${field}', '${status}')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition cursor-pointer" title="Klik untuk ubah status">${field}: Selesai ✓</button>`;
+        mainBtn = `<button onclick="quickToggle('${nip}', '${field}', '${status}')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition cursor-pointer" title="Klik untuk ubah ke Belum">${field}: Selesai ✓</button>`;
+      } else if (status === 'Kendala') {
+        mainBtn = `<button onclick="quickToggle('${nip}', '${field}', '${status}', 'Selesai')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-orange-100 text-orange-800 border border-orange-300 hover:bg-emerald-100 hover:text-emerald-800 transition cursor-pointer" title="Klik untuk tandai Selesai">${field}: Kendala !</button>`;
+      } else {
+        mainBtn = `<button onclick="quickToggle('${nip}', '${field}', '${status}', 'Selesai')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-emerald-100 hover:text-emerald-800 transition cursor-pointer" title="Klik untuk tandai Selesai">${field}: Belum</button>`;
       }
-      if (status === 'Kendala') {
-        return `<button onclick="quickToggle('${nip}', '${field}', '${status}')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-rose-100 text-rose-800 hover:bg-rose-200 transition cursor-pointer" title="Klik untuk tandai Selesai">${field}: Kendala !</button>`;
+
+      if (field === 'BA') {
+        const nextKendala = status === 'Kendala' ? 'Belum' : 'Kendala';
+        const kendalaTitle = status === 'Kendala' ? 'Batalkan status Kendala BA' : 'Tandai BA Kendala';
+        const kendalaClass = status === 'Kendala'
+          ? 'bg-orange-600 text-white'
+          : 'bg-orange-50 dark:bg-orange-950/50 text-orange-600 hover:bg-orange-100 border border-orange-200 dark:border-orange-800';
+        return `<div class="inline-flex items-center gap-1">
+          ${mainBtn}
+          <button onclick="quickToggle('${nip}', 'BA', '${status}', '${nextKendala}')" title="${kendalaTitle}" class="px-1.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer ${kendalaClass}">⚠️</button>
+        </div>`;
       }
-      return `<button onclick="quickToggle('${nip}', '${field}', '${status}')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-emerald-100 hover:text-emerald-800 transition cursor-pointer" title="Klik untuk tandai Selesai">${field}: Belum</button>`;
+
+      return mainBtn;
     }
 
     function driveBadge(r) {
@@ -1274,7 +1411,9 @@
         const verHtml = r.verifikator
           ? `<span class="font-semibold text-slate-800 dark:text-slate-200 text-xs">${r.verifikator}</span>`
           : `<button onclick="quickClaimSingle('${r.nip}')" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold shadow-xs cursor-pointer">+ Ambil</button>`;
-        const boxHtml = r.lokasiBox ? `<div class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">📦 ${r.lokasiBox}</div>` : '';
+        const boxHtml = r.lokasiBox
+          ? `<div class="mt-1"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-[11px] font-bold text-indigo-700 dark:text-indigo-300">🔒 ${r.lokasiBox}</span></div>`
+          : '';
 
         const canRelease = r.verifikator && (isAdminUnlocked || (activeVer && normStr(r.verifikator) === normStr(activeVer)));
         const releaseBtnHtml = canRelease
@@ -1368,15 +1507,21 @@
       if (currentPage < totalPages) { currentPage++; renderTable(); }
     }
 
+    function syncEditModalLockedBox() {
+      const chosenVer = document.getElementById('editVerifikator').value;
+      document.getElementById('editLokasiBox').value = getLockedBoxForVer(chosenVer);
+    }
+
     function openEditModal(nip) {
       const r = allRecords.find(item => item.nip === nip);
       if (!r) return;
       const activeVer = document.getElementById('activeVerifikatorSelect').value;
+      const initialVer = r.verifikator || activeVer || '';
       document.getElementById('editNip').value = r.nip;
       document.getElementById('editModalTitle').textContent = r.nama;
       document.getElementById('editModalSub').textContent = `NIP: ${r.nip} • ${r.unitKerja}`;
-      document.getElementById('editVerifikator').value = r.verifikator || activeVer || '';
-      document.getElementById('editLokasiBox').value = r.lokasiBox || '';
+      document.getElementById('editVerifikator').value = initialVer;
+      document.getElementById('editLokasiBox').value = getLockedBoxForVer(initialVer);
       document.getElementById('editStatusBA').value = r.statusBA || 'Belum';
       document.getElementById('editStatusPK').value = r.statusPK || 'Belum';
       document.getElementById('editKeterangan').value = r.keterangan || '';
@@ -1387,12 +1532,13 @@
     async function saveSingleEdit() {
       const activeVerifikator = document.getElementById('activeVerifikatorSelect').value;
       const chosenVerifikator = document.getElementById('editVerifikator').value;
+      const lockedBox = getLockedBoxForVer(chosenVerifikator);
       const statusBA = document.getElementById('editStatusBA').value;
       const statusPK = document.getElementById('editStatusPK').value;
       const nip = document.getElementById('editNip').value;
 
-      if (!chosenVerifikator && (statusBA === 'Selesai' || statusPK === 'Selesai')) {
-        showToast('Pilih nama Petugas Verifikator terlebih dahulu sebelum menandai Selesai.');
+      if (!chosenVerifikator && (statusBA === 'Selesai' || statusPK === 'Selesai' || statusBA === 'Kendala' || statusPK === 'Kendala')) {
+        showToast('Pilih nama Petugas Verifikator terlebih dahulu sebelum mengubah status.');
         return;
       }
 
@@ -1400,7 +1546,7 @@
         nip: nip,
         verifikator: chosenVerifikator,
         activeVerifikator: activeVerifikator,
-        lokasiBox: document.getElementById('editLokasiBox').value,
+        lokasiBox: lockedBox,
         statusBA: statusBA,
         statusPK: statusPK,
         keterangan: document.getElementById('editKeterangan').value
@@ -1409,7 +1555,7 @@
       const targetRecord = allRecords.find(item => item.nip === nip);
       if (targetRecord) {
         targetRecord.verifikator = chosenVerifikator;
-        targetRecord.lokasiBox = payload.lokasiBox;
+        targetRecord.lokasiBox = lockedBox;
         targetRecord.statusBA = statusBA;
         targetRecord.statusPK = statusPK;
         targetRecord.keterangan = payload.keterangan;
@@ -1455,10 +1601,13 @@
 
     function openBulkModal() {
       if (selectedNips.size === 0) {
-        showToast('Pilih minimal 1 baris (atau klik "Pilih 25 Teratas") terlebih dahulu.');
+        showToast('Pilih minimal 1 baris terlebih dahulu.');
         return;
       }
+      const activeVer = document.getElementById('activeVerifikatorSelect').value;
+      const lockedBox = getLockedBoxForVer(activeVer);
       document.getElementById('bulkCountText').textContent = selectedNips.size;
+      document.getElementById('bulkLockedBoxInfo').textContent = lockedBox ? `${activeVer} → ${lockedBox}` : 'Sesuai verifikator masing-masing';
       openModal('bulkModal');
     }
 
@@ -1467,7 +1616,6 @@
       const payload = {
         nips: Array.from(selectedNips),
         activeVerifikator: activeVerifikator,
-        lokasiBox: document.getElementById('bulkLokasiBox').value,
         statusBA: document.getElementById('bulkStatusBA').value,
         statusPK: document.getElementById('bulkStatusPK').value,
         keterangan: document.getElementById('bulkKeterangan').value
@@ -1525,15 +1673,23 @@
     }
 
     function openAuditModal() {
+      const baKendala = allRecords.filter(r => r.statusBA === 'Kendala');
       const orphanSelesai = allRecords.filter(r => r.verifikator === '' && (r.statusBA === 'Selesai' || r.statusPK === 'Selesai'));
       const gagalTte = allRecords.filter(r => r.driveStatus === 'UPLOAD_TTE_GAGAL');
       const selesaiNoPdf = allRecords.filter(r => r.statusPK === 'Selesai' && r.driveStatus === 'BELUM_ADA_FILE');
-      const selesaiNoBox = allRecords.filter(r => r.statusBA === 'Selesai' && r.statusPK === 'Selesai' && !r.lokasiBox);
 
       document.getElementById('auditContent').innerHTML = `
+        <div class="p-3.5 rounded-xl bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800 flex items-center justify-between gap-2">
+          <div>
+            <div class="font-bold text-orange-900 dark:text-orange-200">1. Berkas Dengan Status Kendala BA</div>
+            <div class="text-xs text-orange-700 dark:text-orange-300">Ditemukan <strong>${baKendala.length}</strong> berkas berstatus BA: Kendala</div>
+          </div>
+          <button onclick="closeModal('auditModal'); quickTab('KENDALA_BA');" class="px-3 py-1.5 rounded-lg bg-orange-600 text-white text-xs font-bold shrink-0 cursor-pointer">Tampilkan</button>
+        </div>
+
         <div class="p-3.5 rounded-xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 flex items-center justify-between gap-2">
           <div>
-            <div class="font-bold text-purple-900 dark:text-purple-200">1. Status BA/PK Selesai Tapi Nama Verifikator Kosong</div>
+            <div class="font-bold text-purple-900 dark:text-purple-200">2. Status BA/PK Selesai Tapi Nama Verifikator Kosong</div>
             <div class="text-xs text-purple-700 dark:text-purple-300">Ditemukan <strong>${orphanSelesai.length}</strong> berkas berstatus Selesai tanpa nama petugas</div>
           </div>
           <button onclick="closeModal('auditModal'); document.getElementById('filterVerifikator').value='ORPHAN_SELESAI'; applyFilters();" class="px-3 py-1.5 rounded-lg bg-purple-600 text-white text-xs font-bold shrink-0 cursor-pointer">Tampilkan</button>
@@ -1541,7 +1697,7 @@
 
         <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 flex items-center justify-between gap-2">
           <div>
-            <div class="font-bold text-rose-800 dark:text-rose-200">2. Berkas Upload TTE Gagal (Perlu TTE / Scan Ulang)</div>
+            <div class="font-bold text-rose-800 dark:text-rose-200">3. Berkas Upload TTE Gagal (Perlu TTE / Scan Ulang)</div>
             <div class="text-xs text-rose-600 dark:text-rose-300">Ditemukan <strong>${gagalTte.length}</strong> berkas di folder 02_Upload_TTE_Gagal</div>
           </div>
           <button onclick="closeModal('auditModal'); quickTab('GAGAL_TTE');" class="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-bold shrink-0 cursor-pointer">Lihat Data</button>
@@ -1549,15 +1705,8 @@
 
         <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 flex items-center justify-between gap-2">
           <div>
-            <div class="font-bold text-amber-800 dark:text-amber-200">3. Status PK Selesai Tapi File PDF Belum Ada di Drive</div>
+            <div class="font-bold text-amber-800 dark:text-amber-200">4. Status PK Selesai Tapi File PDF Belum Ada di Drive</div>
             <div class="text-xs text-amber-700 dark:text-amber-300">Ditemukan <strong>${selesaiNoPdf.length}</strong> berkas belum terhubung ke PDF Drive</div>
-          </div>
-        </div>
-
-        <div class="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-between gap-2">
-          <div>
-            <div class="font-bold text-blue-800 dark:text-blue-200">4. BA & PK Selesai Tapi Nomor Box Fisik Masih Kosong</div>
-            <div class="text-xs text-blue-700 dark:text-blue-300">Ditemukan <strong>${selesaiNoBox.length}</strong> berkas belum diisi Lokasi Box</div>
           </div>
         </div>
       `;
@@ -1565,11 +1714,11 @@
     }
 
     function openBoxLabelModal() {
-      const boxes = [...new Set(allRecords.map(r => r.lokasiBox).filter(Boolean))].sort();
       const sel = document.getElementById('boxSelect');
-      sel.innerHTML = boxes.length
-        ? boxes.map(b => `<option value="${b}">${b}</option>`).join('')
-        : '<option value="">Belum ada data Lokasi Box yang diisi</option>';
+      sel.innerHTML = petugasList.map((p, idx) => {
+        const boxCode = p.boxDefault || ('BOX ' + (idx + 1));
+        return `<option value="${boxCode}">${boxCode} — ${p.nama}</option>`;
+      }).join('');
       renderBoxPreview();
       openModal('boxLabelModal');
     }
@@ -1577,42 +1726,47 @@
     function renderBoxPreview() {
       const boxName = document.getElementById('boxSelect').value;
       const area = document.getElementById('printBoxArea');
-      if (!boxName) {
-        area.innerHTML = '<p class="text-xs text-slate-500 text-center py-6">Isi kolom Lokasi Box pada data berkas terlebih dahulu untuk mencetak label arsip.</p>';
-        return;
-      }
+      if (!boxName) return;
+
+      const ownerObj = petugasList.find(p => p.boxDefault === boxName);
+      const ownerName = ownerObj ? ownerObj.nama : '-';
       const items = allRecords.filter(r => r.lokasiBox === boxName);
+
       area.innerHTML = `
         <div class="border-b-2 border-slate-900 pb-3 mb-3 flex justify-between items-end">
           <div>
             <div class="text-xs font-bold uppercase tracking-wider text-slate-500">ARSIP FISIK SIMON-BAPK 2025</div>
             <div class="text-2xl font-extrabold">${boxName}</div>
+            <div class="text-xs font-bold text-slate-700 mt-0.5">Verifikator: ${ownerName}</div>
           </div>
           <div class="text-right text-xs">
             <div>Jumlah Berkas: <strong>${items.length} Dokumen</strong></div>
             <div>Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}</div>
           </div>
         </div>
-        <table class="w-full text-left border-collapse text-xs">
-          <thead>
-            <tr class="border-b border-slate-400">
-              <th class="py-1.5 pr-2">No</th>
-              <th class="py-1.5 pr-2">NIP</th>
-              <th class="py-1.5 pr-2">Nama Guru</th>
-              <th class="py-1.5">Verifikator</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-200">
-            ${items.map((it, i) => `
-              <tr>
-                <td class="py-1 pr-2">${i + 1}</td>
-                <td class="py-1 pr-2 font-mono">${it.nip}</td>
-                <td class="py-1 pr-2 font-semibold">${it.nama}</td>
-                <td class="py-1">${it.verifikator || '-'}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
+        ${items.length === 0
+          ? '<p class="text-xs text-slate-500 text-center py-6">Belum ada berkas yang diambil untuk ' + boxName + ' (' + ownerName + ').</p>'
+          : `<table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-400">
+                  <th class="py-1.5 pr-2">No</th>
+                  <th class="py-1.5 pr-2">NIP</th>
+                  <th class="py-1.5 pr-2">Nama Guru</th>
+                  <th class="py-1.5">Status BA / PK</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                ${items.map((it, i) => `
+                  <tr>
+                    <td class="py-1 pr-2">${i + 1}</td>
+                    <td class="py-1 pr-2 font-mono">${it.nip}</td>
+                    <td class="py-1 pr-2 font-semibold">${it.nama}</td>
+                    <td class="py-1">BA: ${it.statusBA} | PK: ${it.statusPK}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>`
+        }
       `;
     }
 
